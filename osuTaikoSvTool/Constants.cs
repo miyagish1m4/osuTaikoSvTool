@@ -15,12 +15,12 @@ namespace osuTaikoSvTool
             SLIDER,
             SPINNER
         }
-        const string BACKUP_DIRECTORY = "\\BackUp";
-        const string WORK_DIRECTORY = "\\Work";
-        const string INFO_MESSAGE_DIRECTORY = "\\Log\\Info";
-        const string ERROR_MESSAGE_DIRECTORY = "\\Log\\Error";
-        const string HISTORY_DIRECTORY = "\\History";
-        const string BEATMAP_EXTENSION = ".osu";
-        const string LOG_EXTENSION = ".log";
+        internal const string BACKUP_DIRECTORY = "\\BackUp";
+        internal const string WORK_DIRECTORY = "\\Work";
+        internal const string INFO_MESSAGE_DIRECTORY = "\\Log\\Info";
+        internal const string ERROR_MESSAGE_DIRECTORY = "\\Log\\Error";
+        internal const string HISTORY_DIRECTORY = "\\History";
+        internal const string BEATMAP_EXTENSION = ".osu";
+        internal const string LOG_EXTENSION = ".log";
     }
 }

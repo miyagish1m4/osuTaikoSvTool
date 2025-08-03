@@ -15,13 +15,6 @@ namespace osuTaikoSvTool
 {
     public partial class osuTaikoSVTool : Form
     {
-        const string CONST_STRINGS = ",4,1,0,";
-        const string BACKUP_DIRECTORY = "\\BackUp";
-        const string WORK_DIRECTORY = "\\Work";
-        const string INFO_MESSAGE_DIRECTORY = "\\Log\\Info";
-        const string ERROR_MESSAGE_DIRECTORY = "\\Log\\Error";
-        const string BEATMAP_EXTENSION = ".osu";
-        const string LOG_EXTENSION = ".log";
         string infoMessagePath = "";
         string errorMessagePath = "";
         string path = "";
@@ -61,28 +54,28 @@ namespace osuTaikoSvTool
             Application.ApplicationExit += new EventHandler(Application_ApplicationExit);
             currentDateTime = DateTime.Now;
             // 新規ファイルの絶対パス
-            infoMessagePath = Directory.GetCurrentDirectory() + INFO_MESSAGE_DIRECTORY + "\\Info_" + String.Format("{0:yyyyMMdd}", currentDateTime) + LOG_EXTENSION;
-            if (!Directory.Exists(Directory.GetCurrentDirectory() + BACKUP_DIRECTORY))
+            infoMessagePath = Directory.GetCurrentDirectory() + Constants.INFO_MESSAGE_DIRECTORY + "\\Info_" + String.Format("{0:yyyyMMdd}", currentDateTime) + Constants.LOG_EXTENSION;
+            if (!Directory.Exists(Directory.GetCurrentDirectory() + Constants.BACKUP_DIRECTORY))
             {
-                Directory.CreateDirectory(Directory.GetCurrentDirectory() + BACKUP_DIRECTORY);
+                Directory.CreateDirectory(Directory.GetCurrentDirectory() + Constants.BACKUP_DIRECTORY);
             }
-            if (!Directory.Exists(Directory.GetCurrentDirectory() + WORK_DIRECTORY))
+            if (!Directory.Exists(Directory.GetCurrentDirectory() + Constants.WORK_DIRECTORY))
             {
-                Directory.CreateDirectory(Directory.GetCurrentDirectory() + WORK_DIRECTORY);
+                Directory.CreateDirectory(Directory.GetCurrentDirectory() + Constants.WORK_DIRECTORY);
             }
-            if (!Directory.Exists(Directory.GetCurrentDirectory() + INFO_MESSAGE_DIRECTORY))
+            if (!Directory.Exists(Directory.GetCurrentDirectory() + Constants.INFO_MESSAGE_DIRECTORY))
             {
-                Directory.CreateDirectory(Directory.GetCurrentDirectory() + INFO_MESSAGE_DIRECTORY);
+                Directory.CreateDirectory(Directory.GetCurrentDirectory() + Constants.INFO_MESSAGE_DIRECTORY);
             }
             if (!File.Exists(infoMessagePath))
             {
                 // 新規ファイル作成
                 File.Create(infoMessagePath).Close();
             }
-            errorMessagePath = Directory.GetCurrentDirectory() + ERROR_MESSAGE_DIRECTORY + "\\error_" + String.Format("{0:yyyyMMdd}", currentDateTime) + LOG_EXTENSION;
-            if (!Directory.Exists(Directory.GetCurrentDirectory() + ERROR_MESSAGE_DIRECTORY))
+            errorMessagePath = Directory.GetCurrentDirectory() + Constants.ERROR_MESSAGE_DIRECTORY + "\\error_" + String.Format("{0:yyyyMMdd}", currentDateTime) + Constants.LOG_EXTENSION;
+            if (!Directory.Exists(Directory.GetCurrentDirectory() + Constants.ERROR_MESSAGE_DIRECTORY))
             {
-                Directory.CreateDirectory(Directory.GetCurrentDirectory() + ERROR_MESSAGE_DIRECTORY);
+                Directory.CreateDirectory(Directory.GetCurrentDirectory() + Constants.ERROR_MESSAGE_DIRECTORY);
             }
             if (!File.Exists(errorMessagePath))
             {
@@ -116,9 +109,9 @@ namespace osuTaikoSvTool
         private void WriteInfoMessage(string message)
         {
             currentDateTime = DateTime.Now;
-            if (!Directory.Exists(Directory.GetCurrentDirectory() + INFO_MESSAGE_DIRECTORY))
+            if (!Directory.Exists(Directory.GetCurrentDirectory() + Constants.INFO_MESSAGE_DIRECTORY))
             {
-                Directory.CreateDirectory(Directory.GetCurrentDirectory() + INFO_MESSAGE_DIRECTORY);
+                Directory.CreateDirectory(Directory.GetCurrentDirectory() + Constants.INFO_MESSAGE_DIRECTORY);
             }
             if (!File.Exists(infoMessagePath))
             {
@@ -138,9 +131,9 @@ namespace osuTaikoSvTool
         private void WriteErrorMessage(string message)
         {
             currentDateTime = DateTime.Now;
-            if (!Directory.Exists(Directory.GetCurrentDirectory() + ERROR_MESSAGE_DIRECTORY))
+            if (!Directory.Exists(Directory.GetCurrentDirectory() + Constants.ERROR_MESSAGE_DIRECTORY))
             {
-                Directory.CreateDirectory(Directory.GetCurrentDirectory() + ERROR_MESSAGE_DIRECTORY);
+                Directory.CreateDirectory(Directory.GetCurrentDirectory() + Constants.ERROR_MESSAGE_DIRECTORY);
             }
             if (!File.Exists(errorMessagePath))
             {
@@ -214,6 +207,11 @@ namespace osuTaikoSvTool
             }
             string fileName = Path.GetFileName(path);
             label1.Text = fileName;
+
+            // TimingPoint の取得
+            // Note の取得
+            // TimingPoint から Barline を取得 し、Note に追加
+            //
         }
 
         /// <summary>
@@ -237,6 +235,147 @@ namespace osuTaikoSvTool
                 }
             }
             return ret;
+        }
+
+
+        /// <summary>
+        /// 追加ボタン押下時の処理
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void addButton_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var lines = File.ReadAllLines(path);
+                bool isHitObjects = false;
+                bool isTimingPoints = false;
+                var timingPointList = new List<TimingPoint>();
+                var uninheritedTimingPointList = new List<TimingPoint>();
+                var hitObjectList = new List<HitObject>();
+
+                // HitObject, TimingPoint を全取得
+                foreach (var line in lines)
+                {
+                    if (line == "")
+                    {
+                        continue;
+                    }
+                    if (line == "[HitObjects]")
+                    {
+                        isTimingPoints = false;
+                    }
+
+                    if (isTimingPoints)
+                    {
+                        timingPointList.Add(new TimingPoint(line));
+                    }
+                    if (isHitObjects)
+                    {
+                        hitObjectList.Add(new HitObject(line));
+                    }
+                    if (line == "[HitObjects]")
+                    {
+                        isHitObjects = true;
+                    }
+                    if (line == "[TimingPoints]")
+                    {
+                        isTimingPoints = true;
+                    }
+                }
+
+                // 小節線を取得する
+                // 最終ノーツを取る(これ以上は見ない)
+                hitObjectList.Sort((a, b) => a.time.CompareTo(b.time));
+                HitObject lastHitObject = hitObjectList.Last();
+
+                foreach (var timingPoint in timingPointList)
+                {
+                    if (timingPoint.isRedLine)
+                    {
+                        uninheritedTimingPointList.Add(timingPoint);
+                    }
+                }
+                for (int i = 0; i < uninheritedTimingPointList.Count; i++)
+                {
+                    decimal time = uninheritedTimingPointList[i].time;
+                    int timeEnd = lastHitObject.time;
+
+                    if (i + 1 < uninheritedTimingPointList.Count) timeEnd = uninheritedTimingPointList[i + 1].time;
+                    decimal timeBar = uninheritedTimingPointList[i].barLength;
+                    for (; time < timeEnd; time += timeBar)
+                    {
+                        int timeBarline = (int)Math.Floor(time);
+
+                        // すでに同じ time の HitObject が存在するかをチェック
+                        var hitObjectOnBarLine = hitObjectList.FirstOrDefault(h => h.time == timeBarline);
+                        if (hitObjectOnBarLine == null)
+                        {
+                            // 赤線を HitObject として追加
+                            hitObjectList.Add(new HitObject(timeBarline));
+                        }
+                        else
+                        {
+                            hitObjectOnBarLine.isBarline = true;
+                        }
+                    }
+                }
+
+                // ソートする
+                timingPointList.Sort((a, b) => b.isRedLine.CompareTo(a.isRedLine));
+                timingPointList.Sort((a, b) => a.time.CompareTo(b.time));
+                hitObjectList.Sort((a, b) => a.time.CompareTo(b.time));
+
+
+                // HitObject に SVとBPMを適用(ソート後)
+                int timingIndex = 0;
+                decimal currentBpm = 0;
+                decimal currentSv = 1.0m;
+                foreach (var hitObject in hitObjectList)
+                {
+                    // timingPoint を進める
+                    while (timingIndex + 1 < timingPointList.Count &&
+                           timingPointList[timingIndex + 1].time <= hitObject.time)
+                    {
+                        timingIndex++;
+                    }
+
+                    // 赤線と緑線が同じ time に複数ある可能性があるため、
+                    // その time の中で緑線があれば優先的に使う
+                    var timeGroup = timingPointList
+                        .Where(tp => tp.time == timingPointList[timingIndex].time)
+                        .ToList();
+
+                    var green = timeGroup.FirstOrDefault(tp => !tp.isRedLine);
+                    var red = timeGroup.FirstOrDefault(tp => tp.isRedLine);
+
+                    if (red != null)
+                    {
+                        currentBpm = red.bpm;
+                    }
+                    if (green != null)
+                    {
+                        currentSv = green.sv;
+                    }
+                    else if (red != null)
+                    {
+                        // 赤線のみある場合、SVは1.0
+                        currentSv = 1.0m;
+                    }
+
+                    hitObject.bpm = currentBpm;
+                    hitObject.sv = currentSv;
+                }
+
+                // BeatmapInfo に渡す
+                return;
+            }
+            catch (Exception ex) 
+            {
+                WriteErrorMessage("例外エラーが発生しました。");
+                WriteErrorMessage(ex.Message + "\n" + ex.StackTrace);
+                return;
+            }
         }
 
         /// <summary>
@@ -362,7 +501,7 @@ namespace osuTaikoSvTool
         /// <param name="e"></param>
         private void backupFolderButton_Click(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start("EXPLORER.EXE", Directory.GetCurrentDirectory() + BACKUP_DIRECTORY);
+            System.Diagnostics.Process.Start("EXPLORER.EXE", Directory.GetCurrentDirectory() + Constants.BACKUP_DIRECTORY);
         }
         private void swapTimingButton_Click(object sender, EventArgs e)
         {
