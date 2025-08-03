@@ -8,22 +8,22 @@ using System.Threading.Tasks;
 
 namespace osuTaikoSvTool
 {
-    internal class TimingPoint
+    class TimingPoint
     {
-        public double time;
-        public double bpm;
-        public double sv;
-        public double barLength; //1小節の長さ(ms)
+        public int time;
+        public decimal bpm;
+        public decimal sv;
+        public decimal barLength; //1小節の長さ(ms)
         public bool isRedLine;
         public int volume;
         public int mater;
         public int effect;
         public int sampleIndex;
         public int sampleSet;
-        TimingPoint(string line)
+        internal TimingPoint(string line)
         {
             string[] buff = line.Split(",");
-            time = double.Parse(buff[0]);       //タイミング
+            time = int.Parse(buff[0]);          //タイミング
             mater = int.Parse(buff[2]);         //拍子
             sampleSet = int.Parse(buff[3]);     //サンプルセット(Normal,Soft,Drum 等)
             sampleIndex = int.Parse(buff[4]);   //サンプルインデックス?
@@ -33,12 +33,12 @@ namespace osuTaikoSvTool
             if (int.Parse(buff[6]) == 1)
             {
                 isRedLine = true;
-                barLength = double.Parse(buff[1]) * mater;
-                bpm = 60000 / double.Parse(buff[1]);
+                barLength = decimal.Parse(buff[1]) * mater;
+                bpm = 60000 / decimal.Parse(buff[1]);
             } else
             {
                 isRedLine = false;
-                sv = -100 / double.Parse(buff[1]);
+                sv = -100 / decimal.Parse(buff[1]);
             }
 
         }

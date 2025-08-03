@@ -316,6 +316,7 @@ namespace osuTaikoSvTool
             addButton.TabIndex = 2;
             addButton.Text = "追加";
             addButton.UseVisualStyleBackColor = false;
+            addButton.Click += addButton_Click;
             // 
             // enableOffset
             // 
