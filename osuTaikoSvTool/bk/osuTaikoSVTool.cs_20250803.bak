@@ -1,0 +1,1812 @@
+using System;
+using System.Text;
+using System.Collections.Generic;
+using System.Linq;
+using System.Diagnostics.Metrics;
+using System.Threading;
+using System.Security.Cryptography;
+using System.Windows.Forms;
+using System.Drawing.Imaging;
+using System.Reflection.Emit;
+using System.Windows.Forms.VisualStyles;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
+
+namespace osuTaikoSvTool
+{
+    public partial class osuTaikoSVTool : Form
+    {
+        const string CONST_STRINGS = ",4,1,0,";
+        const string BACKUP_DIRECTORY = "\\BackUp";
+        const string WORK_DIRECTORY = "\\Work";
+        const string INFO_MESSAGE_DIRECTORY = "\\Log\\Info";
+        const string ERROR_MESSAGE_DIRECTORY = "\\Log\\Error";
+        const string BEATMAP_EXTENSION = ".osu";
+        const string LOG_EXTENSION = ".log";
+        string infoMessagePath = "";
+        string errorMessagePath = "";
+        string path = "";
+        bool isDSelected = false;
+        bool isKSelected = false;
+        bool isBigDSelected = false;
+        bool isBigKSelected = false;
+        bool isSliderSelected = false;
+        bool isBigSliderSelected = false;
+        bool isBarlineSelected = false;
+        bool isBookMarkSelected = false;
+        bool isCertainObject = false;
+        bool isSV = false;
+        bool isVolume = false;
+        bool isBarline = false;
+        bool isOffset = true;
+        bool isKiai = false;
+        bool isStartKiai = false;
+        bool isEndKiai = false;
+        int calculationCode = 0;
+        int offsetValue = 0;
+        DateTime currentDateTime;
+        public osuTaikoSVTool()
+        {
+            InitializeComponent();
+        }
+
+
+        /// <summary>
+        /// 画面ロード時の処理
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void osuTaikoSVTool_Load(object sender, EventArgs e)
+        {
+            pictureBox5.Controls.Add(label1);
+            Application.ApplicationExit += new EventHandler(Application_ApplicationExit);
+            currentDateTime = DateTime.Now;
+            // 新規ファイルの絶対パス
+            infoMessagePath = Directory.GetCurrentDirectory() + INFO_MESSAGE_DIRECTORY + "\\Info_" + String.Format("{0:yyyyMMdd}", currentDateTime) + LOG_EXTENSION;
+            if (!Directory.Exists(Directory.GetCurrentDirectory() + BACKUP_DIRECTORY))
+            {
+                Directory.CreateDirectory(Directory.GetCurrentDirectory() + BACKUP_DIRECTORY);
+            }
+            if (!Directory.Exists(Directory.GetCurrentDirectory() + WORK_DIRECTORY))
+            {
+                Directory.CreateDirectory(Directory.GetCurrentDirectory() + WORK_DIRECTORY);
+            }
+            if (!Directory.Exists(Directory.GetCurrentDirectory() + INFO_MESSAGE_DIRECTORY))
+            {
+                Directory.CreateDirectory(Directory.GetCurrentDirectory() + INFO_MESSAGE_DIRECTORY);
+            }
+            if (!File.Exists(infoMessagePath))
+            {
+                // 新規ファイル作成
+                File.Create(infoMessagePath).Close();
+            }
+            errorMessagePath = Directory.GetCurrentDirectory() + ERROR_MESSAGE_DIRECTORY + "\\error_" + String.Format("{0:yyyyMMdd}", currentDateTime) + LOG_EXTENSION;
+            if (!Directory.Exists(Directory.GetCurrentDirectory() + ERROR_MESSAGE_DIRECTORY))
+            {
+                Directory.CreateDirectory(Directory.GetCurrentDirectory() + ERROR_MESSAGE_DIRECTORY);
+            }
+            if (!File.Exists(errorMessagePath))
+            {
+                // 新規ファイル作成
+                File.Create(errorMessagePath).Close();
+            }
+            WriteInfoMessage("アプリケーションを開始します。");
+            isStartKialButton.Enabled = false;
+            isEndKialButton.Enabled = false;
+            this.FormBorderStyle = FormBorderStyle.FixedSingle;
+            this.MaximizeBox = false;
+        }
+
+        /// <summary>
+        /// アプリケーション終了時の処理
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Application_ApplicationExit(object sender, EventArgs e)
+        {
+            WriteInfoMessage("アプリケーションを終了します。");
+
+            //ApplicationExitイベントハンドラを削除
+            Application.ApplicationExit -= new EventHandler(Application_ApplicationExit);
+        }
+
+        /// <summary>
+        /// Infoメッセージの書き込み処理
+        /// </summary>
+        /// <param name="message"></param>
+        private void WriteInfoMessage(string message)
+        {
+            currentDateTime = DateTime.Now;
+            if (!Directory.Exists(Directory.GetCurrentDirectory() + INFO_MESSAGE_DIRECTORY))
+            {
+                Directory.CreateDirectory(Directory.GetCurrentDirectory() + INFO_MESSAGE_DIRECTORY);
+            }
+            if (!File.Exists(infoMessagePath))
+            {
+                // 新規ファイル作成
+                File.Create(infoMessagePath).Close();
+            }
+            using (StreamWriter writer = new StreamWriter(infoMessagePath, true, Encoding.GetEncoding("utf-8")))
+            {
+                writer.WriteLine(currentDateTime.ToString("[HH:mm:ss.fff]") + " " + message);
+            }
+        }
+
+        /// <summary>
+        /// Errorメッセージの書き込み処理
+        /// </summary>
+        /// <param name="message"></param>
+        private void WriteErrorMessage(string message)
+        {
+            currentDateTime = DateTime.Now;
+            if (!Directory.Exists(Directory.GetCurrentDirectory() + ERROR_MESSAGE_DIRECTORY))
+            {
+                Directory.CreateDirectory(Directory.GetCurrentDirectory() + ERROR_MESSAGE_DIRECTORY);
+            }
+            if (!File.Exists(errorMessagePath))
+            {
+                // 新規ファイル作成
+                File.Create(errorMessagePath).Close();
+            }
+            using (StreamWriter writer = new StreamWriter(errorMessagePath, true, Encoding.GetEncoding("utf-8")))
+            {
+                writer.WriteLine(currentDateTime.ToString("[HH:mm:ss.fff]") + " " + message);
+            }
+        }
+
+        /// <summary>
+        /// "ファイルを開く"ボタン押下時の処理
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void openFileButton_Click(object sender, EventArgs e)
+        {
+            string pathBuff = SelectFile();
+            if (pathBuff == null || pathBuff == "" || pathBuff == string.Empty)
+            {
+                return;
+            }
+            path = pathBuff;
+            var lines = File.ReadAllLines(path);
+            string imageName = string.Empty;
+            bool isGetBG = false;
+            for (int i = 0; i < lines.Length; i++)
+            {
+                if (lines[i] == "//Background and Video events")
+                {
+                    try
+                    {
+                        while (true)
+                        {
+                            string[] buff = lines[i + 1].Split(",");
+                            if (buff[0] == "Video")
+                            {
+                                i++;
+                                continue;
+                            }
+                            imageName = buff[2].Replace("\"", "");
+                            isGetBG = true;
+                            break;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                    }
+                    break;
+                }
+            }
+            if (isGetBG)
+            {
+                Bitmap canvas = new Bitmap(pictureBox5.Width, pictureBox5.Height);
+                Graphics g = Graphics.FromImage(canvas);
+                Bitmap image = new Bitmap(Path.GetDirectoryName(path) + "\\" + imageName);
+                g.InterpolationMode =
+                    System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+                g.DrawImage(image, 0, 0, 384, 216);
+                g.InterpolationMode =
+                    System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                image.Dispose();
+                g.Dispose();
+                //PictureBox1に表示する
+                pictureBox5.Image = canvas;
+            }
+            else
+            {
+                WriteInfoMessage("BGの取得に失敗しました。");
+            }
+            //pictureBox5.Image = System.Drawing.Image.FromFile(Path.GetDirectoryName(path) + "\\" + imageName);
+            string fileName = Path.GetFileName(path);
+            label1.Text = fileName;
+        }
+
+        /// <summary>
+        /// "ファイル開く"ボタン押下時のダイアログ処理
+        /// </summary>
+        /// <returns>開いたファイルのパス</returns>
+        private string SelectFile()
+        {
+            string ret = string.Empty;
+
+            using (OpenFileDialog openFileDialog = new OpenFileDialog())
+            {
+                openFileDialog.Title = "ファイル選択ダイアログ";
+                openFileDialog.Filter = "osuファイル(*.osu)|*.osu";
+                openFileDialog.InitialDirectory = @"D:\osu!\Songs\";
+
+                //ファイル選択ダイアログを開く
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    ret = openFileDialog.FileName;
+                }
+            }
+            return ret;
+        }
+
+        /// <summary>
+        /// ユーザが入力したタイミングを変換する処理
+        /// </summary>
+        /// <param name="baseTiming">入力したタイミング (mm:ss:fff (notes))</param>
+        /// <param name="returnTiming">変換後のタイミング (mmssfff)</param>
+        /// <returns>処理が正常終了した場合はtrue、異常終了した場合はfalse</returns>
+        private bool ConvertTiming(string baseTiming, ref int returnTiming)
+        {
+            try
+            {
+                string[] arr = baseTiming.Split(':');
+                arr[2] = arr[2].Substring(0, 3);
+                returnTiming = Convert.ToInt32(arr[2]) +
+                               Convert.ToInt32(arr[1]) * 1000 +
+                               Convert.ToInt32(arr[0]) * 60000;
+                return true;
+            }
+            catch (Exception e)
+            {
+                WriteErrorMessage("例外エラーが発生しました。");
+                WriteErrorMessage(e.Message + "\n" + e.StackTrace);
+                return false;
+            }
+        }
+
+        private bool JoinTimingPoint(TimingPoint timingPointData, ref string retTimingPoint)
+        {
+            try
+            {
+                retTimingPoint = ((int)(timingPointData.Time)).ToString() + "," +
+                                 timingPointData.BeatLength.ToString() + "," +
+                                 timingPointData.Meter.ToString() + "," +
+                                 timingPointData.SampleSet.ToString() + "," +
+                                 timingPointData.SampleIndex.ToString() + "," +
+                                 timingPointData.Volume.ToString() + "," +
+                                 timingPointData.Uninherited.ToString() + "," +
+                                 timingPointData.Effects.ToString();
+                return true;
+            }
+            catch (Exception e)
+            {
+                WriteErrorMessage("例外エラーが発生しました。");
+                WriteErrorMessage(e.Message + "\n" + e.StackTrace);
+                return false;
+            }
+
+        }
+
+
+        private bool validationCheck(ref int[] inputTimings)
+        {
+            try
+            {
+                // バリデーションチェック(空欄)
+                if (timingFrom.Text == "" || timingFrom.Text == null ||
+                    timingTo.Text == "" || timingTo.Text == null ||
+                    (((SVFrom.Text == "" || SVFrom.Text == null) &&
+                    (SVTo.Text == "" || SVTo.Text == null)) && isSV) ||
+                    (((volumeFrom.Text == "" || volumeFrom.Text == null) &&
+                    (volumeTo.Text == "" || volumeTo.Text == null)) && isVolume) ||
+                    path == "" || path == null
+                    )
+                {
+                    throw new Exception("バリデーションエラーが発生しました。");
+                }
+                if (offsetTextbox.Text == "" || offsetTextbox.Text == null)
+                {
+                    offsetValue = 0;
+                }
+                else
+                {
+                    offsetValue = Convert.ToInt32(offsetTextbox.Text);
+                }
+
+                // バリデーションチェック(Timingの入力フォーマット)
+                if (!ConvertTiming(timingFrom.Text, ref inputTimings[0]) || !ConvertTiming(timingTo.Text, ref inputTimings[1]))
+                {
+                    throw new Exception("バリデーションエラーが発生しました。");
+                }
+                // バリデーションチェック(TimingがFrom>To)
+                if (inputTimings[0] > inputTimings[1])
+                {
+                    throw new Exception("バリデーションエラーが発生しました。");
+                }
+            }
+            catch (Exception e)
+            {
+                WriteErrorMessage("例外エラーが発生しました。");
+                WriteErrorMessage(e.Message + "\n" + e.StackTrace);
+                return false;
+            }
+            return true;
+        }
+
+        private HitObject ConvertHitObject(string[] buff)
+        {
+            HitObject hitObject = new HitObject(-1, -1, -1, -1, -1, string.Empty, string.Empty, string.Empty, -1, -1, string.Empty, string.Empty, -1);
+            hitObject.X = Convert.ToInt32(buff[0]);
+            hitObject.Y = Convert.ToInt32(buff[1]);
+            hitObject.Time = Convert.ToInt32(buff[2]);
+            hitObject.Type = Convert.ToInt32(buff[3]);
+            hitObject.HitSound = Convert.ToInt32(buff[4]);
+            if ((Convert.ToInt32(buff[3]) & 0b000001) != 0)
+            {
+                hitObject.HitSample = buff[5];
+                return hitObject;
+
+            }
+            if ((Convert.ToInt32(buff[3]) & 0b000010) != 0)
+            {
+                hitObject.Curve = buff[5];
+                hitObject.Sildes = Convert.ToInt32(buff[6]);
+                hitObject.Length = Convert.ToDouble(buff[7]);
+                hitObject.EdgeSounds = buff[8];
+                hitObject.EdgeSets = buff[9];
+                hitObject.HitSample = buff[10];
+                return hitObject;
+            }
+            if ((Convert.ToInt32(buff[3]) & 0b001000) != 0)
+            {
+                hitObject.EndTime = Convert.ToInt32(buff[5]);
+                hitObject.HitSample = buff[6];
+                return hitObject;
+            }
+            return hitObject;
+        }
+
+        /// <summary>
+        /// 追加ボタン押下時の処理
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void addButton_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var lines = File.ReadAllLines(path);
+                bool isTimingPoints = false;
+                bool isHitObjects = false;
+                var timingPointsList = new List<TimingPoint>();
+                var hitObjectsList = new List<HitObject>();
+                int[] inputTimings = new int[2];
+                if (!validationCheck(ref inputTimings))
+                {
+                    WriteInfoMessage("処理に失敗しました。");
+                    return;
+                }
+
+                foreach (var line in lines)
+                {
+                    if (line == "")
+                    {
+                        continue;
+                    }
+                    if (line == "[HitObjects]")
+                    {
+                        isTimingPoints = false;
+                    }
+                    if (isTimingPoints)
+                    {
+                        string[] buff = new string[8];
+                        buff = line.Split(",");
+                        timingPointsList.Add(new TimingPoint(Convert.ToDouble(buff[0]),
+                                                             Convert.ToDouble(buff[1]),
+                                                             Convert.ToInt32(buff[2]),
+                                                             Convert.ToInt32(buff[3]),
+                                                             Convert.ToInt32(buff[4]),
+                                                             Convert.ToInt32(buff[5]),
+                                                             Convert.ToInt32(buff[6]),
+                                                             Convert.ToInt32(buff[7])));
+                    }
+                    if (isHitObjects)
+                    {
+                        if (line != "")
+                        {
+                            string[] buff = line.Split(",");
+                            hitObjectsList.Add(ConvertHitObject(buff));
+                        }
+                    }
+                    if (line == "[HitObjects]")
+                    {
+                        isHitObjects = true;
+                    }
+                    if (line == "[TimingPoints]")
+                    {
+                        isTimingPoints = true;
+                    }
+                }
+                if (AddGreenLine(timingPointsList, hitObjectsList, inputTimings))
+                {
+                    if (MessageBox.Show("処理に成功しました。\nCtrl+Lを押し、譜面を更新してください。", "結果", MessageBoxButtons.OK, MessageBoxIcon.Asterisk) == DialogResult.OK)
+                    {
+                        WriteInfoMessage("処理に成功しました。");
+                        return;
+                    };
+                }
+                else
+                {
+                    if (MessageBox.Show("処理に成功しました。\nCtrl+Lを押し、譜面を更新してください。", "結果", MessageBoxButtons.OK, MessageBoxIcon.Asterisk) == DialogResult.OK)
+                    {
+                        WriteInfoMessage("処理に失敗しました。");
+                        return;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                WriteErrorMessage("例外エラーが発生しました。");
+                WriteErrorMessage(ex.Message + "\n" + ex.StackTrace);
+                return;
+            }
+        }
+
+        private void modifyButton_Click(object sender, EventArgs e)
+        {
+            var lines = File.ReadAllLines(path);
+            bool isTimingPoints = false;
+            var timingPointsList = new List<TimingPoint>();
+            int[] inputTimings = new int[2];
+            if (!validationCheck(ref inputTimings))
+            {
+                WriteInfoMessage("処理に失敗しました。");
+                return;
+            }
+
+            // 1行ずつ読み込んで表示
+            foreach (var line in lines)
+            {
+                if (line == "")
+                {
+                    continue;
+                }
+                if (line == "[HitObjects]")
+                {
+                    break;
+                }
+                if (isTimingPoints)
+                {
+                    string[] buff = new string[8];
+                    buff = line.Split(",");
+                    timingPointsList.Add(new TimingPoint(Convert.ToDouble(buff[0]),
+                                                         Convert.ToDouble(buff[1]),
+                                                         Convert.ToInt32(buff[2]),
+                                                         Convert.ToInt32(buff[3]),
+                                                         Convert.ToInt32(buff[4]),
+                                                         Convert.ToInt32(buff[5]),
+                                                         Convert.ToInt32(buff[6]),
+                                                         Convert.ToInt32(buff[7])));
+                }
+                if (line == "[TimingPoints]")
+                {
+                    isTimingPoints = true;
+                }
+            }
+            if (ModifyGreenLine(timingPointsList, inputTimings))
+            {
+                if (MessageBox.Show("処理に成功しました。\nCtrl+Lを押し、譜面を更新してください。", "結果", MessageBoxButtons.OK, MessageBoxIcon.Asterisk) == DialogResult.OK)
+                {
+                    WriteInfoMessage("処理に成功しました。");
+                    return;
+                };
+            }
+            else
+            {
+                if (MessageBox.Show("処理に失敗しました。", "結果", MessageBoxButtons.OK, MessageBoxIcon.Asterisk) == DialogResult.OK)
+                {
+                    WriteInfoMessage("処理に失敗しました。");
+                    return;
+                }
+            }
+        }
+        private void removeButton_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var lines = File.ReadAllLines(path);
+                bool isTimingPoints = false;
+                var timingPointsList = new List<TimingPoint>();
+                var hitObjectsList = new List<TimingPoint>();
+                int[] inputTimings = new int[2];
+                if (!validationCheck(ref inputTimings))
+                {
+                    WriteInfoMessage("処理に失敗しました。");
+                    return;
+                }
+
+                // 1行ずつ読み込んで表示
+                foreach (var line in lines)
+                {
+                    if (line == "")
+                    {
+                        continue;
+                    }
+                    if (line == "[HitObjects]")
+                    {
+                        break;
+                    }
+                    if (isTimingPoints)
+                    {
+                        string[] buff = new string[8];
+                        buff = line.Split(",");
+                        timingPointsList.Add(new TimingPoint(Convert.ToDouble(buff[0]),
+                                                             Convert.ToDouble(buff[1]),
+                                                             Convert.ToInt32(buff[2]),
+                                                             Convert.ToInt32(buff[3]),
+                                                             Convert.ToInt32(buff[4]),
+                                                             Convert.ToInt32(buff[5]),
+                                                             Convert.ToInt32(buff[6]),
+                                                             Convert.ToInt32(buff[7])));
+                    }
+                    if (line == "[TimingPoints]")
+                    {
+                        isTimingPoints = true;
+                    }
+                }
+                if (RemoveGreenLine(timingPointsList, inputTimings))
+                {
+                    if (MessageBox.Show("処理に成功しました。\nCtrl+Lを押し、譜面を更新してください。", "結果", MessageBoxButtons.OK, MessageBoxIcon.Asterisk) == DialogResult.OK)
+                    {
+                        WriteInfoMessage("処理に成功しました。");
+                        return;
+                    };
+                }
+                else
+                {
+                    if (MessageBox.Show("処理に失敗しました。", "結果", MessageBoxButtons.OK, MessageBoxIcon.Asterisk) == DialogResult.OK)
+                    {
+                        WriteInfoMessage("処理に失敗しました。");
+                        return;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                if (MessageBox.Show("譜面を選択してください。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Exclamation) == DialogResult.OK)
+                {
+                    WriteErrorMessage("例外エラーが発生しました。");
+                    WriteErrorMessage(ex.Message + "\n" + ex.StackTrace);
+                    WriteInfoMessage("処理に失敗しました。");
+                    return;
+                }
+                return;
+            }
+        }
+
+        // デバッグ用
+        //bool AddGreenLine(List<TimingPoint> timingPointsList, List<HitObject> hitObjectsList, int[] inputTimings)
+        //{
+        //    return true;
+        //}
+
+        /// <summary>
+        /// 緑線追加処理(Add)
+        /// </summary>
+        /// <param name="timingPointsList">タイミングポイントのリスト</param>
+        /// <param name="hitObjectsList">ヒットオブジェクトのリスト</param>
+        /// <param name="inputTimings">ユーザーが入力したタイミング([0]:始点 [1]:終点)</param>
+        /// <returns>処理が正常終了した場合はtrue、異常終了した場合はfalse</returns>
+        /// 
+        bool AddGreenLine(List<TimingPoint> timingPointsList, List<HitObject> hitObjectsList, int[] inputTimings)
+        {
+            List<HitObject> targetHitObjectList = new List<HitObject>();
+            List<TimingPoint> targetTimingPointList = new List<TimingPoint>();
+            List<TimingPoint> bpmList = new List<TimingPoint>();
+            double baseBPM = 0;
+            double currentBPM = 0;
+            double lastBPM = 0;
+            string mapTitleDirectory = "";
+            int outRangeIndex = 0;
+            List<TimingPoint> retTimings = new List<TimingPoint>();
+            List<double> retSVs = new List<double>();
+            List<int> retVolumes = new List<int>();
+            List<string> ignoreGreenLine = new List<string>();
+            List<TimingPoint> ignoreGreenLineList = new List<TimingPoint>();
+
+            try
+            {
+                // 現時刻の取得
+                currentDateTime = DateTime.Now;
+                // 各曲の曲名の取得
+                int slashIndex = Path.GetDirectoryName(path).LastIndexOf("\\");
+
+                if (slashIndex != -1)
+                {
+                    mapTitleDirectory = Path.GetDirectoryName(path).Substring(slashIndex + 1);
+                }
+                if (!Directory.Exists(Directory.GetCurrentDirectory() + BACKUP_DIRECTORY + "\\" + mapTitleDirectory))
+                {
+                    // バックアップフォルダの作成
+                    Directory.CreateDirectory(Directory.GetCurrentDirectory() + BACKUP_DIRECTORY + "\\" + mapTitleDirectory);
+                }
+                var currentPath = Directory.GetCurrentDirectory() + BACKUP_DIRECTORY + "\\" + mapTitleDirectory + "\\" + String.Format("{0:yyyy_MM_dd_HH_mm_ss_fff}", currentDateTime) + BEATMAP_EXTENSION;
+                // バックアップフォルダに現在のosuファイルをコピー
+                File.Copy(path, currentPath);
+
+                timingPointsList = timingPointsList.OrderBy(t => t.Time).ThenByDescending(i => i.Uninherited).ToList();
+                hitObjectsList = hitObjectsList.OrderBy(t => t.Time).ToList();
+                for (global::System.Int32 i = (timingPointsList.Count) - (1); i >= 0; i--)
+                {
+                    // 入力値の始点の1個前のTimingPointを求める
+                    if (timingPointsList[i - 1].Time < inputTimings[0])
+                    {
+                        outRangeIndex = i - 1;
+                    }
+                    if (timingPointsList[i].Uninherited == 1)
+                    {
+                        bpmList.Insert(0, timingPointsList[i]);
+                        if (timingPointsList[i].Time <= inputTimings[1])
+                        {
+                            break;
+                        }
+                    }
+                    // 入力値の始点のBPMを求める
+                    if ((timingPointsList[i].Uninherited == 1) && (timingPointsList[i].Time <= inputTimings[1]))
+                    {
+                        if (timingPointsList[i].Time <= inputTimings[0])
+                        {
+                            bpmList.Insert(0, timingPointsList[i]);
+                        }
+                    }
+
+                }
+                bool isIgnore = false;
+                // 対象となるヒットオブジェクトの算出
+                for (global::System.Int32 i = 0; i < hitObjectsList.Count; i++)
+                {
+                    if ((hitObjectsList[i].Time >= inputTimings[0]) && (hitObjectsList[i].Time <= inputTimings[1]))
+                    {
+                        if (isCertainObject)
+                        {
+                            // Sliderの場合
+                            if (((hitObjectsList[i].Type & 0b00000010) != 0) &&
+                                ((hitObjectsList[i].HitSound & 0b00000001) != 0) &&
+                                isSliderSelected)
+                            {
+                                isIgnore = false;
+                                targetHitObjectList.Add(hitObjectsList[i]);
+                                continue;
+                            }
+                            // Slider(finisher)の場合
+                            if (((hitObjectsList[i].Type & 0b00000010) != 0) &&
+                                ((hitObjectsList[i].HitSound & 0b00000100) != 0) &&
+                                isSliderSelected)
+                            {
+                                isIgnore = false;
+                                targetHitObjectList.Add(hitObjectsList[i]);
+                                continue;
+                            }
+                            // Dongの場合
+                            if (((hitObjectsList[i].HitSound & 0b11111111) == 0) &&
+                                isDSelected)
+                            {
+                                isIgnore = false;
+                                targetHitObjectList.Add(hitObjectsList[i]);
+                                continue;
+                            }
+                            // Kaの場合
+                            if ((((hitObjectsList[i].HitSound & 0b00000010) != 0) ||
+                                ((hitObjectsList[i].HitSound & 0b00001000) != 0)) &&
+                                isKSelected)
+                            {
+                                isIgnore = false;
+                                targetHitObjectList.Add(hitObjectsList[i]);
+                                continue;
+                            }
+                            // Dong(finisher)の場合
+                            if (((hitObjectsList[i].HitSound & 0b11111011) == 0) &&
+                                ((hitObjectsList[i].HitSound & 0b00000100) != 0) &&
+                                isBigDSelected)
+                            {
+                                isIgnore = false;
+                                targetHitObjectList.Add(hitObjectsList[i]);
+                                continue;
+                            }
+                            // Ka(finisher)の場合
+                            if (((((hitObjectsList[i].HitSound & 0b00000010) != 0) &&
+                                ((hitObjectsList[i].HitSound & 0b00000100) != 0)) ||
+                                (((hitObjectsList[i].HitSound & 0b00000100) != 0) &&
+                                ((hitObjectsList[i].HitSound & 0b00001000) != 0))) &&
+                                isBigKSelected)
+                            {
+                                isIgnore = false;
+                                targetHitObjectList.Add(hitObjectsList[i]);
+                                continue;
+                            }
+                            if ((!isDSelected) &&
+                                (!isKSelected) &&
+                                (isBigDSelected) &&
+                                (isBigKSelected) &&
+                                (!isSliderSelected) &&
+                                (!isBigSliderSelected) &&
+                                (!isBarlineSelected))
+                            {
+                                isIgnore = false;
+                                targetHitObjectList.Add(hitObjectsList[i]);
+                            }
+                            if (!isIgnore)
+                            {
+                                for (global::System.Int32 j = (timingPointsList.Count) - (1); j >= 0; j--)
+                                {
+                                    if (timingPointsList[j].Time <= hitObjectsList[i].Time)
+                                    {
+                                        TimingPoint buff = new TimingPoint(hitObjectsList[i].Time,
+                                                                           timingPointsList[j].BeatLength,
+                                                                           timingPointsList[j].Meter,
+                                                                           timingPointsList[j].SampleSet,
+                                                                           timingPointsList[j].SampleIndex,
+                                                                           timingPointsList[j].Volume,
+                                                                           timingPointsList[j].Uninherited,
+                                                                           timingPointsList[j].Effects);
+                                        if (timingPointsList[j].Uninherited == 1)
+                                        {
+                                            buff.BeatLength = -100;
+                                            buff.Uninherited = 0;
+                                        }
+                                        ignoreGreenLineList.Add(buff);
+                                        isIgnore = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            targetHitObjectList.Add(hitObjectsList[i]);
+                        }
+                    }
+                }
+                // 初期BPM,現BPM,最終BPM情報の取得
+                baseBPM = 60000 / bpmList[0].BeatLength;
+                currentBPM = 60000 / bpmList[0].BeatLength;
+                lastBPM = 60000 / bpmList[bpmList.Count - 1].BeatLength;
+                int currentHitObjectIndex = 1;
+                if (!isSV)
+                {
+                    double[] inputSVs = { Convert.ToDouble(SVFrom.Text), Convert.ToDouble(SVTo.Text) };
+                    switch (calculationCode)
+                    {
+                        // 等差SV
+                        case 1:
+                            double art_svPerMs = (inputSVs[1] - inputSVs[0]) / (inputTimings[1] - inputTimings[0]);
+                            for (global::System.Int32 i = 0; i < bpmList.Count; i++)
+                            {
+                                currentBPM = 60000 / bpmList[i].BeatLength;
+                                for (global::System.Int32 j = currentHitObjectIndex; j < retTimings.Count; j++)
+                                {
+                                    if (i != bpmList.Count - 1)
+                                    {
+                                        if (retTimings[j].Time >= bpmList[i + 1].Time)
+                                        {
+                                            currentHitObjectIndex = j;
+                                            break;
+                                        }
+                                    }
+                                    retTimings[j].BeatLength = -100 / (inputSVs[0] + art_svPerMs * (retTimings[j].Time - inputTimings[0])) * (baseBPM / (60000 / bpmList[i].BeatLength));
+                                    retTimings[j].Meter = bpmList[i].Meter;
+                                    retTimings[j].SampleSet = bpmList[i].SampleSet;
+                                    retTimings[j].SampleIndex = bpmList[i].SampleIndex;
+                                    retTimings[j].Uninherited = 0;
+                                    retTimings[j].Effects = bpmList[i].Effects;
+                                }
+                            }
+
+                            break;
+                        // 等比SV
+                        case 2:
+                            double geo_svPerMs = Math.Pow((inputSVs[1] - inputSVs[0]), 1 / (inputTimings[1] - inputTimings[0]));
+                            for (global::System.Int32 i = 0; i < bpmList.Count; i++)
+                            {
+                                currentBPM = 60000 / bpmList[i].BeatLength;
+                                for (global::System.Int32 j = currentHitObjectIndex; j < retTimings.Count; j++)
+                                {
+                                    if (i != bpmList.Count - 1)
+                                    {
+                                        if (retTimings[j].Time >= bpmList[i + 1].Time)
+                                        {
+                                            currentHitObjectIndex = j;
+                                            break;
+                                        }
+                                    }
+                                    retSVs.Add(-100 / inputSVs[0] * Math.Pow(geo_svPerMs, (retTimings[j].Time - inputTimings[0])) * (baseBPM / (60000 / bpmList[i].BeatLength)));
+                                }
+                            }
+                            break;
+                        default:
+                            return false;
+                    }
+                }
+                else
+                {
+                    double svValue = timingPointsList[outRangeIndex].BeatLength;
+                    if (timingPointsList[outRangeIndex].Uninherited == 1)
+                    {
+                        svValue = -100;
+                    }
+                    for (global::System.Int32 i = 0; i < hitObjectsList.Count; i++)
+                    {
+                        retTimings[i].BeatLength = svValue;
+                        retTimings[i].Meter = bpmList[0].Meter;
+                        retTimings[i].SampleSet = bpmList[0].SampleSet;
+                        retTimings[i].SampleIndex = bpmList[0].SampleIndex;
+                        retTimings[i].Uninherited = 0;
+                        retTimings[i].Effects = bpmList[0].Effects;
+                    }
+                }
+                if (!isVolume)
+                {
+                    double[] inputVolumes = { Convert.ToDouble(volumeFrom.Text), Convert.ToDouble(volumeTo.Text) };
+                    double volumePerMs = (inputVolumes[1] - inputVolumes[0]) / (Convert.ToDouble(inputTimings[1]) - Convert.ToDouble(inputTimings[0]));
+                    for (global::System.Int32 i = 0; i < retTimings.Count; i++)
+                    {
+                        retVolumes.Add((int)(inputVolumes[0] + (volumePerMs * (retTimings[i].Time - inputTimings[0]))));
+                    }
+                    for (global::System.Int32 i = 1; i < bpmList.Count; i++)
+                    {
+                        bpmList[i].Volume = (int)(inputVolumes[0] + (volumePerMs * (bpmList[i].Time - inputTimings[0])));
+                    }
+                }
+                else
+                {
+                    for (global::System.Int32 i = 0; i < hitObjectsList.Count; i++)
+                    {
+                        retVolumes.Add(timingPointsList[outRangeIndex].Volume);
+                    }
+                    for (global::System.Int32 i = 1; i < bpmList.Count; i++)
+                    {
+                        bpmList[i].Volume = timingPointsList[outRangeIndex].Volume;
+                    }
+                }
+
+
+
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                WriteErrorMessage("例外エラーが発生しました。");
+                WriteErrorMessage(e.Message + "\n" + e.StackTrace);
+                return false;
+            }
+
+        }
+        bool AddGreenLine_old(List<string> timingPointsList, List<string> hitObjectsList, int[] inputTimings)
+        {
+            List<List<string>> splitTimingList = new List<List<string>>();
+            List<List<string>> redLines = new List<List<string>>();
+            List<List<string>> rangeRedLines = new List<List<string>>();
+            List<string> objectTimings = new List<string>();
+            List<string> ignoreGreenLine = new List<string>();
+            List<int> rangeBarLineList = new List<int>();
+            List<string> rangeBPMList = new List<string>();
+            List<double> retSVs = new List<double>();
+            List<int> retVolumes = new List<int>();
+            string mapTitleDirectory = "";
+            try
+            {
+                // 現時刻の取得
+                currentDateTime = DateTime.Now;
+                // 各曲の曲名の取得
+                int slashIndex = Path.GetDirectoryName(path).LastIndexOf("\\");
+
+                if (slashIndex != -1)
+                {
+                    mapTitleDirectory = Path.GetDirectoryName(path).Substring(slashIndex + 1);
+                }
+                if (!Directory.Exists(Directory.GetCurrentDirectory() + BACKUP_DIRECTORY + "\\" + mapTitleDirectory))
+                {
+                    // バックアップフォルダの作成
+                    Directory.CreateDirectory(Directory.GetCurrentDirectory() + BACKUP_DIRECTORY + "\\" + mapTitleDirectory);
+                }
+                var currentPath = Directory.GetCurrentDirectory() + BACKUP_DIRECTORY + "\\" + mapTitleDirectory + "\\" + String.Format("{0:yyyy_MM_dd_HH_mm_ss_fff}", currentDateTime) + BEATMAP_EXTENSION;
+                // バックアップフォルダに現在のosuファイルをコピー
+                File.Copy(path, currentPath);
+                // 余分な行の消去する
+                foreach (var objects in hitObjectsList)
+                {
+                    if (objects == "")
+                    {
+                        continue;
+                    }
+                    List<string> splitObject = new List<string>(objects.Split(','));
+                    objectTimings.Add(splitObject[2]);
+                }
+                bool isRangeStart = false;
+                for (int i = 0; i < timingPointsList.Count; i++)
+                {
+                    if (timingPointsList[i] == "")
+                    {
+                        continue;
+                    }
+                    List<string> splitTiming = new List<string>(timingPointsList[i].Split(','));
+                    splitTimingList.Add(splitTiming);
+                    // 取得したタイミングがユーザーが入力した開始位置より後だった場合
+                    if ((Convert.ToInt32(splitTiming[0]) >= inputTimings[0]) && !isRangeStart)
+                    {
+                        for (int j = i; j >= 0; j--)
+                        {
+                            List<string> prevSplitTiming = new List<string>(timingPointsList[j].Split(','));
+                            if (Convert.ToInt32(prevSplitTiming[6]) == 0)
+                            {
+                                ignoreGreenLine = prevSplitTiming;
+                                isRangeStart = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (splitTiming[6] == "1")
+                    {
+                        redLines.Add(splitTiming);
+                    }
+                }
+                if (!isRangeStart)
+                {
+                    ignoreGreenLine = new List<string> { "0", "-100", "4", "1", "0", "100", "0", "0" };
+                }
+                isRangeStart = false;
+                for (int i = 0; i < redLines.Count; i++)
+                {
+
+                    if (Convert.ToInt32(redLines[i][0]) >= inputTimings[0] && Convert.ToInt32(redLines[i][0]) <= inputTimings[1])
+                    {
+                        if (!isRangeStart && (Convert.ToInt32(redLines[i][0]) != inputTimings[0]))
+                        {
+                            rangeRedLines.Add(redLines[i - 1]);
+                        }
+                        if (Convert.ToInt32(redLines[i][0]) >= inputTimings[0])
+                        {
+                            isRangeStart = true;
+                        }
+                        rangeRedLines.Add(redLines[i]);
+                        if (Convert.ToInt32(redLines[i + 1][0]) >= inputTimings[1])
+                        {
+                            rangeRedLines.Add(redLines[i + 1]);
+                            break;
+                        }
+                    }
+                }
+                for (int i = 0; i < rangeRedLines.Count - 1; i++)
+                {
+                    double msPerLine = Convert.ToDouble(rangeRedLines[i][1]) * Convert.ToInt32(rangeRedLines[i][2]);
+                    int j = 0;
+                    while (Convert.ToDouble(rangeRedLines[i][0]) + msPerLine * j <= Convert.ToDouble(rangeRedLines[i + 1][0]) &&
+                           Convert.ToInt32(rangeRedLines[i][0]) + (int)(msPerLine * j) <= Convert.ToInt32(inputTimings[1]))
+                    {
+                        if (Convert.ToDouble(rangeRedLines[i][0]) + msPerLine * j >= Convert.ToDouble(inputTimings[0]))
+                        {
+                            rangeBarLineList.Add(Convert.ToInt32(rangeRedLines[i][0]) + (int)(msPerLine * j));
+                            rangeBPMList.Add(rangeRedLines[i][1]);
+                        }
+                        j++;
+                    }
+
+                }
+                foreach (var hitObject in objectTimings)
+                {
+                    for (int i = 0; i < rangeBarLineList.Count; i++)
+                    {
+                        if (rangeBarLineList[i] == Int32.Parse(hitObject))
+                        {
+                            rangeBarLineList.RemoveAt(i);
+                            rangeBPMList.RemoveAt(i);
+                            break;
+                        }
+                    }
+                }
+                List<int> timingList = new List<int>();
+                foreach (var hitObject in objectTimings)
+                {
+                    timingList.Add(Convert.ToInt32(hitObject));
+                }
+                if (isBarline)
+                {
+                    foreach (var rangeBarLine in rangeBarLineList)
+                    {
+                        timingList.Add(Convert.ToInt32(rangeBarLine));
+                    }
+                }
+                timingList.Sort();
+                for (global::System.Int32 i = (timingList.Count) - (1); i >= 0; i--)
+                {
+                    if (timingList[i] > Convert.ToInt32(inputTimings[1]) || timingList[i] < Convert.ToInt32(inputTimings[0]))
+                    {
+                        timingList.RemoveAt(i);
+                    }
+                }
+                for (global::System.Int32 i = (timingList.Count) - (1); i >= 0; i--)
+                {
+                    if (timingList[i] > Convert.ToInt32(inputTimings[1]))
+                    {
+                        timingList.RemoveAt(i);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                if (!isSV)
+                {
+                    double[] inputSVs = { Convert.ToDouble(SVFrom.Text), Convert.ToDouble(SVTo.Text) };
+                    switch (calculationCode)
+                    {
+                        //等差SV
+                        case 1:
+                            double art_svPerMs = (inputSVs[1] * (Convert.ToDouble(rangeRedLines[0][1]) / Convert.ToDouble(rangeBPMList[rangeBPMList.Count - 1])) - inputSVs[0]) / (Convert.ToDouble(inputTimings[1]) - Convert.ToDouble(inputTimings[0]));
+                            for (int i = 0; i < timingList.Count; i++)
+                            {
+                                for (global::System.Int32 j = (rangeRedLines.Count) - (1); j >= 0; j--)
+                                {
+                                    if (Convert.ToInt32(rangeRedLines[j][0]) <= timingList[i])
+                                    {
+                                        retSVs.Add(-100 / ((inputSVs[0] + (art_svPerMs * (timingList[i] - inputTimings[0]))) * (Convert.ToDouble(rangeRedLines[j][1]) / Convert.ToDouble(rangeRedLines[0][1]))));
+                                        break;
+                                    }
+                                }
+                            }
+                            break;
+                        //等比SV
+                        case 2:
+                            double geo_svPerMs = Math.Pow((inputSVs[1] * (Convert.ToDouble(rangeRedLines[0][1]) / Convert.ToDouble(rangeBPMList[rangeBPMList.Count - 1]))) / inputSVs[0],
+                                                          1 / (Convert.ToDouble(inputTimings[1]) - Convert.ToDouble(inputTimings[0])));
+                            for (int i = 0; i < timingList.Count; i++)
+                            {
+                                for (global::System.Int32 j = (rangeRedLines.Count) - (1); j >= 0; j--)
+                                {
+                                    if (Convert.ToInt32(rangeRedLines[j][0]) <= timingList[i])
+                                    {
+                                        retSVs.Add(-100 / ((inputSVs[0] * Math.Pow(geo_svPerMs, (timingList[i] - inputTimings[0])) * (Convert.ToDouble(rangeRedLines[j][1]) / Convert.ToDouble(rangeRedLines[0][1])))));
+                                        break;
+                                    }
+                                }
+                            }
+                            break;
+                        default:
+                            return false;
+                    }
+
+                }
+                else
+                {
+                    for (int i = 0; i < timingList.Count; i++)
+                    {
+                        retSVs.Add(-100 / Convert.ToDouble(ignoreGreenLine[1]));
+                    }
+                }
+                if (!isVolume)
+                {
+                    double[] inputVolumes = { Convert.ToDouble(volumeFrom.Text), Convert.ToDouble(volumeTo.Text) };
+                    double volumePerMs = (inputVolumes[1] - inputVolumes[0]) / (Convert.ToDouble(inputTimings[1]) - Convert.ToDouble(inputTimings[0]));
+                    for (int i = 0; i < timingList.Count; i++)
+                    {
+                        retVolumes.Add((int)(inputVolumes[0] + (volumePerMs * (timingList[i] - inputTimings[0]))));
+                    }
+                    for (int i = 0; i < splitTimingList.Count; i++)
+                    {
+                        if (splitTimingList[i][6] == "1" &&
+                            (Convert.ToInt32(splitTimingList[i][0]) >= inputTimings[0]) &&
+                            (Convert.ToInt32(splitTimingList[i][0]) <= inputTimings[1]))
+                        {
+                            splitTimingList[i][5] = ((int)(inputVolumes[0] + (volumePerMs * (Convert.ToInt32(splitTimingList[i][0]) - inputTimings[0])))).ToString();
+                        }
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < timingList.Count; i++)
+                    {
+                        retVolumes.Add(Convert.ToInt32(ignoreGreenLine[5]));
+                    }
+                    for (int i = 0; i < splitTimingList.Count; i++)
+                    {
+                        if (splitTimingList[i][6] == "1" &&
+                            (Convert.ToInt32(splitTimingList[i][0]) >= inputTimings[0]) &&
+                            (Convert.ToInt32(splitTimingList[i][0]) <= inputTimings[1]))
+                        {
+                            splitTimingList[i][5] = ignoreGreenLine[5];
+                        }
+                    }
+
+                }
+                File.Delete(path);
+                var lines = File.ReadAllLines(currentPath);
+                StreamWriter file = new StreamWriter(path, true, Encoding.GetEncoding("utf-8"));
+                // 1行ずつ読み込んで表示
+                for (global::System.Int32 i = 0; i < lines.Length; i++)
+                {
+                    file.WriteLine(lines[i]);
+                    if (lines[i] == "[TimingPoints]")
+                    {
+                        var resultText = "";
+                        for (global::System.Int32 j = 0; j < retSVs.Count; j++)
+                        {
+                            string kiaiCode = "";
+                            if (isKiai)
+                            {
+                                if (j == 0 && isStartKiai && (isOffset && (offsetValue != 0)))
+                                {
+                                    kiaiCode = "0";
+                                    resultText = (timingList[j]).ToString() + "," + retSVs[j] + CONST_STRINGS + retVolumes[j] + ",0,1";
+                                    file.WriteLine(resultText);
+                                }
+                                else if (j == retSVs.Count - 1 && isEndKiai)
+                                {
+                                    if (isOffset && (offsetValue != 0))
+                                    {
+                                        kiaiCode = "1";
+                                        resultText = (timingList[j]).ToString() + "," + retSVs[j] + CONST_STRINGS + retVolumes[j] + ",0,0";
+                                        file.WriteLine(resultText);
+                                    }
+                                    else
+                                    {
+                                        kiaiCode = "0";
+                                    }
+                                }
+                                else
+                                {
+                                    kiaiCode = "1";
+                                }
+                            }
+                            else
+                            {
+                                kiaiCode = "0";
+                            }
+                            resultText = (timingList[j] - offsetValue).ToString() + "," + retSVs[j] + CONST_STRINGS + retVolumes[j] + ",0," + kiaiCode;
+                            file.WriteLine(resultText);
+                        }
+                        var orgTimings = "";
+                        for (global::System.Int32 j = 0; j < splitTimingList.Count; j++)
+                        {
+                            string kiaiCode = "";
+                            if (isKiai)
+                            {
+                                if ((inputTimings[1] == Convert.ToInt32(splitTimingList[j][0])) && isEndKiai)
+                                {
+                                    kiaiCode = "0";
+                                }
+                                else
+                                {
+                                    kiaiCode = "1";
+                                }
+                            }
+                            else
+                            {
+                                kiaiCode = "0";
+                            }
+                            if ((inputTimings[0] <= Convert.ToInt32(splitTimingList[j][0])) && (inputTimings[1] >= Convert.ToInt32(splitTimingList[j][0])))
+                                splitTimingList[j][7] = (Convert.ToInt32(kiaiCode) + Convert.ToInt32(splitTimingList[j][7])).ToString();
+                            orgTimings = string.Join(",", splitTimingList[j]);
+                            file.WriteLine(orgTimings);
+                            for (global::System.Int32 k = 0; k < retSVs.Count; k++)
+                            {
+                                if (timingList[k] == Convert.ToInt32(splitTimingList[j][0]))
+                                {
+                                    orgTimings = timingList[k].ToString() + "," + retSVs[k] + CONST_STRINGS + retVolumes[k] + ",0," + kiaiCode;
+                                    file.WriteLine(orgTimings);
+                                }
+                            }
+                        }
+                        for (global::System.Int32 j = i; j < lines.Length; j++)
+                        {
+                            if (lines[j + 1] == "[HitObjects]")
+                            {
+                                i = j;
+                                break;
+                            }
+                        }
+                    }
+                }
+                file.Close();
+                return true;
+            }
+            catch (Exception e)
+            {
+                WriteErrorMessage("例外エラーが発生しました。");
+                WriteErrorMessage(e.Message + "\n" + e.StackTrace);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 緑線変更処理(Modify)
+        /// </summary>
+        /// <param name="timingPointsList">タイミングポイントのリスト</param>
+        /// <param name="inputTimings">ユーザーが入力したタイミング([0]:始点 [1]:終点)</param>
+        /// <returns>処理が正常終了した場合はtrue、異常終了した場合はfalse</returns>
+        bool ModifyGreenLine(List<TimingPoint> timingPointsList, int[] inputTimings)
+        {
+            List<TimingPoint> redLines = new List<TimingPoint>();
+            List<TimingPoint> greenLines = new List<TimingPoint>();
+            bool isSetGreenLine = true;
+            double baseBPM = 0;
+            double currentBPM = 0;
+            double lastBPM = 0;
+            List<double> retSVs = new List<double>();
+            List<int> retVolumes = new List<int>();
+            List<string> ignoreGreenLine = new List<string>();
+            int outRangeIndex = 0;
+
+
+            string mapTitleDirectory = "";
+            try
+            {
+                currentDateTime = DateTime.Now;
+                int slashIndex = Path.GetDirectoryName(path).LastIndexOf("\\");
+
+                if (slashIndex != -1)
+                {
+                    mapTitleDirectory = Path.GetDirectoryName(path).Substring(slashIndex + 1);
+
+                }
+                if (!Directory.Exists(Directory.GetCurrentDirectory() + BACKUP_DIRECTORY + "\\" + mapTitleDirectory))
+                {
+
+                    Directory.CreateDirectory(Directory.GetCurrentDirectory() + BACKUP_DIRECTORY + "\\" + mapTitleDirectory);
+                }
+                var currentPath = Directory.GetCurrentDirectory() + BACKUP_DIRECTORY + "\\" + mapTitleDirectory + "\\" + String.Format("{0:yyyy_MM_dd_HH_mm_ss_fff}", currentDateTime) + BEATMAP_EXTENSION;
+                File.Copy(path, currentPath);
+                timingPointsList = timingPointsList.OrderBy(t => t.Time).ThenByDescending(i => i.Uninherited).ToList();
+                // 後ろから赤線と緑線を選り分ける
+                // ループ終了条件 : 赤線のタイミングが始点のタイミングを上回った場合
+                for (global::System.Int32 i = (timingPointsList.Count) - (1); i >= 0; i--)
+                {
+                    if (timingPointsList[i - 1].Time < inputTimings[0])
+                    {
+                        outRangeIndex = i - 1;
+                    }
+                    if (timingPointsList[i].Uninherited == 1)
+                    {
+                        redLines.Insert(0, timingPointsList[i]);
+                        if (inputTimings[0] >= timingPointsList[i].Time)
+                        {
+                            break;
+                        }
+                    }
+                }
+                // 終点範囲外の赤線、緑線の除去
+                for (global::System.Int32 i = (redLines.Count) - (1); i >= 0; i--)
+                {
+                    if (redLines[i].Time <= inputTimings[1])
+                    {
+                        break;
+                    }
+                    redLines.RemoveAt(i);
+                }
+                for (global::System.Int32 i = (greenLines.Count) - (1); i >= 0; i--)
+                {
+                    if (greenLines[i].Time <= inputTimings[1])
+                    {
+                        break;
+                    }
+                    greenLines.RemoveAt(i);
+                }
+                // 初期BPM,現BPM,最終BPM情報の取得
+                baseBPM = 60000 / redLines[0].BeatLength;
+                currentBPM = 60000 / redLines[0].BeatLength;
+                lastBPM = 60000 / redLines[redLines.Count - 1].BeatLength;
+                // SV作成処理
+                if (!isSV)
+                {
+                    double[] inputSVs = { Convert.ToDouble(SVFrom.Text), Convert.ToDouble(SVTo.Text) };
+                    int currentGreenLineIndex = 0;
+                    switch (calculationCode)
+                    {
+                        // 等差SV
+                        case 1:
+                            double art_svPerMs = (inputSVs[1] * (lastBPM / currentBPM) - inputSVs[0]) / (inputTimings[1] - inputTimings[0]);
+                            for (global::System.Int32 i = 0; i < redLines.Count; i++)
+                            {
+                                currentBPM = 60000 / redLines[i].BeatLength;
+                                for (global::System.Int32 j = currentGreenLineIndex; j < greenLines.Count; j++)
+                                {
+                                    if (i != redLines.Count - 1)
+                                    {
+                                        if (greenLines[j].Time >= redLines[i + 1].Time)
+                                        {
+                                            currentGreenLineIndex = j;
+                                            break;
+                                        }
+                                    }
+                                    retSVs.Add(-100 / ((inputSVs[0] + art_svPerMs * (greenLines[j].Time - inputTimings[0])) * (baseBPM / currentBPM)));
+                                }
+                            }
+
+                            break;
+                        // 等比SV
+                        case 2:
+                            double geo_svPerMs = Math.Pow((inputSVs[1] * (lastBPM / currentBPM)) / inputSVs[0],
+                                                           1 / (inputTimings[1] - inputTimings[0]));
+                            for (global::System.Int32 i = 0; i < redLines.Count; i++)
+                            {
+                                currentBPM = 60000 / redLines[i].BeatLength;
+                                for (global::System.Int32 j = currentGreenLineIndex; j < greenLines.Count; j++)
+                                {
+                                    if (i != redLines.Count - 1)
+                                    {
+                                        if (greenLines[j].Time >= redLines[i + 1].Time)
+                                        {
+                                            currentGreenLineIndex = j;
+                                            break;
+                                        }
+                                    }
+                                    retSVs.Add(-100 / ((inputSVs[0] * Math.Pow(geo_svPerMs, greenLines[j].Time - inputTimings[0])) * (baseBPM / currentBPM)));
+                                }
+                            }
+                            break;
+                        default:
+                            return false;
+                    }
+                }
+                else
+                {
+                    double svValue = timingPointsList[outRangeIndex].BeatLength;
+                    if (timingPointsList[outRangeIndex].Uninherited == 1)
+                    {
+                        svValue = -100;
+                    }
+                    for (global::System.Int32 i = 0; i < greenLines.Count; i++)
+                    {
+                        retSVs.Add(svValue);
+                    }
+                }
+                if (!isVolume)
+                {
+                    double[] inputVolumes = { Convert.ToDouble(volumeFrom.Text), Convert.ToDouble(volumeTo.Text) };
+                    double volumePerMs = (inputVolumes[1] - inputVolumes[0]) / (Convert.ToDouble(inputTimings[1]) - Convert.ToDouble(inputTimings[0]));
+                    for (global::System.Int32 i = 0; i < greenLines.Count; i++)
+                    {
+                        retVolumes.Add((int)(inputVolumes[0] + (volumePerMs * (greenLines[i].Time - inputTimings[0]))));
+                    }
+                    for (global::System.Int32 i = 1; i < redLines.Count; i++)
+                    {
+                        redLines[i].Volume = (int)(inputVolumes[0] + (volumePerMs * (redLines[i].Time - inputTimings[0])));
+                    }
+                }
+                else
+                {
+                    for (global::System.Int32 i = 0; i < greenLines.Count; i++)
+                    {
+                        retVolumes.Add(timingPointsList[outRangeIndex].Volume);
+                    }
+                    for (global::System.Int32 i = 1; i < redLines.Count; i++)
+                    {
+                        redLines[i].Volume = timingPointsList[outRangeIndex].Volume;
+                    }
+                }
+                int modifyRedLine = 0;
+                int modifyGreenLine = 0;
+                var lines = File.ReadAllLines(currentPath);
+                string timingStringBuff = "";
+                string workPath = Directory.GetCurrentDirectory() + WORK_DIRECTORY + "\\" + Path.GetFileName(path);
+                StreamWriter file = new StreamWriter(workPath, true, Encoding.GetEncoding("utf-8"));
+                for (global::System.Int32 i = 0; i < lines.Length; i++)
+                {
+                    file.WriteLine(lines[i]);
+                    if (lines[i] == "[TimingPoints]")
+                    {
+                        for (global::System.Int32 j = 0; j < timingPointsList.Count; j++, i++)
+                        {
+                            if ((((int)timingPointsList[j].Time) >= inputTimings[0]) &&
+                                (((int)timingPointsList[j].Time) <= inputTimings[1]))
+                            {
+                                if (timingPointsList[j].Uninherited == 1)
+                                {
+                                    timingPointsList[j].Volume = redLines[modifyRedLine].Volume;
+                                    modifyRedLine++;
+                                }
+                                else
+                                {
+                                    timingPointsList[j].BeatLength = retSVs[modifyGreenLine];
+                                    timingPointsList[j].Volume = retVolumes[modifyGreenLine];
+                                    modifyGreenLine++;
+                                }
+                            }
+                            JoinTimingPoint(timingPointsList[j], ref timingStringBuff);
+                            file.WriteLine(timingStringBuff);
+                        }
+                    }
+                }
+                file.Close();
+                // 変更前のファイルを削除する
+                File.Delete(path);
+                // 作成したファイルをsongフォルダに移動する
+                File.Move(workPath, path);
+                return true;
+            }
+            catch (Exception e)
+            {
+                WriteErrorMessage("例外エラーが発生しました。");
+                WriteErrorMessage(e.Message + "\n" + e.StackTrace);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 緑線削除処理(Remove)
+        /// </summary>
+        /// <param name="timingPointsList">タイミングポイントのリスト</param>
+        /// <param name="inputTimings">ユーザーが入力したタイミング([0]:始点 [1]:終点)</param>
+        /// <returns>処理が正常終了した場合はtrue、異常終了した場合はfalse</returns>
+        bool RemoveGreenLine(List<TimingPoint> timingPointsList, int[] inputTimings)
+        {
+            string mapTitleDirectory = "";
+            TimingPoint timingBuff;
+            try
+            {
+                // バックアップファイルの作成
+                currentDateTime = DateTime.Now;
+                int slashIndex = Path.GetDirectoryName(path).LastIndexOf("\\");
+
+                if (slashIndex != -1)
+                {
+                    mapTitleDirectory = Path.GetDirectoryName(path).Substring(slashIndex + 1);
+
+                }
+                if (!Directory.Exists(Directory.GetCurrentDirectory() + BACKUP_DIRECTORY + "\\" + mapTitleDirectory))
+                {
+                    Directory.CreateDirectory(Directory.GetCurrentDirectory() + BACKUP_DIRECTORY + "\\" + mapTitleDirectory);
+                }
+                var currentPath = Directory.GetCurrentDirectory() + BACKUP_DIRECTORY + "\\" + mapTitleDirectory + "\\" + String.Format("{0:yyyy_MM_dd_HH_mm_ss_fff}", currentDateTime) + BEATMAP_EXTENSION;
+                File.Copy(path, currentPath);
+                // 指定範囲内の緑線の削除
+                for (global::System.Int32 i = (timingPointsList.Count) - (1); i >= 0; i--)
+                {
+                    timingBuff = timingPointsList[i];
+                    // もし赤線でないかつ、指定範囲内だったら削除
+                    if (timingBuff.Uninherited != 1)
+                    {
+                        if (timingBuff.Time >= inputTimings[0] &&
+                           timingBuff.Time <= inputTimings[1])
+                            timingPointsList.RemoveAt(i);
+                    }
+                }
+                var lines = File.ReadAllLines(currentPath);
+                bool isWrite = true;
+                string timingStringBuff = "";
+                string workPath = Directory.GetCurrentDirectory() + WORK_DIRECTORY + "\\" + Path.GetFileName(path);
+                StreamWriter file = new StreamWriter(workPath, true, Encoding.GetEncoding("utf-8"));
+                // ファイル出力処理
+                for (global::System.Int32 i = 0; i < lines.Length; i++)
+                {
+                    if (lines[i] == "[HitObjects]")
+                    {
+                        isWrite = true;
+                    }
+                    if (isWrite)
+                    {
+                        file.WriteLine(lines[i]);
+                    }
+                    if (lines[i] == "[TimingPoints]")
+                    {
+                        isWrite = false;
+                        for (global::System.Int32 j = 0; j < timingPointsList.Count; j++)
+                        {
+                            if (JoinTimingPoint(timingPointsList[j], ref timingStringBuff))
+                            {
+                                file.WriteLine(timingStringBuff);
+                            }
+                            else
+                            {
+                                return false;
+                            }
+                        }
+                    }
+                }
+                file.Close();
+                // 変更前のファイルを削除する
+                File.Delete(path);
+                // 作成したファイルをsongフォルダに移動する
+                File.Move(workPath, path);
+                return true;
+            }
+            catch (Exception e)
+            {
+                WriteErrorMessage("例外エラーが発生しました。");
+                WriteErrorMessage(e.Message + "\n" + e.StackTrace);
+                return false;
+            }
+        }
+
+        private void disableSV_CheckedChanged(object sender, EventArgs e)
+        {
+            isSV = disableSV.Checked;
+            if (isSV == true)
+            {
+                SVFrom.Enabled = true;
+                SVTo.Enabled = true;
+                SVFrom.BackColor = SystemColors.Window;
+                SVTo.BackColor = SystemColors.Window;
+                swapSVButton.Enabled = true;
+                swapSVButton.ForeColor = Color.Cyan;
+                swapSVButton.FlatAppearance.BorderColor = Color.Cyan;
+                arithmeticButton.Enabled = true;
+                geometricButton.Enabled = true;
+            }
+            else
+            {
+                SVFrom.Text = string.Empty;
+                SVTo.Text = string.Empty;
+                SVFrom.Enabled = false;
+                SVTo.Enabled = false;
+                SVFrom.BackColor = SystemColors.WindowFrame;
+                SVTo.BackColor = SystemColors.WindowFrame;
+                swapSVButton.Enabled = false;
+                swapSVButton.ForeColor = SystemColors.WindowFrame;
+                swapSVButton.FlatAppearance.BorderColor = SystemColors.WindowFrame;
+                arithmeticButton.Enabled = false;
+                geometricButton.Enabled = false;
+
+            }
+        }
+
+        private void disableVolume_CheckedChanged(object sender, EventArgs e)
+        {
+            isVolume = disableVolume.Checked;
+            if (isVolume == true)
+            {
+                volumeFrom.Enabled = true;
+                volumeTo.Enabled = true;
+                volumeFrom.BackColor = SystemColors.Window;
+                volumeTo.BackColor = SystemColors.Window;
+                swapVolumeButton.Enabled = true;
+                swapVolumeButton.ForeColor = Color.Cyan;
+                swapVolumeButton.FlatAppearance.BorderColor = Color.Cyan;
+            }
+            else
+            {
+                volumeFrom.Text = string.Empty;
+                volumeTo.Text = string.Empty;
+                volumeFrom.Enabled = false;
+                volumeTo.Enabled = false;
+                volumeFrom.BackColor = SystemColors.WindowFrame;
+                volumeTo.BackColor = SystemColors.WindowFrame;
+                swapVolumeButton.Enabled = false;
+                swapVolumeButton.ForeColor = SystemColors.WindowFrame;
+                swapVolumeButton.FlatAppearance.BorderColor = SystemColors.WindowFrame;
+
+            }
+        }
+
+        private void includeBarline_CheckedChanged(object sender, EventArgs e)
+        {
+            isBarline = includeBarline.Checked;
+        }
+
+        private void arithmeticButton_CheckedChanged(object sender, EventArgs e)
+        {
+            calculationCode = 1;
+        }
+
+        private void geometricButton_CheckedChanged(object sender, EventArgs e)
+        {
+            calculationCode = 2;
+        }
+
+        private void enableOffset_CheckedChanged(object sender, EventArgs e)
+        {
+            isOffset = enableOffset.Checked;
+            if (isOffset == true)
+            {
+                offsetTextbox.Text = string.Empty;
+                offsetTextbox.BackColor = SystemColors.Window;
+                offsetTextbox.Enabled = true;
+            }
+            else
+            {
+                offsetTextbox.BackColor = SystemColors.WindowFrame;
+                offsetTextbox.Enabled = false;
+            }
+        }
+
+        /// <summary>
+        /// "バックアップフォルダ"ボタン押下時バックアップフォルダを開く
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void backupFolderButton_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start("EXPLORER.EXE", Directory.GetCurrentDirectory() + BACKUP_DIRECTORY);
+        }
+        private void swapTimingButton_Click(object sender, EventArgs e)
+        {
+            string timingBuff = "";
+            timingBuff = timingFrom.Text;
+            timingFrom.Text = timingTo.Text;
+            timingTo.Text = timingBuff;
+        }
+
+        private void swapSVButton_Click(object sender, EventArgs e)
+        {
+            string SVBuff = "";
+            SVBuff = SVFrom.Text;
+            SVFrom.Text = SVTo.Text;
+            SVTo.Text = SVBuff;
+        }
+
+        private void swapVolumeButton_Click(object sender, EventArgs e)
+        {
+            string volumeBuff = "";
+            volumeBuff = volumeFrom.Text;
+            volumeFrom.Text = volumeTo.Text;
+            volumeTo.Text = volumeBuff;
+
+        }
+
+        private void isKiaiButton_CheckedChanged(object sender, EventArgs e)
+        {
+            isKiai = isKiaiButton.Checked;
+            if (isKiaiButton.Checked)
+            {
+                isStartKialButton.Enabled = true;
+                isEndKialButton.Enabled = true;
+            }
+            else
+            {
+                isStartKialButton.Enabled = false;
+                isEndKialButton.Enabled = false;
+                isStartKialButton.Checked = false;
+                isEndKialButton.Checked = false;
+            }
+        }
+
+        private void isStartKialButton_CheckedChanged(object sender, EventArgs e)
+        {
+            isStartKiai = isStartKialButton.Checked;
+        }
+
+        private void isEndKialButton_CheckedChanged(object sender, EventArgs e)
+        {
+            isEndKiai = isEndKialButton.Checked;
+        }
+
+        private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
+        {
+            isDSelected = !isDSelected;
+            if (isDSelected)
+            {
+                pictureBox1.Image = Properties.Resources.d_selected;
+            }
+            else
+            {
+                pictureBox1.Image = Properties.Resources.d;
+            }
+        }
+
+        private void pictureBox3_MouseDown(object sender, MouseEventArgs e)
+        {
+            isBigDSelected = !isBigDSelected;
+            if (isBigDSelected)
+            {
+                pictureBox3.Image = Properties.Resources.d_selected;
+            }
+            else
+            {
+                pictureBox3.Image = Properties.Resources.d;
+            }
+        }
+
+        private void pictureBox2_MouseDown(object sender, MouseEventArgs e)
+        {
+            isKSelected = !isKSelected;
+            if (isKSelected)
+            {
+                pictureBox2.Image = Properties.Resources.k_selected;
+            }
+            else
+            {
+                pictureBox2.Image = Properties.Resources.k;
+            }
+        }
+
+        private void pictureBox4_MouseDown(object sender, MouseEventArgs e)
+        {
+            isBigKSelected = !isBigKSelected;
+            if (isBigKSelected)
+            {
+                pictureBox4.Image = Properties.Resources.k_selected;
+            }
+            else
+            {
+                pictureBox4.Image = Properties.Resources.k;
+            }
+        }
+
+        private void pictureBox6_MouseDown(object sender, MouseEventArgs e)
+        {
+            isSliderSelected = !isSliderSelected;
+            if (isSliderSelected)
+            {
+                pictureBox6.Image = Properties.Resources.slider_selected;
+            }
+            else
+            {
+                pictureBox6.Image = Properties.Resources.slider;
+            }
+
+        }
+
+        private void pictureBox7_MouseDown(object sender, MouseEventArgs e)
+        {
+            isBigSliderSelected = !isBigSliderSelected;
+            if (isBigSliderSelected)
+            {
+                pictureBox7.Image = Properties.Resources.slider_selected;
+            }
+            else
+            {
+                pictureBox7.Image = Properties.Resources.slider;
+            }
+
+        }
+        private void radioButton1_CheckedChanged(object sender, EventArgs e)
+        {
+            isBookMarkSelected = radioButton1.Checked;
+        }
+
+        private void radioButton2_CheckedChanged(object sender, EventArgs e)
+        {
+            isBarlineSelected = radioButton2.Checked;
+        }
+
+        private void radioButton3_CheckedChanged(object sender, EventArgs e)
+        {
+            isCertainObject = radioButton3.Checked;
+        }
+    }
+}
+class TimingPoint()
+{
+    public double timingPoint;
+    public double BPM;
+    public double SV;
+    public double BarLength; //1小節の長さ(ms)
+    public bool isRedLine;
+    public double Volume; //他,拍子,kiai設定など
+}
+
+
+class Note
+{
+    Note()
+    {
+        //行からノーツ情報を取得する
+        //TimingPointを参照し、BPM、SVを初期化する
+        GetTimingInfoOfNote(this)
+    }
+    public double BPM;
+    public double SV;
+    public int timingPoint;
+    public Notetype notetype;
+
+    public bool isKat;
+    public bool isBig;
+    public bool isBarline;
+    public double sliderLength;
+
+    public int positionX;
+    public int positionY;
+
+}
+
+struct Notetype
+{
+    blank, //小節線のみの場合
+    note,  //ヒットノーツ
+    slider,
+    spinner
+}
+
+}
