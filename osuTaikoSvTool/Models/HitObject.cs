@@ -21,10 +21,6 @@ namespace osuTaikoSvTool.Models
         }
         // NewComboの判定
         public bool isNewCombo { set; get; }
-        // kの判定
-        public bool isKat { set; get; }
-        // finisherの判定
-        public bool isBig { set; get; }
         // 小節線の判定
         public bool isBarline { set; get; }
 
@@ -40,19 +36,19 @@ namespace osuTaikoSvTool.Models
         // ノーツの種類(.osuファイルのフォーマット)
         public string hitSound { set; get; }
         // ヒットサンプルの種類
-        public string? hitSample { set; get; }
+        public string? hitSample { set; get; } = null;
         #endregion
         #region slider専用変数
         // sliderのカーブ設定を表す文字列
-        public string? curveSetting { set; get; }
+        public string? curveSetting { set; get; } = null;
         // sliderの折り返し回数
         public decimal slides { set; get; }
         // sliderの長さ
         public decimal sliderLength { set; get; }
         // sliderの折り返し時のヒットサウンドの種類
-        public string? edgeSounds { set; get; }
+        public string? edgeSounds { set; get; } = null;
         // sliderの折り返し時のヒットサンプルの種類
-        public string? edgeSets { set; get; }
+        public string? edgeSets { set; get; } = null;
         #endregion
         #region spinner専用変数
         // spinnerの終了時間
@@ -60,9 +56,6 @@ namespace osuTaikoSvTool.Models
         #endregion
         internal HitObject(string line)
         {
-            hitSample = null;
-            edgeSets = null;
-            edgeSounds = null;
             string[] buff = line.Split(",");
 
             positionX = int.Parse(buff[0]);
@@ -80,7 +73,7 @@ namespace osuTaikoSvTool.Models
             {
                 // スライダーの場合
                 noteType = Constants.NoteType.SLIDER;
-                // curveSetting = buff[5];
+                curveSetting = buff[5];
                 slides = decimal.Parse(buff[6]);
                 sliderLength = decimal.Parse(buff[7]);
                 if (buff.Length > 8)
@@ -113,10 +106,10 @@ namespace osuTaikoSvTool.Models
             // 小節線の場合
             this.time = time;
             noteType = Constants.NoteType.BARLINE;
-            positionX = 0;
-            positionY = 0;
-            hitSound = "0";
-            type = "0";
+            positionX = 0;   // 未使用
+            positionY = 0;   // 未使用
+            hitSound = "-1";  // 未使用
+            type = "0";      // 未使用
             isNewCombo = false;
             isBarline = true;
         }
@@ -142,14 +135,6 @@ namespace osuTaikoSvTool.Models
             if ((int.Parse(buff[4]) & 0b1011) == 0)
             {
                 noteHitSound.isNormal = true;
-            }
-            if (noteHitSound.isFinish)
-            {
-                isBig = true;
-            }
-            if (noteHitSound.isWhistle || noteHitSound.isClap)
-            {
-                isKat = false;
             }
         }
 
