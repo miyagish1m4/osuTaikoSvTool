@@ -1,40 +1,63 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.VisualBasic.ApplicationServices;
+﻿using osuTaikoSvTool.Properties;
 
-namespace osuTaikoSvTool
+namespace osuTaikoSvTool.Models
 {
     class HitObject
     {
-        public decimal bpm;
-        public decimal sv;
-        public int time;
+        // BPM
+        public decimal bpm { set; get; }
+        // SV
+        public decimal sv { set; get; }
+        // ヒットオブジェクトの種類
         public Constants.NoteType noteType;
+        // ノーツの種類
         public NoteHitSound noteHitSound;
+        internal struct NoteHitSound
+        {
+            public bool isNormal { set; get; }
+            public bool isWhistle { set; get; }
+            public bool isFinish { set; get; }
+            public bool isClap { set; get; }
+        }
+        // NewComboの判定
+        public bool isNewCombo { set; get; }
+        // kの判定
+        public bool isKat { set; get; }
+        // finisherの判定
+        public bool isBig { set; get; }
+        // 小節線の判定
+        public bool isBarline { set; get; }
 
-        public int positionX;
-        public int positionY;
-        public string type;
-        public string hitSound;
-        public bool isNewCombo;
-        public bool isKat;
-        public bool isBig;
-        public bool isBarline;
-        public string? hitSample;
-
-        // sliderの場合に使用される変数
-        public string? curveSetting;
-        public decimal slides;
-        public decimal sliderLength;
-        public string? edgeSounds;
-        public string? edgeSets;
-
-        // spinerの場合に使用される変数
-        public int endTime;
-
+        #region 全ヒットオブジェクト共通変数
+        // ヒットオブジェクトのx座標
+        public int positionX { set; get; }
+        // ヒットオブジェクトのy座標
+        public int positionY { set; get; }
+        // タイミング(ミリ秒)
+        public int time { set; get; }
+        // ヒットオブジェクトの種類(.osuファイルのフォーマット)
+        public string type { set; get; }
+        // ノーツの種類(.osuファイルのフォーマット)
+        public string hitSound { set; get; }
+        // ヒットサンプルの種類
+        public string? hitSample { set; get; }
+        #endregion
+        #region slider専用変数
+        // sliderのカーブ設定を表す文字列
+        public string? curveSetting { set; get; }
+        // sliderの折り返し回数
+        public decimal slides { set; get; }
+        // sliderの長さ
+        public decimal sliderLength { set; get; }
+        // sliderの折り返し時のヒットサウンドの種類
+        public string? edgeSounds { set; get; }
+        // sliderの折り返し時のヒットサンプルの種類
+        public string? edgeSets { set; get; }
+        #endregion
+        #region spinner専用変数
+        // spinnerの終了時間
+        public int endTime { set; get; }
+        #endregion
         internal HitObject(string line)
         {
             hitSample = null;
@@ -73,7 +96,8 @@ namespace osuTaikoSvTool
                 noteType = Constants.NoteType.SPINNER;
                 endTime = int.Parse(buff[5]);
                 hitSample = buff[6];
-            } else
+            }
+            else
             {
                 noteType = Constants.NoteType.BARLINE;
             }
@@ -130,12 +154,4 @@ namespace osuTaikoSvTool
         }
 
     }
-    internal struct NoteHitSound
-    {
-        public bool isNormal;
-        public bool isWhistle;
-        public bool isFinish;
-        public bool isClap;
-    }
-
 }
