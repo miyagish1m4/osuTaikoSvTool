@@ -197,7 +197,7 @@ namespace osuTaikoSvTool.Utils.Helper
                                 retSvFrom = -1m;
                                 retSvTo = -1m;
                                 //SVが負の値
-                                MessageBox.Show(Common.WriteDialogMessage("E-010"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                MessageBox.Show(Common.WriteDialogMessage("E-009"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                                 return false;
                             }
                         }
@@ -263,21 +263,21 @@ namespace osuTaikoSvTool.Utils.Helper
                                 retVolumeFrom = -1;
                                 retVolumeTo = -1;
                                 //Volumeが負の値
-                                MessageBox.Show(Common.WriteDialogMessage("E-013"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                MessageBox.Show(Common.WriteDialogMessage("E-011"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                                 return false;
                             }
                         }
                         else
                         {
                             //Volumeのフォーマットが間違えている
-                            MessageBox.Show(Common.WriteDialogMessage("E-012"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show(Common.WriteDialogMessage("E-011"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
                         }
                     }
                     else
                     {
                         //Volumeの入力がない
-                        MessageBox.Show(Common.WriteDialogMessage("E-011"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(Common.WriteDialogMessage("E-010"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return false;
                     }
                 }
@@ -320,7 +320,7 @@ namespace osuTaikoSvTool.Utils.Helper
                         else
                         {
                             //Offsetのフォーマットが間違えている
-                            MessageBox.Show(Common.WriteDialogMessage("E-014"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show(Common.WriteDialogMessage("E-012"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
                         }
                     }
@@ -370,14 +370,14 @@ namespace osuTaikoSvTool.Utils.Helper
                         else
                         {
                             //ビートスナップ間隔は正の整数(0除く)を指定してください。
-                            MessageBox.Show(Common.WriteDialogMessage("E-017"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show(Common.WriteDialogMessage("E-014"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
                         }
                     }
                     else
                     {
                         //ビートスナップ間隔を指定してください。
-                        MessageBox.Show(Common.WriteDialogMessage("E-016"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(Common.WriteDialogMessage("E-013"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return false;
                     }
                     return true;
