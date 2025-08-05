@@ -27,6 +27,7 @@ namespace osuTaikoSvTool
         bool isEndKiai = false;
         int calculationCode = 0;
         int offsetValue = 0;
+        Beatmap beatmapInfo = null;
         #endregion
         public osuTaikoSVTool()
         {
@@ -74,7 +75,8 @@ namespace osuTaikoSvTool
             {
                 return;
             }
-            pictureBox5.Image = BeatmapHelper.SetBgOnForm(this.path);
+            beatmapInfo = BeatmapHelper.GetBeatmapData(this.path);
+            pictureBox5.Image = BeatmapHelper.SetBgOnForm(this.path, beatmapInfo.events);
             string fileName = Path.GetFileName(this.path);
             label1.Text = fileName;
         }
@@ -93,179 +95,16 @@ namespace osuTaikoSvTool
                     //ここにエラーメッセージを入れる miyagi
                     return;
                 }
-                #region beatmapInfo取得処理分割前バックアップ
-                //var lines = File.ReadAllLines(path);
-                //bool isHitObjects = false;
-                //bool isTimingPoints = false;
-                //var timingPointList = new List<TimingPoint>();
-                //var uninheritedTimingPointList = new List<TimingPoint>();
-                //var hitObjectList = new List<HitObject>();
-                //List<int> bookmarks = new List<int>();
-
-                //// HitObject, TimingPoint を全取得
-                //foreach (var line in lines)
-                //{
-                //    if (line == "")
-                //    {
-                //        continue;
-                //    }
-                //    if (line.Length >= 9)
-                //    {
-                //        if (line.Substring(0, 9) == "Bookmarks")
-                //        {
-                //            string[] bookmarkParts = line.Split(':');
-                //            List<string> stringBookmarks = new List<string>(bookmarkParts[1].Replace(" ", "").Split(","));
-                //            foreach (var timing in stringBookmarks)
-                //            {
-                //                bookmarks.Add(int.Parse(timing));
-                //            }
-                //        }
-                //    }
-                //    if (line == "[HitObjects]")
-                //    {
-                //        isTimingPoints = false;
-                //    }
-
-                //    if (isTimingPoints)
-                //    {
-                //        timingPointList.Add(new TimingPoint(line));
-                //    }
-                //    if (isHitObjects)
-                //    {
-                //        hitObjectList.Add(new HitObject(line));
-                //    }
-                //    if (line == "[HitObjects]")
-                //    {
-                //        isHitObjects = true;
-                //    }
-                //    if (line == "[TimingPoints]")
-                //    {
-                //        isTimingPoints = true;
-                //    }
-                //}
-
-                //// 小節線を取得する
-                //// 最終ノーツを取る(これ以上は見ない)
-                //hitObjectList.Sort((a, b) => a.time.CompareTo(b.time));
-                //HitObject lastHitObject = hitObjectList.Last();
-
-                //foreach (var timingPoint in timingPointList)
-                //{
-                //    if (timingPoint.isRedLine)
-                //    {
-                //        uninheritedTimingPointList.Add(timingPoint);
-                //    }
-                //}
-                //for (int i = 0; i < uninheritedTimingPointList.Count; i++)
-                //{
-                //    decimal time = uninheritedTimingPointList[i].time;
-                //    int timeEnd = lastHitObject.time;
-
-                //    if (i + 1 < uninheritedTimingPointList.Count) timeEnd = uninheritedTimingPointList[i + 1].time;
-                //    decimal timeBar = uninheritedTimingPointList[i].barLength;
-                //    for (; time < timeEnd; time += timeBar)
-                //    {
-                //        int timeBarline = (int)Math.Floor(time);
-
-                //        // すでに同じ time の HitObject が存在するかをチェック
-                //        var hitObjectOnBarLine = hitObjectList.FirstOrDefault(h => h.time == timeBarline);
-                //        if (hitObjectOnBarLine == null)
-                //        {
-                //            // 赤線を HitObject として追加
-                //            hitObjectList.Add(new HitObject(timeBarline));
-                //        }
-                //        else
-                //        {
-                //            hitObjectOnBarLine.isBarline = true;
-                //        }
-                //    }
-                //}
-
-                //// ソートする
-                //timingPointList.Sort((a, b) => b.isRedLine.CompareTo(a.isRedLine));
-                //timingPointList.Sort((a, b) => a.time.CompareTo(b.time));
-                //hitObjectList.Sort((a, b) => a.time.CompareTo(b.time));
-
-
-                //// HitObject に SVとBPMを適用(ソート後)
-                //int timingIndex = 0;
-                //decimal currentBpm = 0;
-                //decimal currentSv = 1.0m;
-                //foreach (var hitObject in hitObjectList)
-                //{
-                //    // timingPoint を進める
-                //    while (timingIndex + 1 < timingPointList.Count &&
-                //           timingPointList[timingIndex + 1].time <= hitObject.time)
-                //    {
-                //        timingIndex++;
-                //    }
-
-                //    // 赤線と緑線が同じ time に複数ある可能性があるため、
-                //    // その time の中で緑線があれば優先的に使う
-                //    var timeGroup = timingPointList
-                //        .Where(tp => tp.time == timingPointList[timingIndex].time)
-                //        .ToList();
-
-                //    var green = timeGroup.FirstOrDefault(tp => !tp.isRedLine);
-                //    var red = timeGroup.FirstOrDefault(tp => tp.isRedLine);
-
-                //    if (red != null)
-                //    {
-                //        currentBpm = red.bpm;
-                //    }
-                //    if (green != null)
-                //    {
-                //        currentSv = green.sv;
-                //    }
-                //    else if (red != null)
-                //    {
-                //        // 赤線のみある場合、SVは1.0
-                //        currentSv = 1.0m;
-                //    }
-
-                //    hitObject.bpm = currentBpm;
-                //    hitObject.sv = currentSv;
-                //}
-
-                //// BeatmapInfo に渡す
-                //Beatmap beatmapInfo = new Beatmap(timingPointList, hitObjectList, bookmarks);
-                #endregion
-                Beatmap beatmapInfo = BeatmapHelper.GetBeatmapData(this.path);
+                BeatmapHelper.CreateOsuFile(beatmapInfo, this.path);
                 return;
             }
             catch (Exception ex)
             {
-                Common.WriteErrorMessage("LOG-EXCEPTION");
+                Common.WriteErrorMessage("LOG-ERROR-EXCEPTION");
                 Common.WriteErrorMessage(ex.Message + "\n" + ex.StackTrace);
                 return;
             }
         }
-
-        /// <summary>
-        /// ユーザが入力したタイミングを変換する処理
-        /// </summary>
-        /// <param name="baseTiming">入力したタイミング (mm:ss:fff (notes))</param>
-        /// <param name="returnTiming">変換後のタイミング (mmssfff)</param>
-        /// <returns>処理が正常終了した場合はtrue、異常終了した場合はfalse</returns>
-        private bool ConvertTiming(string baseTiming, ref int returnTiming)
-        {
-            try
-            {
-                string[] arr = baseTiming.Split(':');
-                arr[2] = arr[2].Substring(0, 3);
-                returnTiming = Convert.ToInt32(arr[2]) +
-                               Convert.ToInt32(arr[1]) * 1000 +
-                               Convert.ToInt32(arr[0]) * 60000;
-                return true;
-            }
-            catch (Exception e)
-            {
-                Common.WriteErrorMessage("LOG-EXCEPTION");
-                Common.WriteErrorMessage(e.Message + "\n" + e.StackTrace);
-                return false;
-            }
-        }
-
         private void disableSV_CheckedChanged(object sender, EventArgs e)
         {
             isSV = disableSV.Checked;

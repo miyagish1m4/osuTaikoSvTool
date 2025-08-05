@@ -1,4 +1,8 @@
-﻿using osuTaikoSvTool.Models;
+﻿using System.IO;
+using System.Text;
+using System.Windows.Forms.VisualStyles;
+using osuTaikoSvTool.Models;
+using osuTaikoSvTool.Properties;
 
 namespace osuTaikoSvTool.Utils.Helper
 {
@@ -31,22 +35,21 @@ namespace osuTaikoSvTool.Utils.Helper
         /// </summary>
         /// <param name="path">ファイルパス</param>
         /// <returns>BG</returns>
-        internal static Bitmap SetBgOnForm(string path)
+        internal static Bitmap SetBgOnForm(string path, List<string> eventsList)
         {
             try
             {
-                var lines = File.ReadAllLines(path);
                 string imageName = string.Empty;
                 bool isGetBG = false;
-                for (int i = 0; i < lines.Length; i++)
+                for (global::System.Int32 i = 0; i < eventsList.Count; i++)
                 {
-                    if (lines[i] == "//Background and Video events")
+                    if (eventsList[i] == "//Background and Video events")
                     {
                         try
                         {
                             while (true)
                             {
-                                string[] buff = lines[i + 1].Split(",");
+                                string[] buff = eventsList[i + 1].Split(",");
                                 if (buff[0] == "Video")
                                 {
                                     i++;
@@ -79,12 +82,13 @@ namespace osuTaikoSvTool.Utils.Helper
                 }
                 else
                 {
-                    Common.WriteInfoMessage("LOG-BG-FAIL");
+                    Common.WriteWarningMessage("LOG-WARNING-BG-FAIL");
                 }
                 return null;
             }
             catch (Exception ex)
             {
+                Common.WriteErrorMessage("LOG-ERROR-EXCEPTION");
                 return null;
             }
         }
@@ -95,7 +99,14 @@ namespace osuTaikoSvTool.Utils.Helper
         /// <returns>取得したデータ</returns>
         internal static Beatmap GetBeatmapData(string path)
         {
+            var version = string.Empty;
+            var generalList = new List<string>();
+            var editorList = new List<string>();
+            var metadataList = new List<string>();
+            var difficultyList = new List<string>();
+            var eventsList = new List<string>();
             var timingPointList = new List<TimingPoint>();
+            var coloursList = new List<string>();
             var uninheritedTimingPointList = new List<TimingPoint>();
             var hitObjectList = new List<HitObject>();
             List<int> bookmarks = new List<int>();
@@ -103,9 +114,16 @@ namespace osuTaikoSvTool.Utils.Helper
             try
             {
                 var lines = File.ReadAllLines(path);
-                // HitObject, TimingPoint を全取得
+                // 譜面情報をセクションに区切り全取得
                 if (!GetHitObjectsAndTimingPoints(lines,
+                                                  ref version,
+                                                  ref generalList,
+                                                  ref editorList,
+                                                  ref metadataList,
+                                                  ref difficultyList,
+                                                  ref eventsList,
                                                   ref timingPointList,
+                                                  ref coloursList,
                                                   ref hitObjectList,
                                                   ref bookmarks))
                 {
@@ -125,7 +143,16 @@ namespace osuTaikoSvTool.Utils.Helper
                     throw new Exception();
                 }
                 // BeatmapInfo に渡す
-                return new Beatmap(timingPointList, hitObjectList, bookmarks);
+                return new Beatmap(version,
+                                   generalList,
+                                   editorList,
+                                   metadataList,
+                                   difficultyList,
+                                   eventsList,
+                                   timingPointList,
+                                   coloursList,
+                                   hitObjectList,
+                                   bookmarks);
             }
             catch (Exception ex)
             {
@@ -133,17 +160,32 @@ namespace osuTaikoSvTool.Utils.Helper
             }
         }
         /// <summary>
-        /// HitObjects と TimingPoints を取得する
+        /// 譜面情報をセクションに区切りに取得する
         /// </summary>
         /// <param name="lines">osuファイルの中身</param>
+        /// <param name="generalList">Generalの格納先</param>
+        /// <param name="editorList">Editorの格納先</param>
+        /// <param name="metadataList">Metadataの格納先</param>
+        /// <param name="difficultyList">Difficultyの格納先</param>
+        /// <param name="eventsList">EventsListの格納先</param>
         /// <param name="timingPointList">TimingPointの格納先</param>
+        /// <param name="coloursList">Coloursの格納先</param>
         /// <param name="hitObjectList">HitObjectの格納先</param>
         /// <param name="bookmarks">Bookmarkの格納先</param>
         /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
-        private static bool GetHitObjectsAndTimingPoints(string[] lines, ref List<TimingPoint> timingPointList, ref List<HitObject> hitObjectList, ref List<int> bookmarks)
+        private static bool GetHitObjectsAndTimingPoints(string[] lines,
+                                                         ref string version,
+                                                         ref List<string> generalList,
+                                                         ref List<string> editorList,
+                                                         ref List<string> metadataList,
+                                                         ref List<string> difficultyList,
+                                                         ref List<string> eventsList,
+                                                         ref List<TimingPoint> timingPointList,
+                                                         ref List<string> coloursList,
+                                                         ref List<HitObject> hitObjectList,
+                                                         ref List<int> bookmarks)
         {
-            bool isHitObjects = false;
-            bool isTimingPoints = false;
+            int structureCode = Constants.VERSION_CODE;
             try
             {
                 foreach (var line in lines)
@@ -164,32 +206,75 @@ namespace osuTaikoSvTool.Utils.Helper
                             }
                         }
                     }
-                    if (line == "[HitObjects]")
+                    switch (line)
                     {
-                        isTimingPoints = false;
+                        case Constants.GENERAL:
+                            structureCode = Constants.GENERAL_CODE;
+                            continue;
+                        case Constants.EDITOR:
+                            structureCode = Constants.EDITOR_CODE;
+                            continue;
+                        case Constants.METADATA:
+                            structureCode = Constants.METADATA_CODE;
+                            continue;
+                        case Constants.DIFFICULTY:
+                            structureCode = Constants.DIFFICULTY_CODE;
+                            continue;
+                        case Constants.EVENTS:
+                            structureCode = Constants.EVENTS_CODE;
+                            continue;
+                        case Constants.TIMING_POINTS:
+                            structureCode = Constants.TIMING_POINTS_CODE;
+                            continue;
+                        case Constants.COLOURS:
+                            structureCode = Constants.COLOURS_CODE;
+                            continue;
+                        case Constants.HIT_OBJECTS:
+                            structureCode = Constants.HIT_OBJECTS_CODE;
+                            continue;
+                        default:
+                            break;
                     }
-
-                    if (isTimingPoints)
+                    switch (structureCode)
                     {
-                        timingPointList.Add(new TimingPoint(line));
-                    }
-                    if (isHitObjects)
-                    {
-                        hitObjectList.Add(new HitObject(line));
-                    }
-                    if (line == "[HitObjects]")
-                    {
-                        isHitObjects = true;
-                    }
-                    if (line == "[TimingPoints]")
-                    {
-                        isTimingPoints = true;
+                        case Constants.VERSION_CODE:
+                            version = line;
+                            break;
+                        case Constants.GENERAL_CODE:
+                            generalList.Add(line);
+                            break;
+                        case Constants.EDITOR_CODE:
+                            editorList.Add(line);
+                            break;
+                        case Constants.METADATA_CODE:
+                            metadataList.Add(line);
+                            break;
+                        case Constants.DIFFICULTY_CODE:
+                            difficultyList.Add(line);
+                            break;
+                        case Constants.EVENTS_CODE:
+                            eventsList.Add(line);
+                            break;
+                        case Constants.TIMING_POINTS_CODE:
+                            timingPointList.Add(new TimingPoint(line));
+                            break;
+                        case Constants.COLOURS_CODE:
+                            coloursList.Add(line);
+                            break;
+                        case Constants.HIT_OBJECTS_CODE:
+                            hitObjectList.Add(new HitObject(line));
+                            break;
+                        default:
+                            break;
                     }
                 }
                 return true;
             }
             catch (Exception ex)
             {
+                Common.WriteErrorMessage("LOG-ERROR-EXCEPTION");
+                Common.WriteErrorMessage(ex.Message);
+                Common.WriteErrorMessage(ex.StackTrace);
                 return false;
             }
         }
@@ -201,7 +286,9 @@ namespace osuTaikoSvTool.Utils.Helper
         /// <param name="hitObjectList">小節線の格納先(小節線はHitObjectとしてカウントする)</param>
         /// <param name="uninheritedTimingPointList">赤線の格納先</param>
         /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
-        private static bool GetRedLineAndBarline(ref List<TimingPoint> timingPointList, ref List<HitObject> hitObjectList, ref List<TimingPoint> uninheritedTimingPointList)
+        private static bool GetRedLineAndBarline(ref List<TimingPoint> timingPointList,
+                                                 ref List<HitObject> hitObjectList,
+                                                 ref List<TimingPoint> uninheritedTimingPointList)
         {
             try
             {
@@ -259,7 +346,8 @@ namespace osuTaikoSvTool.Utils.Helper
         /// <param name="timingPointList">赤線のリスト</param>
         /// <param name="hitObjectList">適用対象のHitObject</param>
         /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
-        private static bool SetSvAndBpmOnHitObjects(List<TimingPoint> timingPointList, ref List<HitObject> hitObjectList)
+        private static bool SetSvAndBpmOnHitObjects(List<TimingPoint> timingPointList,
+                                                    ref List<HitObject> hitObjectList)
         {
             int timingIndex = 0;
             decimal currentBpm = 0;
@@ -307,6 +395,107 @@ namespace osuTaikoSvTool.Utils.Helper
             {
                 return false;
             }
+        }
+        internal static bool CreateOsuFile(Beatmap beatmap, string path)
+        {
+            string workPath = Directory.GetCurrentDirectory() + Constants.WORK_DIRECTORY + "\\" + Path.GetFileName(path);
+            StreamWriter file = new StreamWriter(workPath, true, Encoding.GetEncoding("utf-8"));
+            try
+            {
+                file.WriteLine(beatmap.version);
+                file.WriteLine("");
+                file.WriteLine(Constants.GENERAL);
+                beatmap.general.ForEach(line => file.WriteLine(line));
+                file.WriteLine("");
+                file.WriteLine(Constants.EDITOR);
+                beatmap.editor.ForEach(line => file.WriteLine(line));
+                file.WriteLine("");
+                file.WriteLine(Constants.METADATA);
+                beatmap.metadata.ForEach(line => file.WriteLine(line));
+                file.WriteLine("");
+                file.WriteLine(Constants.DIFFICULTY);
+                beatmap.difficulty.ForEach(line => file.WriteLine(line));
+                file.WriteLine("");
+                file.WriteLine(Constants.EVENTS);
+                beatmap.events.ForEach(line => file.WriteLine(line));
+                file.WriteLine("");
+                file.WriteLine(Constants.TIMING_POINTS);
+                foreach (var timingPoint in beatmap.timingPoints)
+                {
+                    string timingPointLine = timingPoint.time + "," +
+                          (timingPoint.isRedLine ? (60000 / timingPoint.bpm).ToString("0.000000000000") : (-100 / timingPoint.sv).ToString("0.000000000000")) + "," +
+                           timingPoint.meter + "," +
+                           timingPoint.sampleSet + "," +
+                           timingPoint.sampleIndex + "," +
+                           timingPoint.volume + "," +
+                          (timingPoint.isRedLine ? "1" : "0") + "," +
+                           timingPoint.effect;
+                    file.WriteLine(timingPointLine);
+                }
+                file.WriteLine("");
+                if (beatmap.colours.Count != 0)
+                {
+                    file.WriteLine(Constants.COLOURS);
+                    beatmap.colours.ForEach(line => file.WriteLine(line));
+                }
+                file.WriteLine("");
+                file.WriteLine(Constants.HIT_OBJECTS);
+                foreach (var hitObject in beatmap.hitObjects)
+                {
+                    if (hitObject.noteType != Constants.NoteType.BARLINE)
+                    {
+                        string hitObjectLine = CreateHitObjectLine(hitObject);
+                        file.WriteLine(hitObjectLine);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Common.WriteErrorMessage("LOG-CREATE-FAIL");
+                Common.WriteErrorMessage(ex.Message + "\n" + ex.StackTrace);
+                return false;
+            }
+            finally
+            {
+                file.Close();
+            }
+            return true;
+        }
+        private static string CreateHitObjectLine(HitObject hitObject)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append(hitObject.positionX + ",");
+            sb.Append(hitObject.positionY + ",");
+            sb.Append(hitObject.time + ",");
+            sb.Append(hitObject.type + ",");
+            sb.Append(hitObject.hitSound + ",");
+            if (hitObject.noteType == Constants.NoteType.SLIDER)
+            {
+                sb.Append(hitObject.curveSetting + ",");
+                sb.Append(hitObject.slides + ",");
+                sb.Append(hitObject.sliderLength);
+                if ((hitObject.edgeSounds != null) && (hitObject.edgeSets) != null && (hitObject.hitSample != null))
+                {
+                    sb.Append(",");
+                    sb.Append(hitObject.edgeSounds + ",");
+                    sb.Append(hitObject.edgeSets + ",");
+                    sb.Append(hitObject.hitSample);
+                }
+                else
+                {
+                    sb.Append("");
+                }
+            }
+            else if (hitObject.noteType == Constants.NoteType.SPINNER)
+            {
+                sb.Append(hitObject.endTime + ",");
+                sb.Append(hitObject.hitSample);
+            }
+            else
+            {
+                sb.Append(hitObject.hitSample);
+            }
+            return sb.ToString();
         }
     }
 }
