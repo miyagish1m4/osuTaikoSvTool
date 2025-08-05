@@ -80,10 +80,22 @@ namespace osuTaikoSvTool.Utils.Helper
                     !validateOffset(offset,
                                     isOffset,
                                     ref retOffset) ||
-                    !validateBeatSnap(beatSnap, 
-                                      isBeatSnap, 
+                    !validateBeatSnap(beatSnap,
+                                      isBeatSnap,
                                       ref retBeatSnap))
                 {
+                    throw new Exception();
+                }
+                if (calculationCode == 0)
+                {
+                    //計算方法が指定されていない
+                    MessageBox.Show(Common.WriteDialogMessage("E-015"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    throw new Exception();
+                }
+                if (isOnlyHitObject && (OnlyHitObjectCode == 0))
+                {
+                    //計算対象のヒットオブジェクトが指定されていない
+                    MessageBox.Show(Common.WriteDialogMessage("E-016"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     throw new Exception();
                 }
                 return new UserInputData(retTimingFrom,
@@ -219,8 +231,8 @@ namespace osuTaikoSvTool.Utils.Helper
                 {
                     retSvFrom = -1;
                     retSvTo = -1;
+                    return true;
                 }
-                return true;
             }
             catch (Exception ex)
             {
@@ -285,8 +297,8 @@ namespace osuTaikoSvTool.Utils.Helper
                 {
                     retVolumeFrom = -1;
                     retVolumeTo = -1;
+                    return true;
                 }
-                return true;
             }
             catch (Exception ex)
             {
@@ -327,10 +339,14 @@ namespace osuTaikoSvTool.Utils.Helper
                     else
                     {
                         retOffset = 0;
-                        return false;
+                        return true;
                     }
                 }
-                return true;
+                else
+                {
+                    retOffset = Int32.MinValue;
+                    return true;
+                }
             }
             catch (Exception ex)
             {
@@ -366,21 +382,26 @@ namespace osuTaikoSvTool.Utils.Helper
                             {
                                 return true;
                             }
+                            else
+                            {
+                                //ビートスナップ間隔が0以下の整数
+                                MessageBox.Show(Common.WriteDialogMessage("E-014"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                return false;
+                            }
                         }
                         else
                         {
-                            //ビートスナップ間隔は正の整数(0除く)を指定してください。
+                            //ビートスナップ間隔が整数ではない
                             MessageBox.Show(Common.WriteDialogMessage("E-014"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
                         }
                     }
                     else
                     {
-                        //ビートスナップ間隔を指定してください。
+                        //ビートスナップ間隔が空欄
                         MessageBox.Show(Common.WriteDialogMessage("E-013"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return false;
                     }
-                    return true;
                 }
                 else
                 {
