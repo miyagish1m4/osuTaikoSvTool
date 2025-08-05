@@ -9,93 +9,96 @@ namespace osuTaikoSvTool
     {
         #region クラス変数
         string path = "";
-        bool isDSelected = false;
-        bool isKSelected = false;
-        bool isBigDSelected = false;
-        bool isBigKSelected = false;
-        bool isSliderSelected = false;
-        bool isBigSliderSelected = false;
-        bool isBarlineSelected = false;
-        bool isBookMarkSelected = false;
-        bool isCertainObject = false;
-        bool isSV = false;
-        bool isVolume = false;
-        bool isBarline = false;
-        bool isOffset = true;
-        bool isKiai = false;
-        bool isStartKiai = false;
-        bool isEndKiai = false;
+        string songsDirectory = "";
+        int objectCode = 0;
         int calculationCode = 0;
-        int offsetValue = 0;
+        bool isOnlySpecificHitObject = false;
+        bool[] isOnlySpecificHitObjectArray = new bool[6] { false, false, false, false, false, false };
         Beatmap beatmapInfo = null;
+        UserInputData userInputData = null;
         #endregion
         public osuTaikoSVTool()
         {
             InitializeComponent();
         }
-
-        /// <summary>
-        /// 画面ロード時の処理
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void osuTaikoSVTool_Load(object sender, EventArgs e)
         {
             Common.WriteInfoMessage("LOG-START");
-            pictureBox5.Controls.Add(label1);
+            songsDirectory = Common.InitializeConfigDirectory();
+            if (songsDirectory == "")
+            {
+                Application.Exit();
+            }
+            picDisplayBg.Controls.Add(lblFileName);
+            picDisplayBg.Controls.Add(pnlDragDropArea);
             Application.ApplicationExit += new EventHandler(Application_ApplicationExit);
             Common.InitializeLogDirectory();
-            isStartKialButton.Enabled = false;
-            isEndKialButton.Enabled = false;
+            chkEnableKiaiStart.Enabled = false;
+            chkEnableKiaiEnd.Enabled = false;
             this.FormBorderStyle = FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
         }
-
-        /// <summary>
-        /// アプリケーション終了時の処理
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void Application_ApplicationExit(object sender, EventArgs e)
         {
             //ApplicationExitイベントハンドラを削除
             Application.ApplicationExit -= new EventHandler(Application_ApplicationExit);
             Common.WriteInfoMessage("LOG-END");
         }
-
         /// <summary>
-        /// "ファイルを開く"ボタン押下時の処理
+        /// 譜面情報取得処理
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void openFileButton_Click(object sender, EventArgs e)
+        private void GetBeatmapInfo()
         {
-            this.path = BeatmapHelper.SelectFile();
+            beatmapInfo = BeatmapHelper.GetBeatmapData(this.path);
+            picDisplayBg.Image = BeatmapHelper.SetBgOnForm(this.path, beatmapInfo.events);
+            string fileName = Path.GetFileName(this.path);
+            lblFileName.Text = fileName;
+        }
+        private void btnOpenFile_Click(object sender, EventArgs e)
+        {
+            this.path = BeatmapHelper.SelectFile(songsDirectory);
             if (this.path == null || this.path == "" || this.path == string.Empty)
             {
                 return;
             }
-            beatmapInfo = BeatmapHelper.GetBeatmapData(this.path);
-            pictureBox5.Image = BeatmapHelper.SetBgOnForm(this.path, beatmapInfo.events);
-            string fileName = Path.GetFileName(this.path);
-            label1.Text = fileName;
+            GetBeatmapInfo();
         }
-
-        /// <summary>
-        /// 追加ボタン押下時の処理
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void addButton_Click(object sender, EventArgs e)
+        private void btnAdd_Click(object sender, EventArgs e)
         {
             try
             {
-                if (this.path == null || this.path == "" || this.path == string.Empty)
+                if (this.path == null || this.path == string.Empty)
                 {
                     //ここにエラーメッセージを入れる miyagi
                     return;
                 }
-                BeatmapHelper.CreateOsuFile(beatmapInfo, this.path);
+                this.userInputData = UserInputDataHelper.GetUserInputData(txtTimingFrom.Text,
+                                                                          txtTimingTo.Text,
+                                                                          chkSvEnable.Checked,
+                                                                          txtSvFrom.Text,
+                                                                          txtSvTo.Text,
+                                                                          chkEnableVolume.Checked,
+                                                                          txtVolumeFrom.Text,
+                                                                          txtVolumeTo.Text,
+                                                                          calculationCode,
+                                                                          chkEnableIncludeBarline.Checked,
+                                                                          chkEnableOffset.Checked,
+                                                                          txtOffset.Text,
+                                                                          chkEnableBeatSnap.Checked,
+                                                                          txtBeatSnap.Text,
+                                                                          chkEnableKiai.Checked,
+                                                                          chkEnableKiaiStart.Checked,
+                                                                          chkEnableKiaiEnd.Checked,
+                                                                          rdoOnlyBarline.Checked,
+                                                                          rdoOnlyBookMark.Checked,
+                                                                          rdoOnlySpecificHitObject.Checked,
+                                                                          objectCode);
+                if (userInputData == null)
+                {
+                    return;
+                }
+                BeatmapHelper.ExportToOsuFile(beatmapInfo);
+
                 return;
             }
             catch (Exception ex)
@@ -105,237 +108,323 @@ namespace osuTaikoSvTool
                 return;
             }
         }
-        private void disableSV_CheckedChanged(object sender, EventArgs e)
+        private void btnModify_Click(object sender, EventArgs e)
         {
-            isSV = disableSV.Checked;
-            if (isSV == true)
-            {
-                SVFrom.Enabled = true;
-                SVTo.Enabled = true;
-                SVFrom.BackColor = SystemColors.Window;
-                SVTo.BackColor = SystemColors.Window;
-                swapSVButton.Enabled = true;
-                swapSVButton.ForeColor = Color.Cyan;
-                swapSVButton.FlatAppearance.BorderColor = Color.Cyan;
-                arithmeticButton.Enabled = true;
-                geometricButton.Enabled = true;
-            }
-            else
-            {
-                SVFrom.Text = string.Empty;
-                SVTo.Text = string.Empty;
-                SVFrom.Enabled = false;
-                SVTo.Enabled = false;
-                SVFrom.BackColor = SystemColors.WindowFrame;
-                SVTo.BackColor = SystemColors.WindowFrame;
-                swapSVButton.Enabled = false;
-                swapSVButton.ForeColor = SystemColors.WindowFrame;
-                swapSVButton.FlatAppearance.BorderColor = SystemColors.WindowFrame;
-                arithmeticButton.Enabled = false;
-                geometricButton.Enabled = false;
 
-            }
         }
-
-        private void disableVolume_CheckedChanged(object sender, EventArgs e)
+        private void btnRemove_Click(object sender, EventArgs e)
         {
-            isVolume = disableVolume.Checked;
-            if (isVolume == true)
-            {
-                volumeFrom.Enabled = true;
-                volumeTo.Enabled = true;
-                volumeFrom.BackColor = SystemColors.Window;
-                volumeTo.BackColor = SystemColors.Window;
-                swapVolumeButton.Enabled = true;
-                swapVolumeButton.ForeColor = Color.Cyan;
-                swapVolumeButton.FlatAppearance.BorderColor = Color.Cyan;
-            }
-            else
-            {
-                volumeFrom.Text = string.Empty;
-                volumeTo.Text = string.Empty;
-                volumeFrom.Enabled = false;
-                volumeTo.Enabled = false;
-                volumeFrom.BackColor = SystemColors.WindowFrame;
-                volumeTo.BackColor = SystemColors.WindowFrame;
-                swapVolumeButton.Enabled = false;
-                swapVolumeButton.ForeColor = SystemColors.WindowFrame;
-                swapVolumeButton.FlatAppearance.BorderColor = SystemColors.WindowFrame;
 
-            }
         }
-
-        private void includeBarline_CheckedChanged(object sender, EventArgs e)
-        {
-            isBarline = includeBarline.Checked;
-        }
-
-        private void arithmeticButton_CheckedChanged(object sender, EventArgs e)
-        {
-            calculationCode = 1;
-        }
-
-        private void geometricButton_CheckedChanged(object sender, EventArgs e)
-        {
-            calculationCode = 2;
-        }
-
-        private void enableOffset_CheckedChanged(object sender, EventArgs e)
-        {
-            isOffset = enableOffset.Checked;
-            if (isOffset == true)
-            {
-                offsetTextbox.Text = string.Empty;
-                offsetTextbox.BackColor = SystemColors.Window;
-                offsetTextbox.Enabled = true;
-            }
-            else
-            {
-                offsetTextbox.BackColor = SystemColors.WindowFrame;
-                offsetTextbox.Enabled = false;
-            }
-        }
-
-        /// <summary>
-        /// "バックアップフォルダ"ボタン押下時バックアップフォルダを開く
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void backupFolderButton_Click(object sender, EventArgs e)
+        private void btnBackup_Click(object sender, EventArgs e)
         {
             System.Diagnostics.Process.Start("EXPLORER.EXE", Directory.GetCurrentDirectory() + Constants.BACKUP_DIRECTORY);
         }
-        private void swapTimingButton_Click(object sender, EventArgs e)
+        private void btnSwapTiming_Click(object sender, EventArgs e)
         {
             string timingBuff = "";
-            timingBuff = timingFrom.Text;
-            timingFrom.Text = timingTo.Text;
-            timingTo.Text = timingBuff;
+            timingBuff = txtTimingFrom.Text;
+            txtTimingFrom.Text = txtTimingTo.Text;
+            txtTimingTo.Text = timingBuff;
         }
-        private void swapSVButton_Click(object sender, EventArgs e)
+        private void btnSwapSv_Click(object sender, EventArgs e)
         {
             string SVBuff = "";
-            SVBuff = SVFrom.Text;
-            SVFrom.Text = SVTo.Text;
-            SVTo.Text = SVBuff;
+            SVBuff = txtSvFrom.Text;
+            txtSvFrom.Text = txtSvTo.Text;
+            txtSvTo.Text = SVBuff;
         }
-        private void swapVolumeButton_Click(object sender, EventArgs e)
+        private void btnSwapVolume_Click(object sender, EventArgs e)
         {
             string volumeBuff = "";
-            volumeBuff = volumeFrom.Text;
-            volumeFrom.Text = volumeTo.Text;
-            volumeTo.Text = volumeBuff;
+            volumeBuff = txtVolumeFrom.Text;
+            txtVolumeFrom.Text = txtVolumeTo.Text;
+            txtVolumeTo.Text = volumeBuff;
 
         }
-        private void isKiaiButton_CheckedChanged(object sender, EventArgs e)
+        private void chkSvEnable_CheckedChanged(object sender, EventArgs e)
         {
-            isKiai = isKiaiButton.Checked;
-            if (isKiaiButton.Checked)
+            if (chkSvEnable.Checked)
             {
-                isStartKialButton.Enabled = true;
-                isEndKialButton.Enabled = true;
+                txtSvFrom.Enabled = true;
+                txtSvTo.Enabled = true;
+                txtSvFrom.BackColor = SystemColors.Window;
+                txtSvTo.BackColor = SystemColors.Window;
+                btnSwapSv.Enabled = true;
+                btnSwapSv.ForeColor = Color.Cyan;
+                btnSwapSv.FlatAppearance.BorderColor = Color.Cyan;
+                rdoArithmetic.Enabled = true;
+                rdoGeometric.Enabled = true;
             }
             else
             {
-                isStartKialButton.Enabled = false;
-                isEndKialButton.Enabled = false;
-                isStartKialButton.Checked = false;
-                isEndKialButton.Checked = false;
-            }
-        }
-        private void isStartKialButton_CheckedChanged(object sender, EventArgs e)
-        {
-            isStartKiai = isStartKialButton.Checked;
-        }
-        private void isEndKialButton_CheckedChanged(object sender, EventArgs e)
-        {
-            isEndKiai = isEndKialButton.Checked;
-        }
-        private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
-        {
-            isDSelected = !isDSelected;
-            if (isDSelected)
-            {
-                pictureBox1.Image = Properties.Resources.d_selected;
-            }
-            else
-            {
-                pictureBox1.Image = Properties.Resources.d;
-            }
-        }
-        private void pictureBox3_MouseDown(object sender, MouseEventArgs e)
-        {
-            isBigDSelected = !isBigDSelected;
-            if (isBigDSelected)
-            {
-                pictureBox3.Image = Properties.Resources.d_selected;
-            }
-            else
-            {
-                pictureBox3.Image = Properties.Resources.d;
-            }
-        }
-        private void pictureBox2_MouseDown(object sender, MouseEventArgs e)
-        {
-            isKSelected = !isKSelected;
-            if (isKSelected)
-            {
-                pictureBox2.Image = Properties.Resources.k_selected;
-            }
-            else
-            {
-                pictureBox2.Image = Properties.Resources.k;
-            }
-        }
-        private void pictureBox4_MouseDown(object sender, MouseEventArgs e)
-        {
-            isBigKSelected = !isBigKSelected;
-            if (isBigKSelected)
-            {
-                pictureBox4.Image = Properties.Resources.k_selected;
-            }
-            else
-            {
-                pictureBox4.Image = Properties.Resources.k;
-            }
-        }
-        private void pictureBox6_MouseDown(object sender, MouseEventArgs e)
-        {
-            isSliderSelected = !isSliderSelected;
-            if (isSliderSelected)
-            {
-                pictureBox6.Image = Properties.Resources.slider_selected;
-            }
-            else
-            {
-                pictureBox6.Image = Properties.Resources.slider;
-            }
+                txtSvFrom.Text = string.Empty;
+                txtSvTo.Text = string.Empty;
+                txtSvFrom.Enabled = false;
+                txtSvTo.Enabled = false;
+                txtSvFrom.BackColor = SystemColors.WindowFrame;
+                txtSvTo.BackColor = SystemColors.WindowFrame;
+                btnSwapSv.Enabled = false;
+                btnSwapSv.ForeColor = SystemColors.WindowFrame;
+                btnSwapSv.FlatAppearance.BorderColor = SystemColors.WindowFrame;
+                rdoArithmetic.Enabled = false;
+                rdoGeometric.Enabled = false;
 
+            }
         }
-        private void pictureBox7_MouseDown(object sender, MouseEventArgs e)
+        private void chkEnableVolume_CheckedChanged(object sender, EventArgs e)
         {
-            isBigSliderSelected = !isBigSliderSelected;
-            if (isBigSliderSelected)
+            if (chkEnableVolume.Checked == true)
             {
-                pictureBox7.Image = Properties.Resources.slider_selected;
+                txtVolumeFrom.Enabled = true;
+                txtVolumeTo.Enabled = true;
+                txtVolumeFrom.BackColor = SystemColors.Window;
+                txtVolumeTo.BackColor = SystemColors.Window;
+                btnSwapVolume.Enabled = true;
+                btnSwapVolume.ForeColor = Color.Cyan;
+                btnSwapVolume.FlatAppearance.BorderColor = Color.Cyan;
             }
             else
             {
-                pictureBox7.Image = Properties.Resources.slider;
+                txtVolumeFrom.Text = string.Empty;
+                txtVolumeTo.Text = string.Empty;
+                txtVolumeFrom.Enabled = false;
+                txtVolumeTo.Enabled = false;
+                txtVolumeFrom.BackColor = SystemColors.WindowFrame;
+                txtVolumeTo.BackColor = SystemColors.WindowFrame;
+                btnSwapVolume.Enabled = false;
+                btnSwapVolume.ForeColor = SystemColors.WindowFrame;
+                btnSwapVolume.FlatAppearance.BorderColor = SystemColors.WindowFrame;
+
+            }
+        }
+        private void chkEnableOffset_CheckedChanged(object sender, EventArgs e)
+        {
+            if (chkEnableOffset.Checked)
+            {
+                txtOffset.Text = string.Empty;
+                txtOffset.BackColor = SystemColors.Window;
+                txtOffset.Enabled = true;
+            }
+            else
+            {
+                txtOffset.BackColor = SystemColors.WindowFrame;
+                txtOffset.Enabled = false;
+            }
+        }
+        private void chkEnableBeatSnap_CheckedChanged(object sender, EventArgs e)
+        {
+            if (chkEnableBeatSnap.Checked)
+            {
+                txtBeatSnap.Text = string.Empty;
+                txtBeatSnap.BackColor = SystemColors.Window;
+                txtBeatSnap.Enabled = true;
+            }
+            else
+            {
+                txtBeatSnap.BackColor = SystemColors.WindowFrame;
+                txtBeatSnap.Enabled = false;
             }
 
         }
-        private void radioButton1_CheckedChanged(object sender, EventArgs e)
+        private void chkEnableKiai_CheckedChanged(object sender, EventArgs e)
         {
-            isBookMarkSelected = radioButton1.Checked;
+            if (chkEnableKiai.Checked)
+            {
+                chkEnableKiaiStart.Enabled = true;
+                chkEnableKiaiEnd.Enabled = true;
+            }
+            else
+            {
+                chkEnableKiaiStart.Enabled = false;
+                chkEnableKiaiEnd.Enabled = false;
+                chkEnableKiaiStart.Checked = false;
+                chkEnableKiaiEnd.Checked = false;
+            }
         }
-        private void radioButton2_CheckedChanged(object sender, EventArgs e)
+        private void picSpecificNormalDong_MouseDown(object sender, MouseEventArgs e)
         {
-            isBarlineSelected = radioButton2.Checked;
+            if (isOnlySpecificHitObjectArray[0] = !isOnlySpecificHitObjectArray[0])
+            {
+                picSpecificNormalDong.Image = Properties.Resources.d_selected;
+                objectCode += 1;
+            }
+            else
+            {
+                picSpecificNormalDong.Image = Properties.Resources.d;
+                objectCode -= 1;
+            }
         }
-        private void radioButton3_CheckedChanged(object sender, EventArgs e)
+        private void picSpecificFinisherDong_MouseDown(object sender, MouseEventArgs e)
         {
-            isCertainObject = radioButton3.Checked;
+            if (isOnlySpecificHitObjectArray[1] = !isOnlySpecificHitObjectArray[1])
+            {
+                picSpecificFinisherDong.Image = Properties.Resources.d_selected;
+                objectCode += 2;
+            }
+            else
+            {
+                picSpecificFinisherDong.Image = Properties.Resources.d;
+                objectCode -= 2;
+            }
+        }
+        private void picSpecificNormalKa_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (isOnlySpecificHitObjectArray[2] = !isOnlySpecificHitObjectArray[2])
+            {
+                picSpecificNormalKa.Image = Properties.Resources.k_selected;
+                objectCode += 4;
+            }
+            else
+            {
+                picSpecificNormalKa.Image = Properties.Resources.k;
+                objectCode -= 4;
+            }
+        }
+        private void picSpecificFinisherKa_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (isOnlySpecificHitObjectArray[3] = !isOnlySpecificHitObjectArray[3])
+            {
+                picSpecificFinisherKa.Image = Properties.Resources.k_selected;
+                objectCode += 8;
+            }
+            else
+            {
+                picSpecificFinisherKa.Image = Properties.Resources.k;
+                objectCode -= 8;
+            }
+        }
+        private void picSpecificNormalSlider_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (isOnlySpecificHitObjectArray[4] = !isOnlySpecificHitObjectArray[4])
+            {
+                picSpecificNormalSlider.Image = Properties.Resources.slider_selected;
+                objectCode += 16;
+            }
+            else
+            {
+                picSpecificNormalSlider.Image = Properties.Resources.slider;
+                objectCode -= 16;
+            }
+        }
+        private void picSpecificFinisherSlider_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (isOnlySpecificHitObjectArray[5] = !isOnlySpecificHitObjectArray[5])
+            {
+                picSpecificFinisherSlider.Image = Properties.Resources.slider_selected;
+                objectCode += 32;
+            }
+            else
+            {
+                picSpecificFinisherSlider.Image = Properties.Resources.slider;
+                objectCode -= 32;
+            }
+        }
+        private void rdoArithmetic_CheckedChanged(object sender, EventArgs e)
+        {
+            calculationCode = 1;
+        }
+        private void rdoGeometric_CheckedChanged(object sender, EventArgs e)
+        {
+            calculationCode = 2;
+        }
+        private void rdoOnlySpecificHitObject_CheckedChanged(object sender, EventArgs e)
+        {
+            if (rdoOnlySpecificHitObject.Checked)
+            {
+                // pictureBoxに設定されているMouseDownイベントを設定する
+                picSpecificNormalDong.MouseDown += picSpecificNormalDong_MouseDown;
+                picSpecificFinisherDong.MouseDown += picSpecificFinisherDong_MouseDown;
+                picSpecificNormalKa.MouseDown += picSpecificNormalKa_MouseDown;
+                picSpecificFinisherKa.MouseDown += picSpecificFinisherKa_MouseDown;
+                picSpecificNormalSlider.MouseDown += picSpecificNormalSlider_MouseDown;
+                picSpecificFinisherSlider.MouseDown += picSpecificFinisherSlider_MouseDown;
+                // rdoOnlyBookMarkとrdoOnlyBarlineに設定されているCheckedChangedイベントを外す
+                // 事前に外さないと次の行のfalseを代入する処理でイベントが走る為
+                rdoOnlyBookMark.CheckedChanged -= rdoOnlyBookMark_CheckedChanged;
+                rdoOnlyBarline.CheckedChanged -= rdoOnlyBarline_CheckedChanged;
+                rdoOnlyBookMark.Checked = false;
+                rdoOnlyBarline.Checked = false;
+                // CheckedChangedイベントを設定しなおす
+                rdoOnlyBookMark.CheckedChanged += rdoOnlyBookMark_CheckedChanged;
+                rdoOnlyBarline.CheckedChanged += rdoOnlyBarline_CheckedChanged;
+
+            }
+            else
+            {
+                // pictureBoxに設定されているMouseDownイベントを外す
+                picSpecificNormalDong.MouseDown -= picSpecificNormalDong_MouseDown;
+                picSpecificFinisherDong.MouseDown -= picSpecificFinisherDong_MouseDown;
+                picSpecificNormalKa.MouseDown -= picSpecificNormalKa_MouseDown;
+                picSpecificFinisherKa.MouseDown -= picSpecificFinisherKa_MouseDown;
+                picSpecificNormalSlider.MouseDown -= picSpecificNormalSlider_MouseDown;
+                picSpecificFinisherSlider.MouseDown -= picSpecificFinisherSlider_MouseDown;
+                // 画像を元に戻す
+                picSpecificNormalDong.Image = Properties.Resources.d;
+                picSpecificFinisherDong.Image = Properties.Resources.d;
+                picSpecificNormalKa.Image = Properties.Resources.k;
+                picSpecificFinisherKa.Image = Properties.Resources.k;
+                picSpecificNormalSlider.Image = Properties.Resources.slider;
+                picSpecificFinisherSlider.Image = Properties.Resources.slider;
+                // 選択肢とコードの初期化
+                isOnlySpecificHitObjectArray = new bool[6] { false, false, false, false, false, false };
+                objectCode = 0;
+            }
+        }
+        /// <summary>
+        /// DragDropの共通イベントハンドラー
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void commonDragDrop(object sender, DragEventArgs e)
+        {
+            var files = (string[])e.Data.GetData(DataFormats.FileDrop, false);
+            if (files.Length != 0)
+            {
+                // 譜面を2個以上ドラッグ&ドロップした場合は、最初の1つだけを読み込む
+                path = files[0];
+                if (path.LastIndexOf(Constants.OSU_EXTENSION) != -1)
+                {
+                    GetBeatmapInfo();
+                }
+                else
+                {
+                    MessageBox.Show(Common.WriteDialogMessage("W-001"), "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+        }
+        /// <summary>
+        /// DragEnterの共通イベントハンドラー
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void commonDragEnter(object sender, DragEventArgs e)
+        {
+            // マウスポインター形状変更
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effect = DragDropEffects.Copy;
+            }
+            else
+            {
+                e.Effect = DragDropEffects.None;
+            }
+        }
+
+        private void rdoOnlyBookMark_CheckedChanged(object sender, EventArgs e)
+        {
+            if (rdoOnlySpecificHitObject.Checked)
+            {
+                rdoOnlySpecificHitObject.Checked = false;
+            }
+        }
+
+        private void rdoOnlyBarline_CheckedChanged(object sender, EventArgs e)
+        {
+            if (rdoOnlySpecificHitObject.Checked)
+            {
+                rdoOnlySpecificHitObject.Checked = false;
+            }
         }
     }
 }

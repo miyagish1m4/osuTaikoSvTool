@@ -1,4 +1,8 @@
-﻿using System.Text;
+﻿using System.Configuration;
+using System.IO;
+using System.Security.Cryptography;
+using System.Text;
+using System.Windows.Forms;
 using osuTaikoSvTool.Properties;
 
 namespace osuTaikoSvTool.Utils
@@ -52,21 +56,90 @@ namespace osuTaikoSvTool.Utils
                     File.Create(errorMessagePath).Close();
                 }
                 return true;
-            } catch
+            }
+            catch
             {
                 return false;
             }
 
         }
         /// <summary>
+        /// コンフィグファイルの初期化設定
+        /// </summary>
+        /// <returns>処理が<br/>・正常終了した場合は指定したフォルダパス<br/>・異常終了した場合は空文字</returns>
+        internal static string InitializeConfigDirectory()
+        {
+            try
+            {
+                string configPath = Directory.GetCurrentDirectory() + "\\" + Constants.CONFIG_FILE_NAME;
+                string songsPath = "";
+                if (!File.Exists(configPath) || File.ReadAllText(configPath) == "" || File.ReadAllText(configPath) == null)
+                {
+                    if (MessageBox.Show(WriteDialogMessage("I-003"), "情報", MessageBoxButtons.OK, MessageBoxIcon.Asterisk) != DialogResult.OK)
+                    {
+                        MessageBox.Show(WriteDialogMessage("E-002"), "結果", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return "";
+                    }
+                    using (var OpenFolderDialog = new OpenFileDialog()
+                    {
+                        Title = "フォルダ選択ダイアログ",
+                        FileName = "SongFolder",
+                        Filter = "Folder|.",
+                        InitialDirectory = Directory.GetCurrentDirectory(),
+                        CheckFileExists = false
+                    })
+                    {
+                        if (OpenFolderDialog.ShowDialog() == DialogResult.OK)
+                        {
+                            songsPath = Path.GetDirectoryName(OpenFolderDialog.FileName);
+                            if (!File.Exists(configPath))
+                            {
+                                // 新規ファイル作成
+                                File.Create(configPath).Close();
+                            }
+                            MessageBox.Show(WriteDialogMessage("I-002"), "結果", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+                            StreamWriter configFile = new StreamWriter(configPath);
+                            configFile.WriteLine(Constants.SONGS_DIRECTORY);
+                            configFile.WriteLine(songsPath);
+                            configFile.Close();
+                        }
+                        else
+                        {
+                            MessageBox.Show(WriteDialogMessage("E-002"), "結果", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return "";
+                        }
+                    }
+                }
+                else
+                {
+                    var lines = File.ReadAllLines(configPath);
+                    for (global::System.Int32 i = 0; i < lines.Length; i++)
+                    {
+                        if (lines[i] == Constants.SONGS_DIRECTORY)
+                        {
+                            songsPath = lines[i + 1];
+                        }
+                    }
+                }
+                return songsPath;
+            }
+            catch (Exception e)
+            {
+                WriteErrorMessage("LOG-ERROR-EXCEPTION");
+                WriteErrorMessage(e.Message + "\n" + e.StackTrace);
+                return "";
+            }
+
+        }
+        /// <summary>
         /// ダイアログメッセージ設定処理
         /// </summary>
-        /// <param name="messageCode"></param>
+        /// <param name="messageCode">メッセージコード、またはメッセージ</param>
         /// <returns>ダイアログメッセージ</returns>
-        internal static string WriteDialogMessage (string messageCode)
+        internal static string WriteDialogMessage(string messageCode)
         {
             string message;
-            if (Messages.LogMessages.ContainsKey(messageCode))
+            if (Messages.DialogMessages.ContainsKey(messageCode))
             {
                 message = Messages.DialogMessages[messageCode];
             }
@@ -79,7 +152,7 @@ namespace osuTaikoSvTool.Utils
         /// <summary>
         /// Infoメッセージの書き込み処理
         /// </summary>
-        /// <param name="messageCode"></param>
+        /// <param name="messageCode">メッセージコード、またはメッセージ</param>
         internal static void WriteInfoMessage(string messageCode)
         {
             DateTime currentDateTime = DateTime.Now;
@@ -110,7 +183,7 @@ namespace osuTaikoSvTool.Utils
         /// <summary>
         /// Errorメッセージの書き込み処理
         /// </summary>
-        /// <param name="messageCode"></param>
+        /// <param name="messageCode">メッセージコード、またはメッセージ</param>
         internal static void WriteWarningMessage(string messageCode)
         {
             DateTime currentDateTime = DateTime.Now;
@@ -141,7 +214,7 @@ namespace osuTaikoSvTool.Utils
         /// <summary>
         /// Errorメッセージの書き込み処理
         /// </summary>
-        /// <param name="messageCode"></param>
+        /// <param name="messageCode">メッセージコード、またはメッセージ</param>
         internal static void WriteErrorMessage(string messageCode)
         {
             DateTime currentDateTime = DateTime.Now;
@@ -175,7 +248,7 @@ namespace osuTaikoSvTool.Utils
         /// <param name="baseTiming">入力したタイミング (mm:ss:fff (notes))</param>
         /// <param name="returnTiming">変換後のタイミング (mmssfff)</param>
         /// <returns>処理が正常終了した場合はtrue、異常終了した場合はfalse</returns>
-        private bool ConvertTiming(string baseTiming, ref int returnTiming)
+        internal static bool ConvertTiming(string baseTiming, ref int returnTiming)
         {
             try
             {
@@ -188,8 +261,6 @@ namespace osuTaikoSvTool.Utils
             }
             catch (Exception e)
             {
-                Common.WriteErrorMessage("LOG-ERROR-EXCEPTION");
-                Common.WriteErrorMessage(e.Message + "\n" + e.StackTrace);
                 return false;
             }
         }

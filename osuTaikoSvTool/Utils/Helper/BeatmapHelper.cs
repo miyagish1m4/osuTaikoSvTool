@@ -1,6 +1,4 @@
-﻿using System.IO;
-using System.Text;
-using System.Windows.Forms.VisualStyles;
+﻿using System.Text;
 using osuTaikoSvTool.Models;
 using osuTaikoSvTool.Properties;
 
@@ -11,8 +9,9 @@ namespace osuTaikoSvTool.Utils.Helper
         /// <summary>
         /// "ファイル開く"ボタン押下時のダイアログ処理
         /// </summary>
-        /// <returns>ファイルパス</returns>
-        internal static string SelectFile()
+        /// <param name="initialDirectory">初期ディレクトリ</param>
+        /// <returns>osuファイルのパス</returns>
+        internal static string SelectFile(string initialDirectory)
         {
             string ret = string.Empty;
 
@@ -20,7 +19,7 @@ namespace osuTaikoSvTool.Utils.Helper
             {
                 openFileDialog.Title = "ファイル選択ダイアログ";
                 openFileDialog.Filter = "osuファイル(*.osu)|*.osu";
-                openFileDialog.InitialDirectory = @"D:\osu!\Songs\";
+                openFileDialog.InitialDirectory = initialDirectory;
 
                 //ファイル選択ダイアログを開く
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
@@ -34,7 +33,7 @@ namespace osuTaikoSvTool.Utils.Helper
         /// BGを取得して、フォームの背景に設定する
         /// </summary>
         /// <param name="path">ファイルパス</param>
-        /// <returns>BG</returns>
+        /// <returns>BGデータ</returns>
         internal static Bitmap SetBgOnForm(string path, List<string> eventsList)
         {
             try
@@ -115,17 +114,17 @@ namespace osuTaikoSvTool.Utils.Helper
             {
                 var lines = File.ReadAllLines(path);
                 // 譜面情報をセクションに区切り全取得
-                if (!GetHitObjectsAndTimingPoints(lines,
-                                                  ref version,
-                                                  ref generalList,
-                                                  ref editorList,
-                                                  ref metadataList,
-                                                  ref difficultyList,
-                                                  ref eventsList,
-                                                  ref timingPointList,
-                                                  ref coloursList,
-                                                  ref hitObjectList,
-                                                  ref bookmarks))
+                if (!GetBeatmapInfoBySection(lines,
+                                             ref version,
+                                             ref generalList,
+                                             ref editorList,
+                                             ref metadataList,
+                                             ref difficultyList,
+                                             ref eventsList,
+                                             ref timingPointList,
+                                             ref coloursList,
+                                             ref hitObjectList,
+                                             ref bookmarks))
                 {
                     throw new Exception();
                 }
@@ -143,7 +142,8 @@ namespace osuTaikoSvTool.Utils.Helper
                     throw new Exception();
                 }
                 // BeatmapInfo に渡す
-                return new Beatmap(version,
+                return new Beatmap(path,
+                                   version,
                                    generalList,
                                    editorList,
                                    metadataList,
@@ -160,7 +160,7 @@ namespace osuTaikoSvTool.Utils.Helper
             }
         }
         /// <summary>
-        /// 譜面情報をセクションに区切りに取得する
+        /// 譜面情報をセクションに区切りに変換する
         /// </summary>
         /// <param name="lines">osuファイルの中身</param>
         /// <param name="generalList">Generalの格納先</param>
@@ -173,111 +173,111 @@ namespace osuTaikoSvTool.Utils.Helper
         /// <param name="hitObjectList">HitObjectの格納先</param>
         /// <param name="bookmarks">Bookmarkの格納先</param>
         /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
-        private static bool GetHitObjectsAndTimingPoints(string[] lines,
-                                                         ref string version,
-                                                         ref List<string> generalList,
-                                                         ref List<string> editorList,
-                                                         ref List<string> metadataList,
-                                                         ref List<string> difficultyList,
-                                                         ref List<string> eventsList,
-                                                         ref List<TimingPoint> timingPointList,
-                                                         ref List<string> coloursList,
-                                                         ref List<HitObject> hitObjectList,
-                                                         ref List<int> bookmarks)
+        private static bool GetBeatmapInfoBySection(string[] lines,
+                                                    ref string version,
+                                                    ref List<string> generalList,
+                                                    ref List<string> editorList,
+                                                    ref List<string> metadataList,
+                                                    ref List<string> difficultyList,
+                                                    ref List<string> eventsList,
+                                                    ref List<TimingPoint> timingPointList,
+                                                    ref List<string> coloursList,
+                                                    ref List<HitObject> hitObjectList,
+                                                    ref List<int> bookmarks)
+    {
+        int structureCode = Constants.VERSION_CODE;
+        try
         {
-            int structureCode = Constants.VERSION_CODE;
-            try
+            foreach (var line in lines)
             {
-                foreach (var line in lines)
+                if (line == "")
                 {
-                    if (line == "")
+                    continue;
+                }
+                if (line.Length >= 9)
+                {
+                    if (line.Substring(0, 9) == "Bookmarks")
                     {
-                        continue;
-                    }
-                    if (line.Length >= 9)
-                    {
-                        if (line.Substring(0, 9) == "Bookmarks")
+                        string[] bookmarkParts = line.Split(':');
+                        List<string> stringBookmarks = new List<string>(bookmarkParts[1].Replace(" ", "").Split(","));
+                        foreach (var timing in stringBookmarks)
                         {
-                            string[] bookmarkParts = line.Split(':');
-                            List<string> stringBookmarks = new List<string>(bookmarkParts[1].Replace(" ", "").Split(","));
-                            foreach (var timing in stringBookmarks)
-                            {
-                                bookmarks.Add(int.Parse(timing));
-                            }
+                            bookmarks.Add(int.Parse(timing));
                         }
                     }
-                    switch (line)
-                    {
-                        case Constants.GENERAL:
-                            structureCode = Constants.GENERAL_CODE;
-                            continue;
-                        case Constants.EDITOR:
-                            structureCode = Constants.EDITOR_CODE;
-                            continue;
-                        case Constants.METADATA:
-                            structureCode = Constants.METADATA_CODE;
-                            continue;
-                        case Constants.DIFFICULTY:
-                            structureCode = Constants.DIFFICULTY_CODE;
-                            continue;
-                        case Constants.EVENTS:
-                            structureCode = Constants.EVENTS_CODE;
-                            continue;
-                        case Constants.TIMING_POINTS:
-                            structureCode = Constants.TIMING_POINTS_CODE;
-                            continue;
-                        case Constants.COLOURS:
-                            structureCode = Constants.COLOURS_CODE;
-                            continue;
-                        case Constants.HIT_OBJECTS:
-                            structureCode = Constants.HIT_OBJECTS_CODE;
-                            continue;
-                        default:
-                            break;
-                    }
-                    switch (structureCode)
-                    {
-                        case Constants.VERSION_CODE:
-                            version = line;
-                            break;
-                        case Constants.GENERAL_CODE:
-                            generalList.Add(line);
-                            break;
-                        case Constants.EDITOR_CODE:
-                            editorList.Add(line);
-                            break;
-                        case Constants.METADATA_CODE:
-                            metadataList.Add(line);
-                            break;
-                        case Constants.DIFFICULTY_CODE:
-                            difficultyList.Add(line);
-                            break;
-                        case Constants.EVENTS_CODE:
-                            eventsList.Add(line);
-                            break;
-                        case Constants.TIMING_POINTS_CODE:
-                            timingPointList.Add(new TimingPoint(line));
-                            break;
-                        case Constants.COLOURS_CODE:
-                            coloursList.Add(line);
-                            break;
-                        case Constants.HIT_OBJECTS_CODE:
-                            hitObjectList.Add(new HitObject(line));
-                            break;
-                        default:
-                            break;
-                    }
                 }
-                return true;
+                switch (line)
+                {
+                    case Constants.GENERAL:
+                        structureCode = Constants.GENERAL_CODE;
+                        continue;
+                    case Constants.EDITOR:
+                        structureCode = Constants.EDITOR_CODE;
+                        continue;
+                    case Constants.METADATA:
+                        structureCode = Constants.METADATA_CODE;
+                        continue;
+                    case Constants.DIFFICULTY:
+                        structureCode = Constants.DIFFICULTY_CODE;
+                        continue;
+                    case Constants.EVENTS:
+                        structureCode = Constants.EVENTS_CODE;
+                        continue;
+                    case Constants.TIMING_POINTS:
+                        structureCode = Constants.TIMING_POINTS_CODE;
+                        continue;
+                    case Constants.COLOURS:
+                        structureCode = Constants.COLOURS_CODE;
+                        continue;
+                    case Constants.HIT_OBJECTS:
+                        structureCode = Constants.HIT_OBJECTS_CODE;
+                        continue;
+                    default:
+                        break;
+                }
+                switch (structureCode)
+                {
+                    case Constants.VERSION_CODE:
+                        version = line;
+                        break;
+                    case Constants.GENERAL_CODE:
+                        generalList.Add(line);
+                        break;
+                    case Constants.EDITOR_CODE:
+                        editorList.Add(line);
+                        break;
+                    case Constants.METADATA_CODE:
+                        metadataList.Add(line);
+                        break;
+                    case Constants.DIFFICULTY_CODE:
+                        difficultyList.Add(line);
+                        break;
+                    case Constants.EVENTS_CODE:
+                        eventsList.Add(line);
+                        break;
+                    case Constants.TIMING_POINTS_CODE:
+                        timingPointList.Add(new TimingPoint(line));
+                        break;
+                    case Constants.COLOURS_CODE:
+                        coloursList.Add(line);
+                        break;
+                    case Constants.HIT_OBJECTS_CODE:
+                        hitObjectList.Add(new HitObject(line));
+                        break;
+                    default:
+                        break;
+                }
             }
-            catch (Exception ex)
-            {
-                Common.WriteErrorMessage("LOG-ERROR-EXCEPTION");
-                Common.WriteErrorMessage(ex.Message);
-                Common.WriteErrorMessage(ex.StackTrace);
-                return false;
-            }
+            return true;
         }
+        catch (Exception ex)
+        {
+            Common.WriteErrorMessage("LOG-ERROR-EXCEPTION");
+            Common.WriteErrorMessage(ex.Message);
+            Common.WriteErrorMessage(ex.StackTrace);
+            return false;
+        }
+    }
 
         /// <summary>
         /// 赤線と小節線を取得する
@@ -396,9 +396,15 @@ namespace osuTaikoSvTool.Utils.Helper
                 return false;
             }
         }
-        internal static bool CreateOsuFile(Beatmap beatmap, string path)
+        /// <summary>
+        /// osuファイルを作成する
+        /// </summary>
+        /// <param name="beatmap">譜面情報</param>
+        /// <param name="path">ファイル名</param>
+        /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
+        internal static bool ExportToOsuFile(Beatmap beatmap)
         {
-            string workPath = Directory.GetCurrentDirectory() + Constants.WORK_DIRECTORY + "\\" + Path.GetFileName(path);
+            string workPath = Directory.GetCurrentDirectory() + Constants.WORK_DIRECTORY + "\\" + Path.GetFileName(beatmap.path);
             StreamWriter file = new StreamWriter(workPath, true, Encoding.GetEncoding("utf-8"));
             try
             {
@@ -451,7 +457,7 @@ namespace osuTaikoSvTool.Utils.Helper
             }
             catch (Exception ex)
             {
-                Common.WriteErrorMessage("LOG-CREATE-FAIL");
+                Common.WriteErrorMessage("LOG-EXPORT-FAIL");
                 Common.WriteErrorMessage(ex.Message + "\n" + ex.StackTrace);
                 return false;
             }
@@ -461,6 +467,11 @@ namespace osuTaikoSvTool.Utils.Helper
             }
             return true;
         }
+        /// <summary>
+        /// osuファイルのヒットオブジェクトの行を作成する
+        /// </summary>
+        /// <param name="hitObject">ヒットオブジェクトデータ</param>
+        /// <returns>ヒットオブジェクトの行</returns>
         private static string CreateHitObjectLine(HitObject hitObject)
         {
             StringBuilder sb = new StringBuilder();
