@@ -108,7 +108,7 @@ namespace osuTaikoSvTool.Models
             noteType = Constants.NoteType.BARLINE;
             positionX = 0;   // 未使用
             positionY = 0;   // 未使用
-            hitSound = "-1";  // 未使用
+            hitSound = "0";  // 未使用
             type = "0";      // 未使用
             isNewCombo = false;
             isBarline = true;

@@ -119,14 +119,5 @@ namespace osuTaikoSvTool.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
-        /// <summary>
-        ///   aaaa に類似しているローカライズされた文字列を検索します。
-        /// </summary>
-        internal static string String1 {
-            get {
-                return ResourceManager.GetString("String1", resourceCulture);
-            }
-        }
     }
 }

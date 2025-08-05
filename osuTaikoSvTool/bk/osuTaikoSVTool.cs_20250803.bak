@@ -20,7 +20,7 @@ namespace osuTaikoSvTool
         const string WORK_DIRECTORY = "\\Work";
         const string INFO_MESSAGE_DIRECTORY = "\\Log\\Info";
         const string ERROR_MESSAGE_DIRECTORY = "\\Log\\Error";
-        const string BEATMAP_EXTENSION = ".osu";
+        const string OSU_EXTENSION = ".osu";
         const string LOG_EXTENSION = ".log";
         string infoMessagePath = "";
         string errorMessagePath = "";
@@ -632,7 +632,7 @@ namespace osuTaikoSvTool
                     // バックアップフォルダの作成
                     Directory.CreateDirectory(Directory.GetCurrentDirectory() + BACKUP_DIRECTORY + "\\" + mapTitleDirectory);
                 }
-                var currentPath = Directory.GetCurrentDirectory() + BACKUP_DIRECTORY + "\\" + mapTitleDirectory + "\\" + String.Format("{0:yyyy_MM_dd_HH_mm_ss_fff}", currentDateTime) + BEATMAP_EXTENSION;
+                var currentPath = Directory.GetCurrentDirectory() + BACKUP_DIRECTORY + "\\" + mapTitleDirectory + "\\" + String.Format("{0:yyyy_MM_dd_HH_mm_ss_fff}", currentDateTime) + OSU_EXTENSION;
                 // バックアップフォルダに現在のosuファイルをコピー
                 File.Copy(path, currentPath);
 
@@ -912,7 +912,7 @@ namespace osuTaikoSvTool
                     // バックアップフォルダの作成
                     Directory.CreateDirectory(Directory.GetCurrentDirectory() + BACKUP_DIRECTORY + "\\" + mapTitleDirectory);
                 }
-                var currentPath = Directory.GetCurrentDirectory() + BACKUP_DIRECTORY + "\\" + mapTitleDirectory + "\\" + String.Format("{0:yyyy_MM_dd_HH_mm_ss_fff}", currentDateTime) + BEATMAP_EXTENSION;
+                var currentPath = Directory.GetCurrentDirectory() + BACKUP_DIRECTORY + "\\" + mapTitleDirectory + "\\" + String.Format("{0:yyyy_MM_dd_HH_mm_ss_fff}", currentDateTime) + OSU_EXTENSION;
                 // バックアップフォルダに現在のosuファイルをコピー
                 File.Copy(path, currentPath);
                 // 余分な行の消去する
@@ -1256,7 +1256,7 @@ namespace osuTaikoSvTool
 
                     Directory.CreateDirectory(Directory.GetCurrentDirectory() + BACKUP_DIRECTORY + "\\" + mapTitleDirectory);
                 }
-                var currentPath = Directory.GetCurrentDirectory() + BACKUP_DIRECTORY + "\\" + mapTitleDirectory + "\\" + String.Format("{0:yyyy_MM_dd_HH_mm_ss_fff}", currentDateTime) + BEATMAP_EXTENSION;
+                var currentPath = Directory.GetCurrentDirectory() + BACKUP_DIRECTORY + "\\" + mapTitleDirectory + "\\" + String.Format("{0:yyyy_MM_dd_HH_mm_ss_fff}", currentDateTime) + OSU_EXTENSION;
                 File.Copy(path, currentPath);
                 timingPointsList = timingPointsList.OrderBy(t => t.Time).ThenByDescending(i => i.Uninherited).ToList();
                 // 後ろから赤線と緑線を選り分ける
@@ -1459,7 +1459,7 @@ namespace osuTaikoSvTool
                 {
                     Directory.CreateDirectory(Directory.GetCurrentDirectory() + BACKUP_DIRECTORY + "\\" + mapTitleDirectory);
                 }
-                var currentPath = Directory.GetCurrentDirectory() + BACKUP_DIRECTORY + "\\" + mapTitleDirectory + "\\" + String.Format("{0:yyyy_MM_dd_HH_mm_ss_fff}", currentDateTime) + BEATMAP_EXTENSION;
+                var currentPath = Directory.GetCurrentDirectory() + BACKUP_DIRECTORY + "\\" + mapTitleDirectory + "\\" + String.Format("{0:yyyy_MM_dd_HH_mm_ss_fff}", currentDateTime) + OSU_EXTENSION;
                 File.Copy(path, currentPath);
                 // 指定範囲内の緑線の削除
                 for (global::System.Int32 i = (timingPointsList.Count) - (1); i >= 0; i--)

@@ -22,10 +22,15 @@
         internal const string ERROR_MESSAGE_DIRECTORY = "\\Log\\Error";
         // 履歴ディレクトリ
         internal const string HISTORY_DIRECTORY = "\\History";
-        // Beatmapファイル拡張子
-        internal const string BEATMAP_EXTENSION = ".osu";
+        // osuファイル拡張子
+        internal const string OSU_EXTENSION = ".osu";
         // ログファイル拡張子
         internal const string LOG_EXTENSION = ".log";
+        // コンフィグファイル名
+        internal const string CONFIG_FILE_NAME = "osuTaikoSvTool.cfg";
+        #region コンフィグファイルのセクション
+        internal const string SONGS_DIRECTORY = "[SongsDirectory]";
+        #endregion
 
         #region osuファイルのセクション
         internal const string GENERAL = "[General]";
