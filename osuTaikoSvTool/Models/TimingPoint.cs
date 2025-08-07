@@ -1,4 +1,6 @@
-﻿namespace osuTaikoSvTool.Models
+﻿using System.Diagnostics;
+
+namespace osuTaikoSvTool.Models
 {
     class TimingPoint
     {
@@ -22,6 +24,29 @@
         public bool isRedLine { set; get; }
         // エフェクト(kiai有無,小節線有無 等)
         public int effect { set; get; }
+        internal TimingPoint(int time,
+                             decimal bpm,
+                             decimal sv,
+                             decimal barLength,
+                             int meter,
+                             int sampleSet,
+                             int sampleIndex,
+                             int volume,
+                             bool isRedLine,
+                             int effect)
+        {
+            this.time = time;
+            this.bpm = bpm;
+            this.sv = sv;
+            this.barLength = barLength;
+            this.meter = meter;
+            this.sampleSet = sampleSet;
+            this.sampleIndex = sampleIndex;
+            this.volume = volume;
+            this.isRedLine = isRedLine;
+            this.effect = effect;
+        }
+
         internal TimingPoint(string line)
         {
             string[] buff = line.Split(",");

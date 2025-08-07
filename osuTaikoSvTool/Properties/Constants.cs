@@ -15,23 +15,38 @@
         // 作業ディレクトリ
         internal const string WORK_DIRECTORY = "\\Work";
         // Infoログディレクトリ
-        internal const string INFO_MESSAGE_DIRECTORY = "\\Log\\Info";
+        internal const string INFO_LOG_DIRECTORY = "\\Log\\Info";
         // Warningログディレクトリ
-        internal const string WARNING_MESSAGE_DIRECTORY = "\\Log\\Warning";
+        internal const string WARNING_LOG_DIRECTORY = "\\Log\\Warning";
         // Errorログディレクトリ
-        internal const string ERROR_MESSAGE_DIRECTORY = "\\Log\\Error";
+        internal const string ERROR_LOG_DIRECTORY = "\\Log\\Error";
         // 履歴ディレクトリ
         internal const string HISTORY_DIRECTORY = "\\History";
         // osuファイル拡張子
         internal const string OSU_EXTENSION = ".osu";
         // ログファイル拡張子
         internal const string LOG_EXTENSION = ".log";
+        // xmlファイル拡張子
+        internal const string XML_EXTENSION = ".xml";
         // コンフィグファイル名
-        internal const string CONFIG_FILE_NAME = "osuTaikoSvTool.cfg";
+        internal const string CONFIG_FILE_NAME = "config.cfg";
         #region コンフィグファイルのセクション
         internal const string SONGS_DIRECTORY = "[SongsDirectory]";
         #endregion
-
+        #region 計算コード
+        internal const int CALCULATION_ARITHMETIC = 1; // 等差
+        internal const int CALCULATION_GEOMETRIC = 2; // 等比
+        #endregion
+        #region 実行コード
+        internal const int EXCECUTE_ADD = 0;
+        internal const int EXCECUTE_MODIFY = 1;
+        internal const int EXCECUTE_REMOVE = 2;
+        #endregion
+        #region ログレベル
+        internal const string LOG_LEVEL_INFO = "INFO";
+        internal const string LOG_LEVEL_WARNING = "WARNING";
+        internal const string LOG_LEVEL_ERROR = "ERROR";
+        #endregion
         #region osuファイルのセクション
         internal const string GENERAL = "[General]";
         internal const string EDITOR = "[Editor]";

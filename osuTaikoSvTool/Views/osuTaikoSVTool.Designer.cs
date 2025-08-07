@@ -84,6 +84,9 @@ namespace osuTaikoSvTool
             rdoOnlyBarline = new RadioButton();
             rdoOnlySpecificHitObject = new RadioButton();
             pnlSpecificGroup = new Panel();
+            btnViewHistory = new Button();
+            lblSpecificGridLine2 = new Label();
+            picSpecificNormalSpinner = new PictureBox();
             pnlBeatmapInfoGroup.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)picDisplayBg).BeginInit();
             pnlCalcurationTypeGroup.SuspendLayout();
@@ -94,6 +97,7 @@ namespace osuTaikoSvTool
             ((System.ComponentModel.ISupportInitialize)picSpecificNormalSlider).BeginInit();
             ((System.ComponentModel.ISupportInitialize)picSpecificFinisherSlider).BeginInit();
             pnlSpecificGroup.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)picSpecificNormalSpinner).BeginInit();
             SuspendLayout();
             // 
             // btnOpenFile
@@ -306,7 +310,7 @@ namespace osuTaikoSvTool
             // 
             chkEnableIncludeBarline.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold);
             chkEnableIncludeBarline.ForeColor = Color.White;
-            chkEnableIncludeBarline.Location = new Point(84, 356);
+            chkEnableIncludeBarline.Location = new Point(70, 356);
             chkEnableIncludeBarline.Name = "chkEnableIncludeBarline";
             chkEnableIncludeBarline.Size = new Size(136, 37);
             chkEnableIncludeBarline.TabIndex = 14;
@@ -342,7 +346,7 @@ namespace osuTaikoSvTool
             chkEnableOffset.AutoSize = true;
             chkEnableOffset.Checked = true;
             chkEnableOffset.CheckState = CheckState.Checked;
-            chkEnableOffset.Location = new Point(83, 402);
+            chkEnableOffset.Location = new Point(69, 402);
             chkEnableOffset.Name = "chkEnableOffset";
             chkEnableOffset.Size = new Size(15, 14);
             chkEnableOffset.TabIndex = 15;
@@ -353,7 +357,7 @@ namespace osuTaikoSvTool
             // 
             txtOffset.BackColor = SystemColors.Window;
             txtOffset.BorderStyle = BorderStyle.FixedSingle;
-            txtOffset.Location = new Point(161, 397);
+            txtOffset.Location = new Point(146, 397);
             txtOffset.Name = "txtOffset";
             txtOffset.Size = new Size(40, 23);
             txtOffset.TabIndex = 16;
@@ -363,7 +367,7 @@ namespace osuTaikoSvTool
             lblMiliSecond.AutoSize = true;
             lblMiliSecond.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold);
             lblMiliSecond.ForeColor = Color.White;
-            lblMiliSecond.Location = new Point(206, 402);
+            lblMiliSecond.Location = new Point(191, 402);
             lblMiliSecond.Name = "lblMiliSecond";
             lblMiliSecond.Size = new Size(23, 15);
             lblMiliSecond.TabIndex = 38;
@@ -374,7 +378,7 @@ namespace osuTaikoSvTool
             lblOffset.AutoSize = true;
             lblOffset.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold);
             lblOffset.ForeColor = Color.White;
-            lblOffset.Location = new Point(103, 401);
+            lblOffset.Location = new Point(89, 401);
             lblOffset.Name = "lblOffset";
             lblOffset.Size = new Size(50, 15);
             lblOffset.TabIndex = 37;
@@ -444,7 +448,7 @@ namespace osuTaikoSvTool
             lblKiai.AutoSize = true;
             lblKiai.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold);
             lblKiai.ForeColor = Color.White;
-            lblKiai.Location = new Point(268, 366);
+            lblKiai.Location = new Point(89, 473);
             lblKiai.Name = "lblKiai";
             lblKiai.Size = new Size(25, 15);
             lblKiai.TabIndex = 36;
@@ -453,7 +457,7 @@ namespace osuTaikoSvTool
             // chkEnableKiai
             // 
             chkEnableKiai.AutoSize = true;
-            chkEnableKiai.Location = new Point(248, 367);
+            chkEnableKiai.Location = new Point(69, 474);
             chkEnableKiai.Name = "chkEnableKiai";
             chkEnableKiai.Size = new Size(15, 14);
             chkEnableKiai.TabIndex = 19;
@@ -465,7 +469,7 @@ namespace osuTaikoSvTool
             lblKiaiStart.AutoSize = true;
             lblKiaiStart.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold);
             lblKiaiStart.ForeColor = Color.White;
-            lblKiaiStart.Location = new Point(332, 366);
+            lblKiaiStart.Location = new Point(153, 473);
             lblKiaiStart.Name = "lblKiaiStart";
             lblKiaiStart.Size = new Size(64, 15);
             lblKiaiStart.TabIndex = 35;
@@ -474,7 +478,7 @@ namespace osuTaikoSvTool
             // chkEnableKiaiStart
             // 
             chkEnableKiaiStart.AutoSize = true;
-            chkEnableKiaiStart.Location = new Point(312, 367);
+            chkEnableKiaiStart.Location = new Point(133, 474);
             chkEnableKiaiStart.Name = "chkEnableKiaiStart";
             chkEnableKiaiStart.Size = new Size(15, 14);
             chkEnableKiaiStart.TabIndex = 20;
@@ -485,7 +489,7 @@ namespace osuTaikoSvTool
             lblKiaiEnd.AutoSize = true;
             lblKiaiEnd.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold);
             lblKiaiEnd.ForeColor = Color.White;
-            lblKiaiEnd.Location = new Point(332, 396);
+            lblKiaiEnd.Location = new Point(153, 503);
             lblKiaiEnd.Name = "lblKiaiEnd";
             lblKiaiEnd.Size = new Size(64, 15);
             lblKiaiEnd.TabIndex = 34;
@@ -494,7 +498,7 @@ namespace osuTaikoSvTool
             // chkEnableKiaiEnd
             // 
             chkEnableKiaiEnd.AutoSize = true;
-            chkEnableKiaiEnd.Location = new Point(312, 397);
+            chkEnableKiaiEnd.Location = new Point(133, 504);
             chkEnableKiaiEnd.Name = "chkEnableKiaiEnd";
             chkEnableKiaiEnd.Size = new Size(15, 14);
             chkEnableKiaiEnd.TabIndex = 21;
@@ -532,9 +536,9 @@ namespace osuTaikoSvTool
             // 
             chkEnableBeatSnap.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 128);
             chkEnableBeatSnap.ForeColor = Color.White;
-            chkEnableBeatSnap.Location = new Point(83, 425);
+            chkEnableBeatSnap.Location = new Point(69, 427);
             chkEnableBeatSnap.Name = "chkEnableBeatSnap";
-            chkEnableBeatSnap.Size = new Size(136, 37);
+            chkEnableBeatSnap.Size = new Size(124, 37);
             chkEnableBeatSnap.TabIndex = 17;
             chkEnableBeatSnap.Text = "ビートスナップ間隔でSVを置く";
             chkEnableBeatSnap.UseVisualStyleBackColor = true;
@@ -545,7 +549,7 @@ namespace osuTaikoSvTool
             txtBeatSnap.BackColor = SystemColors.WindowFrame;
             txtBeatSnap.BorderStyle = BorderStyle.FixedSingle;
             txtBeatSnap.Enabled = false;
-            txtBeatSnap.Location = new Point(236, 433);
+            txtBeatSnap.Location = new Point(210, 435);
             txtBeatSnap.Name = "txtBeatSnap";
             txtBeatSnap.Size = new Size(40, 23);
             txtBeatSnap.TabIndex = 18;
@@ -554,7 +558,7 @@ namespace osuTaikoSvTool
             // 
             lblBeatSnap.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 128);
             lblBeatSnap.ForeColor = Color.White;
-            lblBeatSnap.Location = new Point(219, 436);
+            lblBeatSnap.Location = new Point(193, 438);
             lblBeatSnap.Name = "lblBeatSnap";
             lblBeatSnap.Size = new Size(17, 20);
             lblBeatSnap.TabIndex = 33;
@@ -564,7 +568,7 @@ namespace osuTaikoSvTool
             // 
             picSpecificNormalDong.Image = Properties.Resources.d;
             picSpecificNormalDong.InitialImage = (Image)resources.GetObject("picSpecificNormalDong.InitialImage");
-            picSpecificNormalDong.Location = new Point(12, 572);
+            picSpecificNormalDong.Location = new Point(265, 449);
             picSpecificNormalDong.Name = "picSpecificNormalDong";
             picSpecificNormalDong.Size = new Size(42, 42);
             picSpecificNormalDong.TabIndex = 25;
@@ -574,7 +578,7 @@ namespace osuTaikoSvTool
             // 
             picSpecificNormalKa.Image = Properties.Resources.k;
             picSpecificNormalKa.InitialImage = (Image)resources.GetObject("picSpecificNormalKa.InitialImage");
-            picSpecificNormalKa.Location = new Point(12, 615);
+            picSpecificNormalKa.Location = new Point(265, 492);
             picSpecificNormalKa.Name = "picSpecificNormalKa";
             picSpecificNormalKa.Size = new Size(42, 42);
             picSpecificNormalKa.TabIndex = 27;
@@ -584,7 +588,7 @@ namespace osuTaikoSvTool
             // 
             picSpecificFinisherDong.Image = Properties.Resources.d;
             picSpecificFinisherDong.InitialImage = (Image)resources.GetObject("picSpecificFinisherDong.InitialImage");
-            picSpecificFinisherDong.Location = new Point(55, 572);
+            picSpecificFinisherDong.Location = new Point(308, 449);
             picSpecificFinisherDong.Name = "picSpecificFinisherDong";
             picSpecificFinisherDong.Size = new Size(42, 42);
             picSpecificFinisherDong.TabIndex = 26;
@@ -594,7 +598,7 @@ namespace osuTaikoSvTool
             // 
             picSpecificFinisherKa.Image = Properties.Resources.k;
             picSpecificFinisherKa.InitialImage = (Image)resources.GetObject("picSpecificFinisherKa.InitialImage");
-            picSpecificFinisherKa.Location = new Point(55, 615);
+            picSpecificFinisherKa.Location = new Point(308, 492);
             picSpecificFinisherKa.Name = "picSpecificFinisherKa";
             picSpecificFinisherKa.Size = new Size(42, 42);
             picSpecificFinisherKa.TabIndex = 28;
@@ -603,7 +607,7 @@ namespace osuTaikoSvTool
             // lblSpecificGridLine
             // 
             lblSpecificGridLine.BackColor = Color.White;
-            lblSpecificGridLine.Location = new Point(11, 544);
+            lblSpecificGridLine.Location = new Point(264, 421);
             lblSpecificGridLine.Name = "lblSpecificGridLine";
             lblSpecificGridLine.Size = new Size(87, 157);
             lblSpecificGridLine.TabIndex = 44;
@@ -614,7 +618,7 @@ namespace osuTaikoSvTool
             lblSpecificFinisher.BackColor = SystemColors.WindowText;
             lblSpecificFinisher.Font = new Font("Yu Gothic UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 128);
             lblSpecificFinisher.ForeColor = SystemColors.Window;
-            lblSpecificFinisher.Location = new Point(55, 545);
+            lblSpecificFinisher.Location = new Point(308, 422);
             lblSpecificFinisher.Name = "lblSpecificFinisher";
             lblSpecificFinisher.Size = new Size(42, 26);
             lblSpecificFinisher.TabIndex = 32;
@@ -626,7 +630,7 @@ namespace osuTaikoSvTool
             lblSpecificNormal.BackColor = SystemColors.WindowText;
             lblSpecificNormal.Font = new Font("Yu Gothic UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 128);
             lblSpecificNormal.ForeColor = SystemColors.Window;
-            lblSpecificNormal.Location = new Point(12, 545);
+            lblSpecificNormal.Location = new Point(265, 422);
             lblSpecificNormal.Name = "lblSpecificNormal";
             lblSpecificNormal.Size = new Size(42, 26);
             lblSpecificNormal.TabIndex = 31;
@@ -637,7 +641,7 @@ namespace osuTaikoSvTool
             // 
             picSpecificNormalSlider.Image = Properties.Resources.slider;
             picSpecificNormalSlider.InitialImage = Properties.Resources.slider;
-            picSpecificNormalSlider.Location = new Point(12, 658);
+            picSpecificNormalSlider.Location = new Point(265, 535);
             picSpecificNormalSlider.Name = "picSpecificNormalSlider";
             picSpecificNormalSlider.Size = new Size(42, 42);
             picSpecificNormalSlider.TabIndex = 29;
@@ -647,7 +651,7 @@ namespace osuTaikoSvTool
             // 
             picSpecificFinisherSlider.Image = Properties.Resources.slider;
             picSpecificFinisherSlider.InitialImage = Properties.Resources.slider;
-            picSpecificFinisherSlider.Location = new Point(55, 658);
+            picSpecificFinisherSlider.Location = new Point(308, 535);
             picSpecificFinisherSlider.Name = "picSpecificFinisherSlider";
             picSpecificFinisherSlider.Size = new Size(42, 42);
             picSpecificFinisherSlider.TabIndex = 30;
@@ -684,7 +688,7 @@ namespace osuTaikoSvTool
             rdoOnlySpecificHitObject.AutoSize = true;
             rdoOnlySpecificHitObject.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 128);
             rdoOnlySpecificHitObject.ForeColor = Color.White;
-            rdoOnlySpecificHitObject.Location = new Point(10, 518);
+            rdoOnlySpecificHitObject.Location = new Point(263, 395);
             rdoOnlySpecificHitObject.Name = "rdoOnlySpecificHitObject";
             rdoOnlySpecificHitObject.Size = new Size(132, 19);
             rdoOnlySpecificHitObject.TabIndex = 24;
@@ -696,10 +700,42 @@ namespace osuTaikoSvTool
             // 
             pnlSpecificGroup.Controls.Add(rdoOnlyBookMark);
             pnlSpecificGroup.Controls.Add(rdoOnlyBarline);
-            pnlSpecificGroup.Location = new Point(6, 468);
+            pnlSpecificGroup.Location = new Point(259, 345);
             pnlSpecificGroup.Name = "pnlSpecificGroup";
-            pnlSpecificGroup.Size = new Size(147, 74);
+            pnlSpecificGroup.Size = new Size(136, 74);
             pnlSpecificGroup.TabIndex = 45;
+            // 
+            // btnViewHistory
+            // 
+            btnViewHistory.BackColor = Color.DarkCyan;
+            btnViewHistory.FlatStyle = FlatStyle.Flat;
+            btnViewHistory.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
+            btnViewHistory.ForeColor = Color.Cyan;
+            btnViewHistory.Location = new Point(12, 805);
+            btnViewHistory.Name = "btnViewHistory";
+            btnViewHistory.Size = new Size(189, 39);
+            btnViewHistory.TabIndex = 46;
+            btnViewHistory.Text = "履歴";
+            btnViewHistory.UseVisualStyleBackColor = false;
+            btnViewHistory.Click += btnViewHistory_Click;
+            // 
+            // lblSpecificGridLine2
+            // 
+            lblSpecificGridLine2.BackColor = Color.White;
+            lblSpecificGridLine2.Location = new Point(264, 578);
+            lblSpecificGridLine2.Name = "lblSpecificGridLine2";
+            lblSpecificGridLine2.Size = new Size(44, 43);
+            lblSpecificGridLine2.TabIndex = 47;
+            lblSpecificGridLine2.Text = " ";
+            // 
+            // picSpecificNormalSpinner
+            // 
+            picSpecificNormalSpinner.BackgroundImage = Properties.Resources.spinner;
+            picSpecificNormalSpinner.Location = new Point(265, 578);
+            picSpecificNormalSpinner.Name = "picSpecificNormalSpinner";
+            picSpecificNormalSpinner.Size = new Size(42, 42);
+            picSpecificNormalSpinner.TabIndex = 48;
+            picSpecificNormalSpinner.TabStop = false;
             // 
             // osuTaikoSVTool
             // 
@@ -707,6 +743,9 @@ namespace osuTaikoSvTool
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(0, 64, 64);
             ClientSize = new Size(408, 878);
+            Controls.Add(picSpecificNormalSpinner);
+            Controls.Add(lblSpecificGridLine2);
+            Controls.Add(btnViewHistory);
             Controls.Add(rdoOnlySpecificHitObject);
             Controls.Add(picSpecificFinisherSlider);
             Controls.Add(chkEnableIncludeBarline);
@@ -767,6 +806,7 @@ namespace osuTaikoSvTool
             ((System.ComponentModel.ISupportInitialize)picSpecificFinisherSlider).EndInit();
             pnlSpecificGroup.ResumeLayout(false);
             pnlSpecificGroup.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)picSpecificNormalSpinner).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -826,5 +866,8 @@ namespace osuTaikoSvTool
         private RadioButton rdoOnlySpecificHitObject;
         private Panel pnlSpecificGroup;
         private Panel pnlDragDropArea;
+        private Button btnViewHistory;
+        private Label lblSpecificGridLine2;
+        private PictureBox picSpecificNormalSpinner;
     }
 }

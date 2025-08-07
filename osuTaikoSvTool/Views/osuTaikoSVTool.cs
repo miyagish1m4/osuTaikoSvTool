@@ -2,6 +2,8 @@ using osuTaikoSvTool.Models;
 using osuTaikoSvTool.Properties;
 using osuTaikoSvTool.Utils;
 using osuTaikoSvTool.Utils.Helper;
+using osuTaikoSvTool.Views;
+using osuTaikoSvTool.Services;
 
 namespace osuTaikoSvTool
 {
@@ -12,10 +14,9 @@ namespace osuTaikoSvTool
         string songsDirectory = "";
         int objectCode = 0;
         int calculationCode = 0;
-        bool isOnlySpecificHitObject = false;
-        bool[] isOnlySpecificHitObjectArray = new bool[6] { false, false, false, false, false, false };
-        Beatmap beatmapInfo = null;
-        UserInputData userInputData = null;
+        bool[] isOnlySpecificHitObjectArray = new bool[7] { false, false, false, false, false, false, false };
+        Beatmap? beatmapInfo;
+        UserInputData? userInputData;
         #endregion
         public osuTaikoSVTool()
         {
@@ -23,7 +24,8 @@ namespace osuTaikoSvTool
         }
         private void osuTaikoSVTool_Load(object sender, EventArgs e)
         {
-            Common.WriteInfoMessage("LOG-START");
+            Common.InitializeDirectoryAndFiles();
+            Common.WriteInfoMessage("LOG-I-START");
             songsDirectory = Common.InitializeConfigDirectory();
             if (songsDirectory == "")
             {
@@ -32,7 +34,6 @@ namespace osuTaikoSvTool
             picDisplayBg.Controls.Add(lblFileName);
             picDisplayBg.Controls.Add(pnlDragDropArea);
             Application.ApplicationExit += new EventHandler(Application_ApplicationExit);
-            Common.InitializeLogDirectory();
             chkEnableKiaiStart.Enabled = false;
             chkEnableKiaiEnd.Enabled = false;
             this.FormBorderStyle = FormBorderStyle.FixedSingle;
@@ -42,7 +43,7 @@ namespace osuTaikoSvTool
         {
             //ApplicationExitイベントハンドラを削除
             Application.ApplicationExit -= new EventHandler(Application_ApplicationExit);
-            Common.WriteInfoMessage("LOG-END");
+            Common.WriteInfoMessage("LOG-I-END");
         }
         /// <summary>
         /// 譜面情報取得処理
@@ -50,6 +51,11 @@ namespace osuTaikoSvTool
         private void GetBeatmapInfo()
         {
             beatmapInfo = BeatmapHelper.GetBeatmapData(this.path);
+            if (beatmapInfo == null)
+            {
+                MessageBox.Show(Common.WriteDialogMessage("E_A-D-001"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
             picDisplayBg.Image = BeatmapHelper.SetBgOnForm(this.path, beatmapInfo.events);
             string fileName = Path.GetFileName(this.path);
             lblFileName.Text = fileName;
@@ -69,10 +75,10 @@ namespace osuTaikoSvTool
             {
                 if (this.path == null || this.path == string.Empty)
                 {
-                    //ここにエラーメッセージを入れる miyagi
+                    MessageBox.Show(Common.WriteDialogMessage("E_V-EM-001"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
-                this.userInputData = UserInputDataHelper.GetUserInputData(txtTimingFrom.Text,
+                this.userInputData = UserInputDataHelper.SetUserInputData(txtTimingFrom.Text,
                                                                           txtTimingTo.Text,
                                                                           chkSvEnable.Checked,
                                                                           txtSvFrom.Text,
@@ -92,29 +98,114 @@ namespace osuTaikoSvTool
                                                                           rdoOnlyBarline.Checked,
                                                                           rdoOnlyBookMark.Checked,
                                                                           rdoOnlySpecificHitObject.Checked,
-                                                                          objectCode);
+                                                                          objectCode,
+                                                                          Constants.EXCECUTE_ADD);
                 if (userInputData == null)
                 {
                     return;
                 }
-                BeatmapHelper.ExportToOsuFile(beatmapInfo);
-
-                return;
+                if (!SVCalculatorSevice.Add(userInputData, beatmapInfo))
+                {
+                    beatmapInfo = null;
+                    return;
+                }
+                if (BeatmapHelper.ExportToOsuFile(beatmapInfo))
+                {
+                    beatmapInfo = null;
+                    if (!UserInputDataHelper.SerializeUserInputData(userInputData))
+                    {
+                        userInputData = null;
+                        MessageBox.Show(Common.WriteDialogMessage("E_A-P-001"), "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        return;
+                    }
+                    userInputData = null;
+                    MessageBox.Show(Common.WriteDialogMessage("I_A-P-001"), "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+                else
+                {
+                    beatmapInfo = null;
+                    userInputData = null;
+                    MessageBox.Show(Common.WriteDialogMessage("E_A-P-001"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
             }
             catch (Exception ex)
             {
-                Common.WriteErrorMessage("LOG-ERROR-EXCEPTION");
-                Common.WriteErrorMessage(ex.Message + "\n" + ex.StackTrace);
+                beatmapInfo = null;
+                userInputData = null;
+                Common.WriteErrorMessage("LOG_E-EXCEPTION");
+                Common.WriteExceptionMessage(ex);
                 return;
             }
         }
         private void btnModify_Click(object sender, EventArgs e)
         {
-
         }
         private void btnRemove_Click(object sender, EventArgs e)
         {
-
+            try
+            {
+                if (this.path == null || this.path == string.Empty)
+                {
+                    MessageBox.Show(Common.WriteDialogMessage("E_V-EM-001"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                this.userInputData = UserInputDataHelper.SetUserInputData(txtTimingFrom.Text,
+                                                                          txtTimingTo.Text,
+                                                                          chkSvEnable.Checked,
+                                                                          txtSvFrom.Text,
+                                                                          txtSvTo.Text,
+                                                                          chkEnableVolume.Checked,
+                                                                          txtVolumeFrom.Text,
+                                                                          txtVolumeTo.Text,
+                                                                          calculationCode,
+                                                                          chkEnableIncludeBarline.Checked,
+                                                                          chkEnableOffset.Checked,
+                                                                          txtOffset.Text,
+                                                                          chkEnableBeatSnap.Checked,
+                                                                          txtBeatSnap.Text,
+                                                                          chkEnableKiai.Checked,
+                                                                          chkEnableKiaiStart.Checked,
+                                                                          chkEnableKiaiEnd.Checked,
+                                                                          rdoOnlyBarline.Checked,
+                                                                          rdoOnlyBookMark.Checked,
+                                                                          rdoOnlySpecificHitObject.Checked,
+                                                                          objectCode,
+                                                                          Constants.EXCECUTE_REMOVE);
+                if (userInputData == null)
+                {
+                    return;
+                }
+                if (SVCalculatorSevice.Remove(userInputData, ref beatmapInfo))
+                {
+                    if (BeatmapHelper.ExportToOsuFile(beatmapInfo))
+                    {
+                        if (!UserInputDataHelper.SerializeUserInputData(userInputData))
+                        {
+                            MessageBox.Show(Common.WriteDialogMessage("E_A-P-001"), "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            return;
+                        }
+                        MessageBox.Show(Common.WriteDialogMessage("I_A-P-001"), "Infomation", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        return;
+                    }
+                    else
+                    {
+                        MessageBox.Show(Common.WriteDialogMessage("E_A-P-001"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+                }
+                else
+                {
+                    throw new Exception();
+                }
+            }
+            catch (Exception ex)
+            {
+                Common.WriteErrorMessage("LOG_E-EXCEPTION");
+                Common.WriteExceptionMessage(ex);
+                return;
+            }
         }
         private void btnBackup_Click(object sender, EventArgs e)
         {
@@ -320,6 +411,21 @@ namespace osuTaikoSvTool
                 objectCode -= 32;
             }
         }
+        private void picSpecificNormalSpinner_MouseDown(object sender, MouseEventArgs e)
+        {
+            {
+                if (isOnlySpecificHitObjectArray[6] = !isOnlySpecificHitObjectArray[6])
+                {
+                    picSpecificNormalSpinner.Image = Properties.Resources.spinner_selected;
+                    objectCode += 64;
+                }
+                else
+                {
+                    picSpecificNormalSpinner.Image = Properties.Resources.spinner;
+                    objectCode -= 64;
+                }
+            }
+        }
         private void rdoArithmetic_CheckedChanged(object sender, EventArgs e)
         {
             calculationCode = 1;
@@ -339,6 +445,7 @@ namespace osuTaikoSvTool
                 picSpecificFinisherKa.MouseDown += picSpecificFinisherKa_MouseDown;
                 picSpecificNormalSlider.MouseDown += picSpecificNormalSlider_MouseDown;
                 picSpecificFinisherSlider.MouseDown += picSpecificFinisherSlider_MouseDown;
+                picSpecificNormalSpinner.MouseDown += picSpecificNormalSpinner_MouseDown;
                 // rdoOnlyBookMarkとrdoOnlyBarlineに設定されているCheckedChangedイベントを外す
                 // 事前に外さないと次の行のfalseを代入する処理でイベントが走る為
                 rdoOnlyBookMark.CheckedChanged -= rdoOnlyBookMark_CheckedChanged;
@@ -359,6 +466,7 @@ namespace osuTaikoSvTool
                 picSpecificFinisherKa.MouseDown -= picSpecificFinisherKa_MouseDown;
                 picSpecificNormalSlider.MouseDown -= picSpecificNormalSlider_MouseDown;
                 picSpecificFinisherSlider.MouseDown -= picSpecificFinisherSlider_MouseDown;
+                picSpecificNormalSpinner.MouseDown -= picSpecificNormalSpinner_MouseDown;
                 // 画像を元に戻す
                 picSpecificNormalDong.Image = Properties.Resources.d;
                 picSpecificFinisherDong.Image = Properties.Resources.d;
@@ -366,6 +474,7 @@ namespace osuTaikoSvTool
                 picSpecificFinisherKa.Image = Properties.Resources.k;
                 picSpecificNormalSlider.Image = Properties.Resources.slider;
                 picSpecificFinisherSlider.Image = Properties.Resources.slider;
+                picSpecificNormalSpinner.Image = Properties.Resources.spinner;
                 // 選択肢とコードの初期化
                 isOnlySpecificHitObjectArray = new bool[6] { false, false, false, false, false, false };
                 objectCode = 0;
@@ -379,18 +488,15 @@ namespace osuTaikoSvTool
         private void commonDragDrop(object sender, DragEventArgs e)
         {
             var files = (string[])e.Data.GetData(DataFormats.FileDrop, false);
-            if (files.Length != 0)
+            // 譜面を2個以上ドラッグ&ドロップした場合は、最初の1つだけを読み込む
+            path = files[0];
+            if (path.LastIndexOf(Constants.OSU_EXTENSION) != -1)
             {
-                // 譜面を2個以上ドラッグ&ドロップした場合は、最初の1つだけを読み込む
-                path = files[0];
-                if (path.LastIndexOf(Constants.OSU_EXTENSION) != -1)
-                {
-                    GetBeatmapInfo();
-                }
-                else
-                {
-                    MessageBox.Show(Common.WriteDialogMessage("W-001"), "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                }
+                GetBeatmapInfo();
+            }
+            else
+            {
+                MessageBox.Show(Common.WriteDialogMessage("W_A-EXT-001"), "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
         /// <summary>
@@ -425,6 +531,13 @@ namespace osuTaikoSvTool
             {
                 rdoOnlySpecificHitObject.Checked = false;
             }
+        }
+
+        private void btnViewHistory_Click(object sender, EventArgs e)
+        {
+            Form historyForm = new HistoryForm();
+            historyForm.ShowDialog();
+
         }
     }
 }

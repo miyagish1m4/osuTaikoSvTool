@@ -1,9 +1,72 @@
-﻿using osuTaikoSvTool.Models;
+﻿using System.ComponentModel.Design.Serialization;
+using Microsoft.VisualBasic;
+using osuTaikoSvTool.Models;
+using osuTaikoSvTool.Properties;
 
 namespace osuTaikoSvTool.Utils.Helper
 {
     class UserInputDataHelper
     {
+        /// <summary>
+        /// ユーザーが入力したデータをXML形式でシリアライズする関数
+        /// </summary>
+        /// <param name="userInputData">入力データ</param>
+        /// <returns></returns>
+        internal static bool SerializeUserInputData(UserInputData userInputData)
+        {
+            try
+            {
+                DateTime date = DateTime.Now;
+                var serializer = new System.Xml.Serialization.XmlSerializer(userInputData.GetType());
+                using (var sw = new StreamWriter(Directory.GetCurrentDirectory() + "\\" +
+                                                 Properties.Constants.HISTORY_DIRECTORY + "\\" +
+                                                 "\\history_" +
+                                                 userInputData.createDate.ToString("yyyyMMddhhmmssfff") +
+                                                 Properties.Constants.XML_EXTENSION,
+                                                 false,
+                                                 new System.Text.UTF8Encoding(false))) // BOMなしUTF-8
+                {
+                    serializer.Serialize(sw, userInputData);
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Common.WriteErrorMessage("LOG_E-SERIALIZE-XML");
+                Common.WriteExceptionMessage(ex);
+                return false;
+            }
+        }
+        /// <summary>
+        /// ユーザーが入力したデータをXML形式からデシリアライズする関数
+        /// </summary>
+        /// <param name="userInputData">格納先のデータ</param>
+        /// <returns></returns>
+        internal static bool DeserializeUserInputData(ref List<UserInputData> userInputData)
+        {
+            try
+            {
+                string[] files = Directory.GetFiles(Directory.GetCurrentDirectory() + "\\" +
+                                                    Properties.Constants.HISTORY_DIRECTORY, "history_*.xml");
+                DateTime date = DateTime.Now;
+                var serializer = new System.Xml.Serialization.XmlSerializer(typeof(UserInputData));
+                foreach (var file in files)
+                {
+                    using (var sw = new StreamReader(file,
+                                                     new System.Text.UTF8Encoding(false)))
+                    {
+                        userInputData.Add((UserInputData)serializer.Deserialize(sw));
+                    }
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Common.WriteErrorMessage("LOG_E-DESERIALIZE-XML");
+                Common.WriteExceptionMessage(ex);
+                return false;
+            }
+        }
         /// <summary>
         /// 入力値を元にUserInputDataを生成する関数
         /// </summary>
@@ -28,8 +91,9 @@ namespace osuTaikoSvTool.Utils.Helper
         /// <param name="isOnlyBookmark">ブックマークのみ有効化フラグ</param>
         /// <param name="isOnlyHitObject">特定のオブジェクトのみ有効化フラグ</param>
         /// <param name="OnlyHitObjectCode">特定のオブジェクトコード</param>
+        /// <param name="excecuteCode">実行コード</param>
         /// <returns>作成したUserInputData</returns>
-        internal static UserInputData GetUserInputData(string timingFrom,
+        internal static UserInputData SetUserInputData(string timingFrom,
                                                        string timingTo,
                                                        bool isSv,
                                                        string svFrom,
@@ -49,7 +113,8 @@ namespace osuTaikoSvTool.Utils.Helper
                                                        bool isOnlyBarline,
                                                        bool isOnlyBookmark,
                                                        bool isOnlyHitObject,
-                                                       int OnlyHitObjectCode)
+                                                       int OnlyHitObjectCode,
+                                                       int excecuteCode)
         {
             int retTimingFrom = -1;
             int retTimingTo = -1;
@@ -59,44 +124,50 @@ namespace osuTaikoSvTool.Utils.Helper
             int retVolumeTo = -1;
             int retOffset = Int32.MinValue;
             int retBeatSnap = -1;
-
-            UserInputData userInputData = null;
+            DateTime date = DateTime.Now;
             try
             {
                 if (!validateTiming(timingFrom,
                                     timingTo,
                                     ref retTimingFrom,
-                                    ref retTimingTo) ||
-                    !validateSv(svFrom,
-                                svTo,
-                                isSv,
-                                ref retSvFrom,
-                                ref retSvTo) ||
-                    !validateVolume(volumeFrom,
-                                    volumeTo,
-                                    isVolume,
-                                    ref retVolumeFrom,
-                                    ref retVolumeTo) ||
-                    !validateOffset(offset,
-                                    isOffset,
-                                    ref retOffset) ||
-                    !validateBeatSnap(beatSnap,
-                                      isBeatSnap,
-                                      ref retBeatSnap))
+                                    ref retTimingTo))
                 {
                     throw new Exception();
                 }
-                if (calculationCode == 0)
+                if ((excecuteCode == Properties.Constants.EXCECUTE_ADD) ||
+                    (excecuteCode == Properties.Constants.EXCECUTE_MODIFY))
                 {
-                    //計算方法が指定されていない
-                    MessageBox.Show(Common.WriteDialogMessage("E-015"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    throw new Exception();
-                }
-                if (isOnlyHitObject && (OnlyHitObjectCode == 0))
-                {
-                    //計算対象のヒットオブジェクトが指定されていない
-                    MessageBox.Show(Common.WriteDialogMessage("E-016"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    throw new Exception();
+                    if (!validateSv(svFrom,
+                                    svTo,
+                                    isSv,
+                                    ref retSvFrom,
+                                    ref retSvTo) ||
+                        !validateVolume(volumeFrom,
+                                        volumeTo,
+                                        isVolume,
+                                        ref retVolumeFrom,
+                                        ref retVolumeTo) ||
+                        !validateOffset(offset,
+                                        isOffset,
+                                        ref retOffset) ||
+                        !validateBeatSnap(beatSnap,
+                                          isBeatSnap,
+                                          ref retBeatSnap))
+                    {
+                        throw new Exception();
+                    }
+                    if (calculationCode == 0)
+                    {
+                        //計算方法が指定されていない
+                        MessageBox.Show(Common.WriteDialogMessage("E_V-EM-007"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        throw new Exception();
+                    }
+                    if (isOnlyHitObject && (OnlyHitObjectCode == 0))
+                    {
+                        //計算対象のヒットオブジェクトが指定されていない
+                        MessageBox.Show(Common.WriteDialogMessage("E_V-EM-006"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        throw new Exception();
+                    }
                 }
                 return new UserInputData(retTimingFrom,
                                          retTimingTo,
@@ -118,11 +189,14 @@ namespace osuTaikoSvTool.Utils.Helper
                                          isOnlyBarline,
                                          isOnlyBookmark,
                                          isOnlyHitObject,
-                                         OnlyHitObjectCode);
+                                         OnlyHitObjectCode,
+                                         date);
 
             }
             catch (Exception ex)
             {
+                Common.WriteErrorMessage("LOG_E-GET-INPUT");
+                Common.WriteExceptionMessage(ex);
                 return null;
             }
 
@@ -150,30 +224,29 @@ namespace osuTaikoSvTool.Utils.Helper
                         if (retTimingFrom > retTimingTo)
                         {
                             //タイミングの開始位置が終了位置より大きい
-                            MessageBox.Show(Common.WriteDialogMessage("E-007"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show(Common.WriteDialogMessage("E_V-C-002"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
                         }
                     }
                     else
                     {
                         //タイミングのフォーマットが間違えている
-                        MessageBox.Show(Common.WriteDialogMessage("E-006"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(Common.WriteDialogMessage("E_V-C-001"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return false;
                     }
                 }
                 else
                 {
                     //タイミングの入力がない
-                    MessageBox.Show(Common.WriteDialogMessage("E-005"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(Common.WriteDialogMessage("E_V-EM-002"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return false;
                 }
                 return true;
             }
             catch (Exception ex)
             {
-                Common.WriteErrorMessage("LOG-ERROR-EXCEPTION");
-                Common.WriteErrorMessage(ex.Message + "\n" + ex.StackTrace);
-                MessageBox.Show(Common.WriteDialogMessage("E-001"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Common.WriteErrorMessage("LOG_E-EXCEPTION");
+                Common.WriteExceptionMessage(ex);
                 return false;
             }
         }
@@ -209,21 +282,21 @@ namespace osuTaikoSvTool.Utils.Helper
                                 retSvFrom = -1m;
                                 retSvTo = -1m;
                                 //SVが負の値
-                                MessageBox.Show(Common.WriteDialogMessage("E-009"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                MessageBox.Show(Common.WriteDialogMessage("E_V-T-001"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                                 return false;
                             }
                         }
                         else
                         {
                             //SVのフォーマットが間違えている
-                            MessageBox.Show(Common.WriteDialogMessage("E-009"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show(Common.WriteDialogMessage("E_V-T-001"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
                         }
                     }
                     else
                     {
                         //SVの入力がない
-                        MessageBox.Show(Common.WriteDialogMessage("E-008"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(Common.WriteDialogMessage("E_V-EM-003"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return false;
                     }
                 }
@@ -236,9 +309,8 @@ namespace osuTaikoSvTool.Utils.Helper
             }
             catch (Exception ex)
             {
-                Common.WriteErrorMessage("LOG-ERROR-EXCEPTION");
-                Common.WriteErrorMessage(ex.Message + "\n" + ex.StackTrace);
-                MessageBox.Show(Common.WriteDialogMessage("E-001"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Common.WriteErrorMessage("LOG_E-EXCEPTION");
+                Common.WriteExceptionMessage(ex);
                 return false;
             }
 
@@ -275,21 +347,21 @@ namespace osuTaikoSvTool.Utils.Helper
                                 retVolumeFrom = -1;
                                 retVolumeTo = -1;
                                 //Volumeが負の値
-                                MessageBox.Show(Common.WriteDialogMessage("E-011"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                MessageBox.Show(Common.WriteDialogMessage("E_V-T-002"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                                 return false;
                             }
                         }
                         else
                         {
                             //Volumeのフォーマットが間違えている
-                            MessageBox.Show(Common.WriteDialogMessage("E-011"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show(Common.WriteDialogMessage("E_V-T-002"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
                         }
                     }
                     else
                     {
                         //Volumeの入力がない
-                        MessageBox.Show(Common.WriteDialogMessage("E-010"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(Common.WriteDialogMessage("E_V-EM-004"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return false;
                     }
                 }
@@ -302,9 +374,8 @@ namespace osuTaikoSvTool.Utils.Helper
             }
             catch (Exception ex)
             {
-                Common.WriteErrorMessage("LOG-ERROR-EXCEPTION");
-                Common.WriteErrorMessage(ex.Message + "\n" + ex.StackTrace);
-                MessageBox.Show(Common.WriteDialogMessage("E-001"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Common.WriteErrorMessage("LOG_E-EXCEPTION");
+                Common.WriteExceptionMessage(ex);
                 return false;
             }
         }
@@ -332,7 +403,7 @@ namespace osuTaikoSvTool.Utils.Helper
                         else
                         {
                             //Offsetのフォーマットが間違えている
-                            MessageBox.Show(Common.WriteDialogMessage("E-012"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show(Common.WriteDialogMessage("E_V-T-003"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
                         }
                     }
@@ -350,9 +421,8 @@ namespace osuTaikoSvTool.Utils.Helper
             }
             catch (Exception ex)
             {
-                Common.WriteErrorMessage("LOG-ERROR-EXCEPTION");
-                Common.WriteErrorMessage(ex.Message + "\n" + ex.StackTrace);
-                MessageBox.Show(Common.WriteDialogMessage("E-001"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Common.WriteErrorMessage("LOG_E-EXCEPTION");
+                Common.WriteExceptionMessage(ex);
                 return false;
             }
 
@@ -385,21 +455,21 @@ namespace osuTaikoSvTool.Utils.Helper
                             else
                             {
                                 //ビートスナップ間隔が0以下の整数
-                                MessageBox.Show(Common.WriteDialogMessage("E-014"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                MessageBox.Show(Common.WriteDialogMessage("E_V-T-004"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                                 return false;
                             }
                         }
                         else
                         {
                             //ビートスナップ間隔が整数ではない
-                            MessageBox.Show(Common.WriteDialogMessage("E-014"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show(Common.WriteDialogMessage("E_V-T-004"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
                         }
                     }
                     else
                     {
                         //ビートスナップ間隔が空欄
-                        MessageBox.Show(Common.WriteDialogMessage("E-013"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(Common.WriteDialogMessage("E_V-EM-005"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return false;
                     }
                 }
@@ -411,9 +481,8 @@ namespace osuTaikoSvTool.Utils.Helper
             }
             catch (Exception ex)
             {
-                Common.WriteErrorMessage("LOG-ERROR-EXCEPTION");
-                Common.WriteErrorMessage(ex.Message + "\n" + ex.StackTrace);
-                MessageBox.Show(Common.WriteDialogMessage("E-001"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Common.WriteErrorMessage("LOG_E-EXCEPTION");
+                Common.WriteExceptionMessage(ex);
                 return false;
             }
         }

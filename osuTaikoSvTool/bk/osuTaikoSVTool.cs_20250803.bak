@@ -18,12 +18,12 @@ namespace osuTaikoSvTool
         const string CONST_STRINGS = ",4,1,0,";
         const string BACKUP_DIRECTORY = "\\BackUp";
         const string WORK_DIRECTORY = "\\Work";
-        const string INFO_MESSAGE_DIRECTORY = "\\Log\\Info";
-        const string ERROR_MESSAGE_DIRECTORY = "\\Log\\Error";
+        const string INFO_LOG_DIRECTORY = "\\Log\\Info";
+        const string ERROR_LOG_DIRECTORY = "\\Log\\Error";
         const string OSU_EXTENSION = ".osu";
         const string LOG_EXTENSION = ".log";
-        string infoMessagePath = "";
-        string errorMessagePath = "";
+        string infoLogPath = "";
+        string errorLogPath = "";
         string path = "";
         bool isDSelected = false;
         bool isKSelected = false;
@@ -61,7 +61,7 @@ namespace osuTaikoSvTool
             Application.ApplicationExit += new EventHandler(Application_ApplicationExit);
             currentDateTime = DateTime.Now;
             // 新規ファイルの絶対パス
-            infoMessagePath = Directory.GetCurrentDirectory() + INFO_MESSAGE_DIRECTORY + "\\Info_" + String.Format("{0:yyyyMMdd}", currentDateTime) + LOG_EXTENSION;
+            infoLogPath = Directory.GetCurrentDirectory() + INFO_LOG_DIRECTORY + "\\Info_" + String.Format("{0:yyyyMMdd}", currentDateTime) + LOG_EXTENSION;
             if (!Directory.Exists(Directory.GetCurrentDirectory() + BACKUP_DIRECTORY))
             {
                 Directory.CreateDirectory(Directory.GetCurrentDirectory() + BACKUP_DIRECTORY);
@@ -70,24 +70,24 @@ namespace osuTaikoSvTool
             {
                 Directory.CreateDirectory(Directory.GetCurrentDirectory() + WORK_DIRECTORY);
             }
-            if (!Directory.Exists(Directory.GetCurrentDirectory() + INFO_MESSAGE_DIRECTORY))
+            if (!Directory.Exists(Directory.GetCurrentDirectory() + INFO_LOG_DIRECTORY))
             {
-                Directory.CreateDirectory(Directory.GetCurrentDirectory() + INFO_MESSAGE_DIRECTORY);
+                Directory.CreateDirectory(Directory.GetCurrentDirectory() + INFO_LOG_DIRECTORY);
             }
-            if (!File.Exists(infoMessagePath))
+            if (!File.Exists(infoLogPath))
             {
                 // 新規ファイル作成
-                File.Create(infoMessagePath).Close();
+                File.Create(infoLogPath).Close();
             }
-            errorMessagePath = Directory.GetCurrentDirectory() + ERROR_MESSAGE_DIRECTORY + "\\error_" + String.Format("{0:yyyyMMdd}", currentDateTime) + LOG_EXTENSION;
-            if (!Directory.Exists(Directory.GetCurrentDirectory() + ERROR_MESSAGE_DIRECTORY))
+            errorLogPath = Directory.GetCurrentDirectory() + ERROR_LOG_DIRECTORY + "\\error_" + String.Format("{0:yyyyMMdd}", currentDateTime) + LOG_EXTENSION;
+            if (!Directory.Exists(Directory.GetCurrentDirectory() + ERROR_LOG_DIRECTORY))
             {
-                Directory.CreateDirectory(Directory.GetCurrentDirectory() + ERROR_MESSAGE_DIRECTORY);
+                Directory.CreateDirectory(Directory.GetCurrentDirectory() + ERROR_LOG_DIRECTORY);
             }
-            if (!File.Exists(errorMessagePath))
+            if (!File.Exists(errorLogPath))
             {
                 // 新規ファイル作成
-                File.Create(errorMessagePath).Close();
+                File.Create(errorLogPath).Close();
             }
             WriteInfoMessage("アプリケーションを開始します。");
             isStartKialButton.Enabled = false;
@@ -116,16 +116,16 @@ namespace osuTaikoSvTool
         private void WriteInfoMessage(string message)
         {
             currentDateTime = DateTime.Now;
-            if (!Directory.Exists(Directory.GetCurrentDirectory() + INFO_MESSAGE_DIRECTORY))
+            if (!Directory.Exists(Directory.GetCurrentDirectory() + INFO_LOG_DIRECTORY))
             {
-                Directory.CreateDirectory(Directory.GetCurrentDirectory() + INFO_MESSAGE_DIRECTORY);
+                Directory.CreateDirectory(Directory.GetCurrentDirectory() + INFO_LOG_DIRECTORY);
             }
-            if (!File.Exists(infoMessagePath))
+            if (!File.Exists(infoLogPath))
             {
                 // 新規ファイル作成
-                File.Create(infoMessagePath).Close();
+                File.Create(infoLogPath).Close();
             }
-            using (StreamWriter writer = new StreamWriter(infoMessagePath, true, Encoding.GetEncoding("utf-8")))
+            using (StreamWriter writer = new StreamWriter(infoLogPath, true, Encoding.GetEncoding("utf-8")))
             {
                 writer.WriteLine(currentDateTime.ToString("[HH:mm:ss.fff]") + " " + message);
             }
@@ -138,16 +138,16 @@ namespace osuTaikoSvTool
         private void WriteErrorMessage(string message)
         {
             currentDateTime = DateTime.Now;
-            if (!Directory.Exists(Directory.GetCurrentDirectory() + ERROR_MESSAGE_DIRECTORY))
+            if (!Directory.Exists(Directory.GetCurrentDirectory() + ERROR_LOG_DIRECTORY))
             {
-                Directory.CreateDirectory(Directory.GetCurrentDirectory() + ERROR_MESSAGE_DIRECTORY);
+                Directory.CreateDirectory(Directory.GetCurrentDirectory() + ERROR_LOG_DIRECTORY);
             }
-            if (!File.Exists(errorMessagePath))
+            if (!File.Exists(errorLogPath))
             {
                 // 新規ファイル作成
-                File.Create(errorMessagePath).Close();
+                File.Create(errorLogPath).Close();
             }
-            using (StreamWriter writer = new StreamWriter(errorMessagePath, true, Encoding.GetEncoding("utf-8")))
+            using (StreamWriter writer = new StreamWriter(errorLogPath, true, Encoding.GetEncoding("utf-8")))
             {
                 writer.WriteLine(currentDateTime.ToString("[HH:mm:ss.fff]") + " " + message);
             }

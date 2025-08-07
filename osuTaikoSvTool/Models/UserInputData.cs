@@ -1,8 +1,10 @@
-﻿using static osuTaikoSvTool.Models.UserInputData;
+﻿using Microsoft.VisualBasic.Logging;
+using osuTaikoSvTool.Utils;
 
 namespace osuTaikoSvTool.Models
 {
-    class UserInputData
+    [Serializable]
+    public class UserInputData
 
     {
         #region 必須入力値
@@ -48,9 +50,12 @@ namespace osuTaikoSvTool.Models
         public bool isOnlyBookmark { set; get; }
         // HitObjectsのみ有効化設定
         public bool isOnlyHitObjects { set; get; }
-        // 
-        public HitObjectType hitObjectType = new(false, false, false, false, false, false);
-        internal struct HitObjectType
+        //作成日時
+         public DateTime createDate { set; get; }
+        // 更新日時
+        // public DateTime updateDate { set; get; }
+        public HitObjectType hitObjectType = new HitObjectType();
+        public struct HitObjectType
         {
             public bool isDong { set; get; }
             public bool isFinisherDong { set; get; }
@@ -58,23 +63,12 @@ namespace osuTaikoSvTool.Models
             public bool isFinisherKa { set; get; }
             public bool isSlider { set; get; }
             public bool isFinisherSlider { set; get; }
-            internal HitObjectType(bool isDong,
-                                   bool isFinisherDong,
-                                   bool isKa,
-                                   bool isFinisherKa,
-                                   bool isSlider,
-                                   bool isSliderFinisher)
-            {
-                this.isDong = isDong;
-                this.isFinisherDong = isFinisherDong;
-                this.isKa = isKa;
-                this.isFinisherKa = isFinisherKa;
-                this.isSlider = isSlider;
-                this.isFinisherSlider = isSliderFinisher;
-            }
+            public bool isNormalSpinner { set; get; }
         }
-
         #endregion
+        public UserInputData()
+        {
+        }
 
         internal UserInputData(int timingFrom,
                                int timingTo,
@@ -96,7 +90,8 @@ namespace osuTaikoSvTool.Models
                                bool isOnlyBarline,
                                bool isOnlyBookmark,
                                bool isOnlyHitObject,
-                               int OnlyHitObjectCode)
+                               int OnlyHitObjectCode,
+                               DateTime date)
         {
             this.timingFrom = timingFrom;
             this.timingTo = timingTo;
@@ -119,13 +114,14 @@ namespace osuTaikoSvTool.Models
             this.isOnlyBookmark = isOnlyBookmark;
             this.isOnlyHitObjects = isOnlyHitObjects;
             ConvertHitObjectType(OnlyHitObjectCode, ref hitObjectType);
+            this.createDate = date;
         }
 
         private void ConvertHitObjectType(int OnlyHitObject, ref HitObjectType hitObjectType)
         {
             try
             {
-                if (OnlyHitObject >= 64)
+                if (OnlyHitObject >= 128)
                 {
                     throw new Exception();
                 }
@@ -135,31 +131,64 @@ namespace osuTaikoSvTool.Models
                     {
                         hitObjectType.isDong = true;
                     }
+                    else
+                    {
+                        hitObjectType.isDong = false;
+                    }
                     if ((OnlyHitObject & 0b00000010) != 0)
                     {
                         hitObjectType.isFinisherDong = true;
+                    }
+                    else
+                    {
+                        hitObjectType.isFinisherDong = false;
                     }
                     if ((OnlyHitObject & 0b00000100) != 0)
                     {
                         hitObjectType.isKa = true;
                     }
+                    else
+                    {
+                        hitObjectType.isKa = false;
+                    }
                     if ((OnlyHitObject & 0b00001000) != 0)
                     {
                         hitObjectType.isFinisherKa = true;
+                    }
+                    else
+                    {
+                        hitObjectType.isFinisherKa = false;
                     }
                     if ((OnlyHitObject & 0b00010000) != 0)
                     {
                         hitObjectType.isSlider = true;
                     }
+                    else
+                    {
+                        hitObjectType.isSlider = false;
+                    }
                     if ((OnlyHitObject & 0b00100000) != 0)
                     {
                         hitObjectType.isFinisherSlider = true;
+                    }
+                    else
+                    {
+                        hitObjectType.isFinisherSlider = false;
+                    }
+                    if ((OnlyHitObject & 0b01000000) != 0)
+                    {
+                        hitObjectType.isNormalSpinner = true;
+                    }
+                    else
+                    {
+                        hitObjectType.isNormalSpinner = false;
                     }
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"エラー: {ex.Message}");
+                Common.WriteErrorMessage("LOG_E-GET-INPUT");
+                Common.WriteExceptionMessage(ex);
             }
         }
     }
