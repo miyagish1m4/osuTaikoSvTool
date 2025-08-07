@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.Design.Serialization;
+using System.ComponentModel.Design.Serialization;
 using Microsoft.VisualBasic;
 using osuTaikoSvTool.Models;
 using osuTaikoSvTool.Properties;

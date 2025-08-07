@@ -9,7 +9,7 @@ namespace osuTaikoSvTool
 {
     public partial class osuTaikoSVTool : Form
     {
-        #region ƒNƒ‰ƒX•Ï”
+        #region ã‚¯ãƒ©ã‚¹å¤‰æ•°
         string path = "";
         string songsDirectory = "";
         int objectCode = 0;
@@ -41,12 +41,12 @@ namespace osuTaikoSvTool
         }
         private void Application_ApplicationExit(object sender, EventArgs e)
         {
-            //ApplicationExitƒCƒxƒ“ƒgƒnƒ“ƒhƒ‰‚ğíœ
+            //ApplicationExitã‚¤ãƒ™ãƒ³ãƒˆãƒãƒ³ãƒ‰ãƒ©ã‚’å‰Šé™¤
             Application.ApplicationExit -= new EventHandler(Application_ApplicationExit);
             Common.WriteInfoMessage("LOG-I-END");
         }
         /// <summary>
-        /// •ˆ–Êî•ñæ“¾ˆ—
+        /// è­œé¢æƒ…å ±å–å¾—å‡¦ç†
         /// </summary>
         private void GetBeatmapInfo()
         {
@@ -438,7 +438,7 @@ namespace osuTaikoSvTool
         {
             if (rdoOnlySpecificHitObject.Checked)
             {
-                // pictureBox‚Éİ’è‚³‚ê‚Ä‚¢‚éMouseDownƒCƒxƒ“ƒg‚ğİ’è‚·‚é
+                // pictureBoxã«è¨­å®šã•ã‚Œã¦ã„ã‚‹MouseDownã‚¤ãƒ™ãƒ³ãƒˆã‚’è¨­å®šã™ã‚‹
                 picSpecificNormalDong.MouseDown += picSpecificNormalDong_MouseDown;
                 picSpecificFinisherDong.MouseDown += picSpecificFinisherDong_MouseDown;
                 picSpecificNormalKa.MouseDown += picSpecificNormalKa_MouseDown;
@@ -446,20 +446,20 @@ namespace osuTaikoSvTool
                 picSpecificNormalSlider.MouseDown += picSpecificNormalSlider_MouseDown;
                 picSpecificFinisherSlider.MouseDown += picSpecificFinisherSlider_MouseDown;
                 picSpecificNormalSpinner.MouseDown += picSpecificNormalSpinner_MouseDown;
-                // rdoOnlyBookMark‚ÆrdoOnlyBarline‚Éİ’è‚³‚ê‚Ä‚¢‚éCheckedChangedƒCƒxƒ“ƒg‚ğŠO‚·
-                // –‘O‚ÉŠO‚³‚È‚¢‚ÆŸ‚Ìs‚Ìfalse‚ğ‘ã“ü‚·‚éˆ—‚ÅƒCƒxƒ“ƒg‚ª‘–‚éˆ×
+                // rdoOnlyBookMarkã¨rdoOnlyBarlineã«è¨­å®šã•ã‚Œã¦ã„ã‚‹CheckedChangedã‚¤ãƒ™ãƒ³ãƒˆã‚’å¤–ã™
+                // äº‹å‰ã«å¤–ã•ãªã„ã¨æ¬¡ã®è¡Œã®falseã‚’ä»£å…¥ã™ã‚‹å‡¦ç†ã§ã‚¤ãƒ™ãƒ³ãƒˆãŒèµ°ã‚‹ç‚º
                 rdoOnlyBookMark.CheckedChanged -= rdoOnlyBookMark_CheckedChanged;
                 rdoOnlyBarline.CheckedChanged -= rdoOnlyBarline_CheckedChanged;
                 rdoOnlyBookMark.Checked = false;
                 rdoOnlyBarline.Checked = false;
-                // CheckedChangedƒCƒxƒ“ƒg‚ğİ’è‚µ‚È‚¨‚·
+                // CheckedChangedã‚¤ãƒ™ãƒ³ãƒˆã‚’è¨­å®šã—ãªãŠã™
                 rdoOnlyBookMark.CheckedChanged += rdoOnlyBookMark_CheckedChanged;
                 rdoOnlyBarline.CheckedChanged += rdoOnlyBarline_CheckedChanged;
 
             }
             else
             {
-                // pictureBox‚Éİ’è‚³‚ê‚Ä‚¢‚éMouseDownƒCƒxƒ“ƒg‚ğŠO‚·
+                // pictureBoxã«è¨­å®šã•ã‚Œã¦ã„ã‚‹MouseDownã‚¤ãƒ™ãƒ³ãƒˆã‚’å¤–ã™
                 picSpecificNormalDong.MouseDown -= picSpecificNormalDong_MouseDown;
                 picSpecificFinisherDong.MouseDown -= picSpecificFinisherDong_MouseDown;
                 picSpecificNormalKa.MouseDown -= picSpecificNormalKa_MouseDown;
@@ -467,7 +467,7 @@ namespace osuTaikoSvTool
                 picSpecificNormalSlider.MouseDown -= picSpecificNormalSlider_MouseDown;
                 picSpecificFinisherSlider.MouseDown -= picSpecificFinisherSlider_MouseDown;
                 picSpecificNormalSpinner.MouseDown -= picSpecificNormalSpinner_MouseDown;
-                // ‰æ‘œ‚ğŒ³‚É–ß‚·
+                // ç”»åƒã‚’å…ƒã«æˆ»ã™
                 picSpecificNormalDong.Image = Properties.Resources.d;
                 picSpecificFinisherDong.Image = Properties.Resources.d;
                 picSpecificNormalKa.Image = Properties.Resources.k;
@@ -475,20 +475,20 @@ namespace osuTaikoSvTool
                 picSpecificNormalSlider.Image = Properties.Resources.slider;
                 picSpecificFinisherSlider.Image = Properties.Resources.slider;
                 picSpecificNormalSpinner.Image = Properties.Resources.spinner;
-                // ‘I‘ğˆ‚ÆƒR[ƒh‚Ì‰Šú‰»
+                // é¸æŠè‚¢ã¨ã‚³ãƒ¼ãƒ‰ã®åˆæœŸåŒ–
                 isOnlySpecificHitObjectArray = new bool[6] { false, false, false, false, false, false };
                 objectCode = 0;
             }
         }
         /// <summary>
-        /// DragDrop‚Ì‹¤’ÊƒCƒxƒ“ƒgƒnƒ“ƒhƒ‰[
+        /// DragDropã®å…±é€šã‚¤ãƒ™ãƒ³ãƒˆãƒãƒ³ãƒ‰ãƒ©ãƒ¼
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void commonDragDrop(object sender, DragEventArgs e)
         {
             var files = (string[])e.Data.GetData(DataFormats.FileDrop, false);
-            // •ˆ–Ê‚ğ2ŒÂˆÈãƒhƒ‰ƒbƒO&ƒhƒƒbƒv‚µ‚½ê‡‚ÍAÅ‰‚Ì1‚Â‚¾‚¯‚ğ“Ç‚İ‚Ş
+            // è­œé¢ã‚’2å€‹ä»¥ä¸Šãƒ‰ãƒ©ãƒƒã‚°&ãƒ‰ãƒ­ãƒƒãƒ—ã—ãŸå ´åˆã¯ã€æœ€åˆã®1ã¤ã ã‘ã‚’èª­ã¿è¾¼ã‚€
             path = files[0];
             if (path.LastIndexOf(Constants.OSU_EXTENSION) != -1)
             {
@@ -500,13 +500,13 @@ namespace osuTaikoSvTool
             }
         }
         /// <summary>
-        /// DragEnter‚Ì‹¤’ÊƒCƒxƒ“ƒgƒnƒ“ƒhƒ‰[
+        /// DragEnterã®å…±é€šã‚¤ãƒ™ãƒ³ãƒˆãƒãƒ³ãƒ‰ãƒ©ãƒ¼
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void commonDragEnter(object sender, DragEventArgs e)
         {
-            // ƒ}ƒEƒXƒ|ƒCƒ“ƒ^[Œ`ó•ÏX
+            // ãƒã‚¦ã‚¹ãƒã‚¤ãƒ³ã‚¿ãƒ¼å½¢çŠ¶å¤‰æ›´
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
                 e.Effect = DragDropEffects.Copy;

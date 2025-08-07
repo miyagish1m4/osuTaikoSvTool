@@ -1,4 +1,4 @@
-﻿namespace osuTaikoSvTool.Properties
+namespace osuTaikoSvTool.Properties
 {
     internal class Constants
     {

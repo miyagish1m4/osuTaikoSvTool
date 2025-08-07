@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using osuTaikoSvTool.Models;
 using osuTaikoSvTool.Properties;
 
@@ -507,3 +507,4 @@ namespace osuTaikoSvTool.Utils.Helper
         }
     }
 }
+
