@@ -207,7 +207,7 @@ namespace osuTaikoSvTool
                                                                           rdoOnlyBookMark.Checked,
                                                                           rdoOnlySpecificHitObject.Checked,
                                                                           objectCode,
-                                                                          Constants.EXCECUTE_ADD);
+                                                                          Constants.EXECUTE_ADD);
                 if (userInputData == null)
                 {
                     return;
@@ -271,7 +271,7 @@ namespace osuTaikoSvTool
                                                                       rdoOnlyBookMarkModify.Checked,
                                                                       rdoOnlySpecificHitObjectModify.Checked,
                                                                       objectCode,
-                                                                      Constants.EXCECUTE_MODIFY);
+                                                                      Constants.EXECUTE_MODIFY);
         }
         private void btnRemove_Click(object sender, EventArgs e)
         {
@@ -304,7 +304,7 @@ namespace osuTaikoSvTool
                                                                           rdoOnlyBookMark.Checked,
                                                                           rdoOnlySpecificHitObject.Checked,
                                                                           objectCode,
-                                                                          Constants.EXCECUTE_REMOVE);
+                                                                          Constants.EXECUTE_REMOVE);
                 if (userInputData == null)
                 {
                     return;

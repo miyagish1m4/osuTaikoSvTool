@@ -113,7 +113,7 @@ namespace osuTaikoSvTool.Utils.Helper
                                                        bool isOnlyBookmark,
                                                        bool isOnlyHitObject,
                                                        int OnlyHitObjectCode,
-                                                       int excecuteCode)
+                                                       int executeCode)
         {
             int retTimingFrom = -1;
             int retTimingTo = -1;
@@ -133,8 +133,8 @@ namespace osuTaikoSvTool.Utils.Helper
                 {
                     throw new Exception();
                 }
-                if ((excecuteCode == Properties.Constants.EXCECUTE_ADD) ||
-                    (excecuteCode == Properties.Constants.EXCECUTE_MODIFY))
+                if ((executeCode == Properties.Constants.EXCECUTE_ADD) ||
+                    (executeCode == Properties.Constants.EXCECUTE_MODIFY))
                 {
                     if (!validateSv(svFrom,
                                     svTo,

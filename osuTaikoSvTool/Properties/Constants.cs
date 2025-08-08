@@ -40,9 +40,9 @@ namespace osuTaikoSvTool.Properties
         internal const int CALCULATION_GEOMETRIC = 2; // 等比
         #endregion
         #region 実行コード
-        internal const int EXCECUTE_ADD = 0;
-        internal const int EXCECUTE_MODIFY = 1;
-        internal const int EXCECUTE_REMOVE = 2;
+        internal const int EXECUTE_ADD = 0;
+        internal const int EXECUTE_MODIFY = 1;
+        internal const int EXECUTE_REMOVE = 2;
         #endregion
         #region ログレベル
         internal const string LOG_LEVEL_INFO = "INFO";
