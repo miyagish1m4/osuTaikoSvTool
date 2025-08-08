@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace osuTaikoSvTool.Models
+﻿namespace osuTaikoSvTool.Models
 {
     class TimingPoint
     {

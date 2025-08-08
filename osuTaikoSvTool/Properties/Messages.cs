@@ -31,6 +31,7 @@
         // ログメッセージ
         public static Dictionary<string, string> LogMessages = new()
         {
+            { "LOG_E-SERIALIZE-XML", "xmlファイルのシリアライズに失敗しました。" },
             { "LOG_E-DESERIALIZE-XML", "xmlファイルのデシリアライズに失敗しました。" },
             { "LOG_E-EXPORT-OSU", "osuへエクスポートに失敗しました。" },
             { "LOG_E-DIRECTORY-SONGS", "Songsフォルダの設定に失敗しました。" },
@@ -49,7 +50,6 @@
             { "LOG_I-ADD-LINES", "緑線の追加に成功しました。" },
             { "LOG_I-REMOVE-LINES", "緑線の削除に成功しました。" },
             { "LOG_I-MODIFY-LINES", "緑線の変更に成功しました。" },
-            { "LOG_", "" }
         };
     }
 }

@@ -17,33 +17,103 @@ namespace osuTaikoSvTool
         bool[] isOnlySpecificHitObjectArray = new bool[7] { false, false, false, false, false, false, false };
         Beatmap? beatmapInfo;
         UserInputData? userInputData;
+        int beforeSelectedTabIndex = 0;
         #endregion
+        #region メソッド
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public osuTaikoSVTool()
         {
             InitializeComponent();
         }
-        private void osuTaikoSVTool_Load(object sender, EventArgs e)
+        /// <summary>
+        /// 処理項目タブが"追加"の時のコントロールの初期化処理
+        /// </summary>
+        private void InitializeAddControls()
         {
-            Common.InitializeDirectoryAndFiles();
-            Common.WriteInfoMessage("LOG-I-START");
-            songsDirectory = Common.InitializeConfigDirectory();
-            if (songsDirectory == "")
-            {
-                Application.Exit();
-            }
-            picDisplayBg.Controls.Add(lblFileName);
-            picDisplayBg.Controls.Add(pnlDragDropArea);
-            Application.ApplicationExit += new EventHandler(Application_ApplicationExit);
-            chkEnableKiaiStart.Enabled = false;
-            chkEnableKiaiEnd.Enabled = false;
-            this.FormBorderStyle = FormBorderStyle.FixedSingle;
-            this.MaximizeBox = false;
+            tabSetType.SelectedIndex = 0;
+            InitializeHitObjectsControls();
+            InitializeBeatSnapControls();
         }
-        private void Application_ApplicationExit(object sender, EventArgs e)
+        /// <summary>
+        /// 実行項目タブが"変更"の時のコントロールの初期化処理
+        /// </summary>
+        private void InitializeModifyControls()
         {
-            //ApplicationExitイベントハンドラを削除
-            Application.ApplicationExit -= new EventHandler(Application_ApplicationExit);
-            Common.WriteInfoMessage("LOG-I-END");
+            rdoAllHitObjectsModify.Checked = true;
+            picSpecificNormalDongModify.Visible = false;
+            picSpecificFinisherDongModify.Visible = false;
+            picSpecificNormalKaModify.Visible = false;
+            picSpecificFinisherKaModify.Visible = false;
+            picSpecificNormalSliderModify.Visible = false;
+            picSpecificFinisherSliderModify.Visible = false;
+            picSpecificNormalSpinnerModify.Visible = false;
+            lblSpecificNormalModify.Visible = false;
+            lblSpecificFinisherModify.Visible = false;
+            lblSpecificGridLineModify.Visible = false;
+            lblSpecificGridLine2Modify.Visible = false;
+            chkEnableKiaiModify.Checked = false;
+            chkEnableKiaiStartModify.Visible = false;
+            chkEnableKiaiEndModify.Visible = false;
+            lblKiaiStartModify.Visible = false;
+            lblKiaiEndModify.Visible = false;
+        }
+        /// <summary>
+        /// 実行項目タブが"削除"の時のコントロールの初期化処理
+        /// </summary>
+        private void InitializeRemoveControls()
+        {
+            chkEnableSv.Checked = false;
+            chkEnableVolume.Checked = false;
+            chkEnableSv.Enabled = false;
+            chkEnableVolume.Enabled = false;
+            chkEnableSv.Visible = false;
+            chkEnableVolume.Visible = false;
+        }
+        /// <summary>
+        /// 実行項目タブが"削除"から変更された時のコントロールの初期化処理
+        /// </summary>
+        private void ReturnRemoveControls()
+        {
+            chkEnableSv.Checked = true;
+            chkEnableVolume.Checked = true;
+            chkEnableSv.Enabled = true;
+            chkEnableVolume.Enabled = true;
+            chkEnableSv.Visible = true;
+            chkEnableVolume.Visible = true;
+        }
+        /// <summary>
+        /// 処理項目タブが"Objectsのみ"の時のコントロールの初期化処理
+        /// </summary>
+        private void InitializeHitObjectsControls()
+        {
+            rdoAllHitObjects.Checked = true;
+            picSpecificNormalDong.Visible = false;
+            picSpecificFinisherDong.Visible = false;
+            picSpecificNormalKa.Visible = false;
+            picSpecificFinisherKa.Visible = false;
+            picSpecificNormalSlider.Visible = false;
+            picSpecificFinisherSlider.Visible = false;
+            picSpecificNormalSpinner.Visible = false;
+            lblSpecificNormal.Visible = false;
+            lblSpecificFinisher.Visible = false;
+            lblSpecificGridLine.Visible = false;
+            lblSpecificGridLine2.Visible = false;
+            chkEnableKiai.Checked = false;
+            chkEnableKiaiStart.Visible = false;
+            chkEnableKiaiEnd.Visible = false;
+            lblKiaiStart.Visible = false;
+            lblKiaiEnd.Visible = false;
+            chkEnableOffset.Checked = true;
+            chkEnableIncludeBarline.Checked = false;
+        }
+        /// <summary>
+        /// 処理項目タブが"ビートスナップ間隔"の時のコントロールの初期化処理
+        /// </summary>
+        private void InitializeBeatSnapControls()
+        {
+            chkEnableBeatSnap.Checked = false;
         }
         /// <summary>
         /// 譜面情報取得処理
@@ -59,6 +129,43 @@ namespace osuTaikoSvTool
             picDisplayBg.Image = BeatmapHelper.SetBgOnForm(this.path, beatmapInfo.events);
             string fileName = Path.GetFileName(this.path);
             lblFileName.Text = fileName;
+        }
+        #endregion
+        #region イベントハンドラ
+        private void osuTaikoSVTool_Load(object sender, EventArgs e)
+        {
+            Common.InitializeDirectoryAndFiles();
+            Common.WriteInfoMessage("LOG_I-START");
+            songsDirectory = Common.InitializeConfigDirectory();
+            if (songsDirectory == "")
+            {
+                Application.Exit();
+            }
+            Application.ApplicationExit += new EventHandler(Application_ApplicationExit);
+            InitializeAddControls();
+            InitializeModifyControls();
+            picDisplayBg.Controls.Add(lblFileName);
+            picDisplayBg.Controls.Add(pnlDragDropArea);
+            this.FormBorderStyle = FormBorderStyle.FixedSingle;
+            this.MaximizeBox = false;
+        }
+        private void osuTaikoSVTool_Shown(object sender, EventArgs e)
+        {
+            // 画面がタスクバーと被らないように位置の変更をする
+            if (this.WindowState == System.Windows.Forms.FormWindowState.Normal)
+            {
+                var rect = System.Windows.Forms.Screen.GetWorkingArea(this);
+                this.Left = (rect.Left + rect.Width > this.Left + this.Width) ? this.Left : rect.Left + rect.Width - this.Width;
+                this.Left = (rect.Left < this.Left) ? this.Left : rect.Left;
+                this.Top = (rect.Top + rect.Height > this.Top + this.Height) ? this.Top : rect.Top + rect.Height - this.Height;
+                this.Top = (rect.Top < this.Top) ? this.Top : rect.Top;
+            }
+        }
+        private void Application_ApplicationExit(object sender, EventArgs e)
+        {
+            //ApplicationExitイベントハンドラを削除
+            Application.ApplicationExit -= new EventHandler(Application_ApplicationExit);
+            Common.WriteInfoMessage("LOG_I-END");
         }
         private void btnOpenFile_Click(object sender, EventArgs e)
         {
@@ -80,7 +187,7 @@ namespace osuTaikoSvTool
                 }
                 this.userInputData = UserInputDataHelper.SetUserInputData(txtTimingFrom.Text,
                                                                           txtTimingTo.Text,
-                                                                          chkSvEnable.Checked,
+                                                                          chkEnableSv.Checked,
                                                                           txtSvFrom.Text,
                                                                           txtSvTo.Text,
                                                                           chkEnableVolume.Checked,
@@ -95,6 +202,7 @@ namespace osuTaikoSvTool
                                                                           chkEnableKiai.Checked,
                                                                           chkEnableKiaiStart.Checked,
                                                                           chkEnableKiaiEnd.Checked,
+                                                                          rdoAllHitObjects.Checked,
                                                                           rdoOnlyBarline.Checked,
                                                                           rdoOnlyBookMark.Checked,
                                                                           rdoOnlySpecificHitObject.Checked,
@@ -141,6 +249,29 @@ namespace osuTaikoSvTool
         }
         private void btnModify_Click(object sender, EventArgs e)
         {
+            this.userInputData = UserInputDataHelper.SetUserInputData(txtTimingFrom.Text,
+                                                                      txtTimingTo.Text,
+                                                                      chkEnableSv.Checked,
+                                                                      txtSvFrom.Text,
+                                                                      txtSvTo.Text,
+                                                                      chkEnableVolume.Checked,
+                                                                      txtVolumeFrom.Text,
+                                                                      txtVolumeTo.Text,
+                                                                      calculationCode,
+                                                                      chkEnableIncludeBarlineModify.Checked,
+                                                                      chkEnableOffset.Checked,
+                                                                      txtOffset.Text,
+                                                                      chkEnableBeatSnap.Checked,
+                                                                      txtBeatSnap.Text,
+                                                                      chkEnableKiaiModify.Checked,
+                                                                      chkEnableKiaiStartModify.Checked,
+                                                                      chkEnableKiaiEndModify.Checked,
+                                                                      rdoAllHitObjectsModify.Checked,
+                                                                      rdoOnlyBarlineModify.Checked,
+                                                                      rdoOnlyBookMarkModify.Checked,
+                                                                      rdoOnlySpecificHitObjectModify.Checked,
+                                                                      objectCode,
+                                                                      Constants.EXCECUTE_MODIFY);
         }
         private void btnRemove_Click(object sender, EventArgs e)
         {
@@ -153,7 +284,7 @@ namespace osuTaikoSvTool
                 }
                 this.userInputData = UserInputDataHelper.SetUserInputData(txtTimingFrom.Text,
                                                                           txtTimingTo.Text,
-                                                                          chkSvEnable.Checked,
+                                                                          chkEnableSv.Checked,
                                                                           txtSvFrom.Text,
                                                                           txtSvTo.Text,
                                                                           chkEnableVolume.Checked,
@@ -168,6 +299,7 @@ namespace osuTaikoSvTool
                                                                           chkEnableKiai.Checked,
                                                                           chkEnableKiaiStart.Checked,
                                                                           chkEnableKiaiEnd.Checked,
+                                                                          rdoAllHitObjects.Checked,
                                                                           rdoOnlyBarline.Checked,
                                                                           rdoOnlyBookMark.Checked,
                                                                           rdoOnlySpecificHitObject.Checked,
@@ -233,9 +365,9 @@ namespace osuTaikoSvTool
             txtVolumeTo.Text = volumeBuff;
 
         }
-        private void chkSvEnable_CheckedChanged(object sender, EventArgs e)
+        private void chkEnableSv_CheckedChanged(object sender, EventArgs e)
         {
-            if (chkSvEnable.Checked)
+            if (chkEnableSv.Checked)
             {
                 txtSvFrom.Enabled = true;
                 txtSvTo.Enabled = true;
@@ -322,13 +454,17 @@ namespace osuTaikoSvTool
         {
             if (chkEnableKiai.Checked)
             {
-                chkEnableKiaiStart.Enabled = true;
-                chkEnableKiaiEnd.Enabled = true;
+                lblKiaiStart.Visible = true;
+                lblKiaiEnd.Visible = true;
+                chkEnableKiaiStart.Visible = true;
+                chkEnableKiaiEnd.Visible = true;
             }
             else
             {
-                chkEnableKiaiStart.Enabled = false;
-                chkEnableKiaiEnd.Enabled = false;
+                lblKiaiStart.Visible = false;
+                lblKiaiEnd.Visible = false;
+                chkEnableKiaiStart.Visible = false;
+                chkEnableKiaiEnd.Visible = false;
                 chkEnableKiaiStart.Checked = false;
                 chkEnableKiaiEnd.Checked = false;
             }
@@ -438,6 +574,17 @@ namespace osuTaikoSvTool
         {
             if (rdoOnlySpecificHitObject.Checked)
             {
+                picSpecificNormalDong.Visible = true;
+                picSpecificFinisherDong.Visible = true;
+                picSpecificNormalKa.Visible = true;
+                picSpecificFinisherKa.Visible = true;
+                picSpecificNormalSlider.Visible = true;
+                picSpecificFinisherSlider.Visible = true;
+                picSpecificNormalSpinner.Visible = true;
+                lblSpecificNormal.Visible = true;
+                lblSpecificFinisher.Visible = true;
+                lblSpecificGridLine.Visible = true;
+                lblSpecificGridLine2.Visible = true;
                 // pictureBoxに設定されているMouseDownイベントを設定する
                 picSpecificNormalDong.MouseDown += picSpecificNormalDong_MouseDown;
                 picSpecificFinisherDong.MouseDown += picSpecificFinisherDong_MouseDown;
@@ -446,19 +593,20 @@ namespace osuTaikoSvTool
                 picSpecificNormalSlider.MouseDown += picSpecificNormalSlider_MouseDown;
                 picSpecificFinisherSlider.MouseDown += picSpecificFinisherSlider_MouseDown;
                 picSpecificNormalSpinner.MouseDown += picSpecificNormalSpinner_MouseDown;
-                // rdoOnlyBookMarkとrdoOnlyBarlineに設定されているCheckedChangedイベントを外す
-                // 事前に外さないと次の行のfalseを代入する処理でイベントが走る為
-                rdoOnlyBookMark.CheckedChanged -= rdoOnlyBookMark_CheckedChanged;
-                rdoOnlyBarline.CheckedChanged -= rdoOnlyBarline_CheckedChanged;
-                rdoOnlyBookMark.Checked = false;
-                rdoOnlyBarline.Checked = false;
-                // CheckedChangedイベントを設定しなおす
-                rdoOnlyBookMark.CheckedChanged += rdoOnlyBookMark_CheckedChanged;
-                rdoOnlyBarline.CheckedChanged += rdoOnlyBarline_CheckedChanged;
-
             }
             else
             {
+                picSpecificNormalDong.Visible = false;
+                picSpecificFinisherDong.Visible = false;
+                picSpecificNormalKa.Visible = false;
+                picSpecificFinisherKa.Visible = false;
+                picSpecificNormalSlider.Visible = false;
+                picSpecificFinisherSlider.Visible = false;
+                picSpecificNormalSpinner.Visible = false;
+                lblSpecificNormal.Visible = false;
+                lblSpecificFinisher.Visible = false;
+                lblSpecificGridLine.Visible = false;
+                lblSpecificGridLine2.Visible = false;
                 // pictureBoxに設定されているMouseDownイベントを外す
                 picSpecificNormalDong.MouseDown -= picSpecificNormalDong_MouseDown;
                 picSpecificFinisherDong.MouseDown -= picSpecificFinisherDong_MouseDown;
@@ -476,8 +624,255 @@ namespace osuTaikoSvTool
                 picSpecificFinisherSlider.Image = Properties.Resources.slider;
                 picSpecificNormalSpinner.Image = Properties.Resources.spinner;
                 // 選択肢とコードの初期化
-                isOnlySpecificHitObjectArray = new bool[6] { false, false, false, false, false, false };
+                isOnlySpecificHitObjectArray = new bool[7] { false, false, false, false, false, false, false };
                 objectCode = 0;
+            }
+        }
+        private void btnViewHistory_Click(object sender, EventArgs e)
+        {
+            Form historyForm = new HistoryForm();
+            historyForm.ShowDialog();
+
+        }
+        private void tabPage1_Click(object sender, EventArgs e)
+        {
+
+        }
+        private void rdoAllHitObjects_CheckedChanged(object sender, EventArgs e)
+        {
+            if (rdoAllHitObjects.Checked)
+            {
+                chkEnableIncludeBarline.Visible = true;
+            }
+            else
+            {
+                chkEnableIncludeBarline.Visible = false;
+                chkEnableIncludeBarline.Checked = false;
+            }
+        }
+        private void tabExecuteType_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (beforeSelectedTabIndex == 2)
+            {
+                ReturnRemoveControls();
+            }
+            switch (tabExecuteType.SelectedIndex)
+            {
+                case 0:
+                    // Add
+                    InitializeModifyControls();
+                    break;
+                case 1:
+                    // Modify
+                    InitializeAddControls();
+                    break;
+                case 2:
+                    // Remove
+                    InitializeAddControls();
+                    InitializeModifyControls();
+                    InitializeRemoveControls();
+                    break;
+                default:
+                    break;
+            }
+            beforeSelectedTabIndex = tabExecuteType.SelectedIndex;
+        }
+        private void tabSetType_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            switch (tabSetType.SelectedIndex)
+            {
+                case 0:
+                    // HitObjects
+                    InitializeBeatSnapControls();
+                    break;
+                case 1:
+                    // BeatSnap
+                    InitializeHitObjectsControls();
+                    break;
+                default:
+                    break;
+            }
+        }
+        private void picSpecificNormalDongModify_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (isOnlySpecificHitObjectArray[0] = !isOnlySpecificHitObjectArray[0])
+            {
+                picSpecificNormalDongModify.Image = Properties.Resources.d_selected;
+                objectCode += 1;
+            }
+            else
+            {
+                picSpecificNormalDongModify.Image = Properties.Resources.d;
+                objectCode -= 1;
+            }
+        }
+        private void picSpecificFinisherDongModify_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (isOnlySpecificHitObjectArray[1] = !isOnlySpecificHitObjectArray[1])
+            {
+                picSpecificFinisherDongModify.Image = Properties.Resources.d_selected;
+                objectCode += 2;
+            }
+            else
+            {
+                picSpecificFinisherDongModify.Image = Properties.Resources.d;
+                objectCode -= 2;
+            }
+        }
+        private void picSpecificNormalKaModify_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (isOnlySpecificHitObjectArray[2] = !isOnlySpecificHitObjectArray[2])
+            {
+                picSpecificNormalKaModify.Image = Properties.Resources.k_selected;
+                objectCode += 4;
+            }
+            else
+            {
+                picSpecificNormalKaModify.Image = Properties.Resources.k;
+                objectCode -= 4;
+            }
+        }
+        private void picSpecificFinisherKaModify_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (isOnlySpecificHitObjectArray[3] = !isOnlySpecificHitObjectArray[3])
+            {
+                picSpecificFinisherKaModify.Image = Properties.Resources.k_selected;
+                objectCode += 8;
+            }
+            else
+            {
+                picSpecificFinisherKaModify.Image = Properties.Resources.k;
+                objectCode -= 8;
+            }
+        }
+        private void picSpecificNormalSliderModify_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (isOnlySpecificHitObjectArray[4] = !isOnlySpecificHitObjectArray[4])
+            {
+                picSpecificNormalSliderModify.Image = Properties.Resources.slider_selected;
+                objectCode += 16;
+            }
+            else
+            {
+                picSpecificNormalSliderModify.Image = Properties.Resources.slider;
+                objectCode -= 16;
+            }
+        }
+        private void picSpecificFinisherSliderModify_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (isOnlySpecificHitObjectArray[5] = !isOnlySpecificHitObjectArray[5])
+            {
+                picSpecificFinisherSliderModify.Image = Properties.Resources.slider_selected;
+                objectCode += 32;
+            }
+            else
+            {
+                picSpecificFinisherSliderModify.Image = Properties.Resources.slider;
+                objectCode -= 32;
+            }
+        }
+        private void picSpecificNormalSpinnerModify_MouseDown(object sender, MouseEventArgs e)
+        {
+            {
+                if (isOnlySpecificHitObjectArray[6] = !isOnlySpecificHitObjectArray[6])
+                {
+                    picSpecificNormalSpinnerModify.Image = Properties.Resources.spinner_selected;
+                    objectCode += 64;
+                }
+                else
+                {
+                    picSpecificNormalSpinnerModify.Image = Properties.Resources.spinner;
+                    objectCode -= 64;
+                }
+            }
+        }
+        private void rdoOnlySpecificHitObjectModify_CheckedChanged(object sender, EventArgs e)
+        {
+            if (rdoOnlySpecificHitObjectModify.Checked)
+            {
+                picSpecificNormalDongModify.Visible = true;
+                picSpecificFinisherDongModify.Visible = true;
+                picSpecificNormalKaModify.Visible = true;
+                picSpecificFinisherKaModify.Visible = true;
+                picSpecificNormalSliderModify.Visible = true;
+                picSpecificFinisherSliderModify.Visible = true;
+                picSpecificNormalSpinnerModify.Visible = true;
+                lblSpecificNormalModify.Visible = true;
+                lblSpecificFinisherModify.Visible = true;
+                lblSpecificGridLineModify.Visible = true;
+                lblSpecificGridLine2Modify.Visible = true;
+                // pictureBoxに設定されているMouseDownイベントを設定する
+                picSpecificNormalDongModify.MouseDown += picSpecificNormalDongModify_MouseDown;
+                picSpecificFinisherDongModify.MouseDown += picSpecificFinisherDongModify_MouseDown;
+                picSpecificNormalKaModify.MouseDown += picSpecificNormalKaModify_MouseDown;
+                picSpecificFinisherKaModify.MouseDown += picSpecificFinisherKaModify_MouseDown;
+                picSpecificNormalSliderModify.MouseDown += picSpecificNormalSliderModify_MouseDown;
+                picSpecificFinisherSliderModify.MouseDown += picSpecificFinisherSliderModify_MouseDown;
+                picSpecificNormalSpinnerModify.MouseDown += picSpecificNormalSpinnerModify_MouseDown;
+            }
+            else
+            {
+                picSpecificNormalDongModify.Visible = false;
+                picSpecificFinisherDongModify.Visible = false;
+                picSpecificNormalKaModify.Visible = false;
+                picSpecificFinisherKaModify.Visible = false;
+                picSpecificNormalSliderModify.Visible = false;
+                picSpecificFinisherSliderModify.Visible = false;
+                picSpecificNormalSpinnerModify.Visible = false;
+                lblSpecificNormalModify.Visible = false;
+                lblSpecificFinisherModify.Visible = false;
+                lblSpecificGridLineModify.Visible = false;
+                lblSpecificGridLine2Modify.Visible = false;
+                // pictureBoxに設定されているMouseDownイベントを外す
+                picSpecificNormalDongModify.MouseDown -= picSpecificNormalDongModify_MouseDown;
+                picSpecificFinisherDongModify.MouseDown -= picSpecificFinisherDongModify_MouseDown;
+                picSpecificNormalKaModify.MouseDown -= picSpecificNormalKaModify_MouseDown;
+                picSpecificFinisherKaModify.MouseDown -= picSpecificFinisherKaModify_MouseDown;
+                picSpecificNormalSliderModify.MouseDown -= picSpecificNormalSliderModify_MouseDown;
+                picSpecificFinisherSliderModify.MouseDown -= picSpecificFinisherSliderModify_MouseDown;
+                picSpecificNormalSpinnerModify.MouseDown -= picSpecificNormalSpinnerModify_MouseDown;
+                // 画像を元に戻す
+                picSpecificNormalDongModify.Image = Properties.Resources.d;
+                picSpecificFinisherDongModify.Image = Properties.Resources.d;
+                picSpecificNormalKaModify.Image = Properties.Resources.k;
+                picSpecificFinisherKaModify.Image = Properties.Resources.k;
+                picSpecificNormalSliderModify.Image = Properties.Resources.slider;
+                picSpecificFinisherSliderModify.Image = Properties.Resources.slider;
+                picSpecificNormalSpinnerModify.Image = Properties.Resources.spinner;
+                // 選択肢とコードの初期化
+                isOnlySpecificHitObjectArray = new bool[7] { false, false, false, false, false, false, false };
+                objectCode = 0;
+            }
+        }
+        private void rdoAllHitObjectsModify_CheckedChanged(object sender, EventArgs e)
+        {
+            if (rdoAllHitObjectsModify.Checked)
+            {
+                chkEnableIncludeBarlineModify.Visible = true;
+            }
+            else
+            {
+                chkEnableIncludeBarlineModify.Visible = false;
+                chkEnableIncludeBarlineModify.Checked = false;
+            }
+        }
+        private void chkEnableKiaiModify_CheckedChanged(object sender, EventArgs e)
+        {
+            if (chkEnableKiaiModify.Checked)
+            {
+                lblKiaiStartModify.Visible = true;
+                lblKiaiEndModify.Visible = true;
+                chkEnableKiaiStartModify.Visible = true;
+                chkEnableKiaiEndModify.Visible = true;
+            }
+            else
+            {
+                lblKiaiStartModify.Visible = false;
+                lblKiaiEndModify.Visible = false;
+                chkEnableKiaiStartModify.Visible = false;
+                chkEnableKiaiEndModify.Visible = false;
+                chkEnableKiaiStartModify.Checked = false;
+                chkEnableKiaiEndModify.Checked = false;
             }
         }
         /// <summary>
@@ -516,28 +911,6 @@ namespace osuTaikoSvTool
                 e.Effect = DragDropEffects.None;
             }
         }
-
-        private void rdoOnlyBookMark_CheckedChanged(object sender, EventArgs e)
-        {
-            if (rdoOnlySpecificHitObject.Checked)
-            {
-                rdoOnlySpecificHitObject.Checked = false;
-            }
-        }
-
-        private void rdoOnlyBarline_CheckedChanged(object sender, EventArgs e)
-        {
-            if (rdoOnlySpecificHitObject.Checked)
-            {
-                rdoOnlySpecificHitObject.Checked = false;
-            }
-        }
-
-        private void btnViewHistory_Click(object sender, EventArgs e)
-        {
-            Form historyForm = new HistoryForm();
-            historyForm.ShowDialog();
-
-        }
+        #endregion
     }
 }

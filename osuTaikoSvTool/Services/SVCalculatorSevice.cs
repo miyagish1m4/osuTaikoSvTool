@@ -1,5 +1,4 @@
-﻿using System.Drawing;
-using osuTaikoSvTool.Models;
+﻿using osuTaikoSvTool.Models;
 using osuTaikoSvTool.Properties;
 using osuTaikoSvTool.Utils;
 
@@ -20,6 +19,7 @@ namespace osuTaikoSvTool.Services
                 int volumePerMs = (userInputData.volumeTo - userInputData.volumeFrom) / (userInputData.timingTo - userInputData.timingFrom);
                 decimal baseBpm = 0;
                 bool isFirst = true;
+                int offset = userInputData.isOffset ? userInputData.offset : 0;
                 for (global::System.Int32 i = 0; i < beatmap.hitObjects.Count; i++)
                 {
                     if ((beatmap.hitObjects[i].time >= userInputData.timingFrom) &&
@@ -30,6 +30,11 @@ namespace osuTaikoSvTool.Services
                             isFirst = !isFirst;
                             baseBpm = beatmap.hitObjects[i].bpm;
                         }
+                        if ((!userInputData.isIncludeBarline) && beatmap.hitObjects[i].isBarline)
+                        {
+                            // 小節線を無視する
+                            continue;
+                        }
                         int timingIndex = 0;
                         for (global::System.Int32 j = (beatmap.timingPoints.Count) - (1); j >= 0; j--)
                         {
@@ -38,6 +43,7 @@ namespace osuTaikoSvTool.Services
                                 timingIndex = j;
                             }
                         }
+                        int time = beatmap.hitObjects[i].time - offset;
                         decimal sv = 0;
                         int volume = 0;
                         if (userInputData.isSv)
@@ -64,8 +70,8 @@ namespace osuTaikoSvTool.Services
                         {
                             volume = beatmap.timingPoints[timingIndex].volume;
                         }
-                        // 計算↓SV,Volumeをタイミングポイントに追加
-                        beatmap.timingPoints.Add(new TimingPoint(beatmap.hitObjects[i].time,
+                        // SV,Volumeをタイミングポイントに追加
+                        beatmap.timingPoints.Add(new TimingPoint(time,
                                                                  beatmap.timingPoints[timingIndex].bpm,
                                                                  sv,
                                                                  beatmap.timingPoints[timingIndex].barLength,
@@ -94,7 +100,6 @@ namespace osuTaikoSvTool.Services
             try
             {
                 return true;
-
             }
             catch (Exception ex)
             {

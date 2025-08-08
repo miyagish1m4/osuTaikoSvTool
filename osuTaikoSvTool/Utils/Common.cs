@@ -1,8 +1,4 @@
-﻿using System.Configuration;
-using System.IO;
-using System.Security.Cryptography;
-using System.Text;
-using System.Windows.Forms;
+﻿using System.Text;
 using osuTaikoSvTool.Properties;
 
 namespace osuTaikoSvTool.Utils
@@ -18,10 +14,21 @@ namespace osuTaikoSvTool.Utils
             string infoLogPath = Directory.GetCurrentDirectory() + Constants.INFO_LOG_DIRECTORY + "\\info_" + currentDateTime.ToString("yyyyMMdd") + Constants.LOG_EXTENSION;
             string warningLogPath = Directory.GetCurrentDirectory() + Constants.WARNING_LOG_DIRECTORY + "\\warning_" + currentDateTime.ToString("yyyyMMdd") + Constants.LOG_EXTENSION;
             string errorLogPath = Directory.GetCurrentDirectory() + Constants.ERROR_LOG_DIRECTORY + "\\error_" + currentDateTime.ToString("yyyyMMdd") + Constants.LOG_EXTENSION;
+            // Logディレクトリの作成
+            if (!Directory.Exists(Directory.GetCurrentDirectory() + Constants.LOG_DIRECTORY))
+            {
+                string folderpath = Directory.GetCurrentDirectory() + Constants.LOG_DIRECTORY;
+                Directory.CreateDirectory(folderpath);
+                var folder_attr = File.GetAttributes(folderpath);
+                File.SetAttributes(folderpath, folder_attr | FileAttributes.Hidden);
+            }
             // INFOログディレクトリの作成
             if (!Directory.Exists(Directory.GetCurrentDirectory() + Constants.INFO_LOG_DIRECTORY))
             {
-                Directory.CreateDirectory(Directory.GetCurrentDirectory() + Constants.INFO_LOG_DIRECTORY);
+                string folderpath = Directory.GetCurrentDirectory() + Constants.INFO_LOG_DIRECTORY;
+                Directory.CreateDirectory(folderpath);
+                var folder_attr = File.GetAttributes(folderpath);
+                File.SetAttributes(folderpath, folder_attr | FileAttributes.Hidden);
             }
             // INFOログファイルの作成
             if (!File.Exists(infoLogPath))
@@ -31,7 +38,10 @@ namespace osuTaikoSvTool.Utils
             // WARNINGログディレクトリの作成
             if (!Directory.Exists(Directory.GetCurrentDirectory() + Constants.WARNING_LOG_DIRECTORY))
             {
-                Directory.CreateDirectory(Directory.GetCurrentDirectory() + Constants.WARNING_LOG_DIRECTORY);
+                string folderpath = Directory.GetCurrentDirectory() + Constants.WARNING_LOG_DIRECTORY;
+                Directory.CreateDirectory(folderpath);
+                var folder_attr = File.GetAttributes(folderpath);
+                File.SetAttributes(folderpath, folder_attr | FileAttributes.Hidden);
             }
             // WARNINGログファイルの作成
             if (!File.Exists(warningLogPath))
@@ -41,7 +51,10 @@ namespace osuTaikoSvTool.Utils
             // ERRORログディレクトリの作成
             if (!Directory.Exists(Directory.GetCurrentDirectory() + Constants.ERROR_LOG_DIRECTORY))
             {
-                Directory.CreateDirectory(Directory.GetCurrentDirectory() + Constants.ERROR_LOG_DIRECTORY);
+                string folderpath = Directory.GetCurrentDirectory() + Constants.ERROR_LOG_DIRECTORY;
+                Directory.CreateDirectory(folderpath);
+                var folder_attr = File.GetAttributes(folderpath);
+                File.SetAttributes(folderpath, folder_attr | FileAttributes.Hidden);
             }
             // ERRORログファイルの作成
             if (!File.Exists(errorLogPath))
@@ -76,7 +89,7 @@ namespace osuTaikoSvTool.Utils
                 string? songsPath = "";
                 if (!File.Exists(configPath) || File.ReadAllText(configPath) == "" || File.ReadAllText(configPath) == null)
                 {
-                    //if (MessageBox.Show(WriteDialogMessage("I_A-EM-001"), "Information", MessageBoxButtons.OK, MessageBoxIcon.Asterisk) != DialogResult.OK)
+                    MessageBox.Show(WriteDialogMessage("I_A-EM-001"), "Information", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
                     //{
                     //    MessageBox.Show(WriteDialogMessage("E_A-P-002"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     //    return "";

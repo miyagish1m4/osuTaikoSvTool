@@ -1,5 +1,4 @@
-﻿using Microsoft.VisualBasic.Logging;
-using osuTaikoSvTool.Utils;
+﻿using osuTaikoSvTool.Utils;
 
 namespace osuTaikoSvTool.Models
 {
@@ -44,11 +43,13 @@ namespace osuTaikoSvTool.Models
         public bool isKiaiStart { set; get; }
         // kiai終了有効化設定
         public bool isKiaiEnd { set; get; }
+        // すべてのHitObjects有効化設定
+        public bool isAllHitObjects { set; get; }
         // 小節線のみ有効化設定
         public bool isOnlyBarline { set; get; }
         // Bookmarkのみ有効化設定
         public bool isOnlyBookmark { set; get; }
-        // HitObjectsのみ有効化設定
+        // 特定のHitObjectsのみ有効化設定
         public bool isOnlyHitObjects { set; get; }
         //作成日時
          public DateTime createDate { set; get; }
@@ -87,6 +88,7 @@ namespace osuTaikoSvTool.Models
                                bool isKiai,
                                bool isKiaiStart,
                                bool isKiaiEnd,
+                               bool isAllHitObjects,
                                bool isOnlyBarline,
                                bool isOnlyBookmark,
                                bool isOnlyHitObject,
@@ -110,6 +112,7 @@ namespace osuTaikoSvTool.Models
             this.isKiai = isKiai;
             this.isKiaiStart = isKiaiStart;
             this.isKiaiEnd = isKiaiEnd;
+            this.isAllHitObjects = isAllHitObjects;
             this.isOnlyBarline = isOnlyBarline;
             this.isOnlyBookmark = isOnlyBookmark;
             this.isOnlyHitObjects = isOnlyHitObjects;

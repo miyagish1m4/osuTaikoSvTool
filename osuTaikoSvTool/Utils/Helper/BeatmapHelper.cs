@@ -347,6 +347,7 @@ namespace osuTaikoSvTool.Utils.Helper
             int timingIndex = 0;
             decimal currentBpm = 0;
             decimal currentSv = 1.0m;
+            int svApplyTime = 0;
             try
             {
                 foreach (var hitObject in hitObjectList)
@@ -374,15 +375,18 @@ namespace osuTaikoSvTool.Utils.Helper
                     if (green != null)
                     {
                         currentSv = green.sv;
+                        svApplyTime = green.time;
                     }
                     else if (red != null)
                     {
                         // 赤線のみある場合、SVは1.0
                         currentSv = 1.0m;
+                        svApplyTime = red.time;
                     }
 
                     hitObject.bpm = currentBpm;
                     hitObject.sv = currentSv;
+                    hitObject.svApplyTime = svApplyTime;
                 }
                 return true;
             }

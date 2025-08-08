@@ -1,7 +1,4 @@
-﻿using System.ComponentModel.Design.Serialization;
-using Microsoft.VisualBasic;
-using osuTaikoSvTool.Models;
-using osuTaikoSvTool.Properties;
+﻿using osuTaikoSvTool.Models;
 
 namespace osuTaikoSvTool.Utils.Helper
 {
@@ -11,7 +8,7 @@ namespace osuTaikoSvTool.Utils.Helper
         /// ユーザーが入力したデータをXML形式でシリアライズする関数
         /// </summary>
         /// <param name="userInputData">入力データ</param>
-        /// <returns></returns>
+        /// <returns>処理が正常終了した場合はtrue、異常終了した場合はfalse</returns>
         internal static bool SerializeUserInputData(UserInputData userInputData)
         {
             try
@@ -41,7 +38,7 @@ namespace osuTaikoSvTool.Utils.Helper
         /// ユーザーが入力したデータをXML形式からデシリアライズする関数
         /// </summary>
         /// <param name="userInputData">格納先のデータ</param>
-        /// <returns></returns>
+        /// <returns>処理が正常終了した場合はtrue、異常終了した場合はfalse</returns>
         internal static bool DeserializeUserInputData(ref List<UserInputData> userInputData)
         {
             try
@@ -87,6 +84,7 @@ namespace osuTaikoSvTool.Utils.Helper
         /// <param name="isKiai">Kiai判定フラグ</param>
         /// <param name="isKiaiStart">Kiai始点判定フラグ</param>
         /// <param name="isKiaiEnd">Kiai終点判定フラグ</param>
+        /// <param name="isAllHitObjects">全オブジェクト有効化フラグ</param>
         /// <param name="isOnlyBarline">小節線のみ有効化フラグ</param>
         /// <param name="isOnlyBookmark">ブックマークのみ有効化フラグ</param>
         /// <param name="isOnlyHitObject">特定のオブジェクトのみ有効化フラグ</param>
@@ -110,6 +108,7 @@ namespace osuTaikoSvTool.Utils.Helper
                                                        bool isKiai,
                                                        bool isKiaiStart,
                                                        bool isKiaiEnd,
+                                                       bool isAllHitObjects,
                                                        bool isOnlyBarline,
                                                        bool isOnlyBookmark,
                                                        bool isOnlyHitObject,
@@ -156,7 +155,7 @@ namespace osuTaikoSvTool.Utils.Helper
                     {
                         throw new Exception();
                     }
-                    if (calculationCode == 0)
+                    if ((calculationCode == 0) && isSv)
                     {
                         //計算方法が指定されていない
                         MessageBox.Show(Common.WriteDialogMessage("E_V-EM-007"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -186,6 +185,7 @@ namespace osuTaikoSvTool.Utils.Helper
                                          isKiai,
                                          isKiaiStart,
                                          isKiaiEnd,
+                                         isAllHitObjects,
                                          isOnlyBarline,
                                          isOnlyBookmark,
                                          isOnlyHitObject,
@@ -209,7 +209,7 @@ namespace osuTaikoSvTool.Utils.Helper
         /// <param name="timingTo">Timing(終点)</param>
         /// <param name="retTimingFrom">チェック後のTiming(始点)</param>
         /// <param name="retTimingTo">チェック後のTiming(終点)</param>
-        /// <returns></returns>
+        /// <returns>処理が正常終了した場合はtrue、異常終了した場合はfalse</returns>
         private static bool validateTiming(string timingFrom,
                                            string timingTo,
                                            ref int retTimingFrom,
@@ -258,7 +258,7 @@ namespace osuTaikoSvTool.Utils.Helper
         /// <param name="isSv">SV有効化フラグ</param>
         /// <param name="retSvFrom">チェック後のSV(始点)</param>
         /// <param name="retSvTo">チェック後のSV(終点)</param>
-        /// <returns></returns>
+        /// <returns>処理が正常終了した場合はtrue、異常終了した場合はfalse</returns>
         private static bool validateSv(string svFrom,
                                        string svTo,
                                        bool isSv,
@@ -323,7 +323,7 @@ namespace osuTaikoSvTool.Utils.Helper
         /// <param name="isVolume">Volume有効化フラグ</param>
         /// <param name="retVolumeFrom">チェック後のVolume(始点)</param>
         /// <param name="retVolumeTo">チェック後のVolume(終点)</param>
-        /// <returns></returns>
+        /// <returns>処理が正常終了した場合はtrue、異常終了した場合はfalse</returns>
         private static bool validateVolume(string volumeFrom,
                                            string volumeTo,
                                            bool isVolume,
@@ -385,7 +385,7 @@ namespace osuTaikoSvTool.Utils.Helper
         /// <param name="offset">Offset</param>
         /// <param name="isOffset">Offset有効化フラグ</param>
         /// <param name="retOffset">チェック後のOffset</param>
-        /// <returns></returns>
+        /// <returns>処理が正常終了した場合はtrue、異常終了した場合はfalse</returns>
         private static bool validateOffset(string offset,
                                            bool isOffset,
                                            ref int retOffset)
@@ -434,7 +434,7 @@ namespace osuTaikoSvTool.Utils.Helper
         /// <param name="beatSnap">BeatSnap</param>
         /// <param name="isBeatSnap">BeatSnap間隔配置有効化フラグ</param>
         /// <param name="retBeatSnap">チェック後のBeatSnap</param>
-        /// <returns></returns>
+        /// <returns>処理が正常終了した場合はtrue、異常終了した場合はfalse</returns>
         private static bool validateBeatSnap(string beatSnap,
                                              bool isBeatSnap,
                                              ref int retBeatSnap)

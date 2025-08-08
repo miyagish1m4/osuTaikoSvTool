@@ -15,6 +15,8 @@
         // 作業ディレクトリ
         internal const string WORK_DIRECTORY = "\\Work";
         // Infoログディレクトリ
+        internal const string LOG_DIRECTORY = "\\Log";
+        // Infoログディレクトリ
         internal const string INFO_LOG_DIRECTORY = "\\Log\\Info";
         // Warningログディレクトリ
         internal const string WARNING_LOG_DIRECTORY = "\\Log\\Warning";
