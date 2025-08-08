@@ -1,4 +1,4 @@
-﻿using osuTaikoSvTool.Models;
+using osuTaikoSvTool.Models;
 
 namespace osuTaikoSvTool.Utils.Helper
 {

@@ -51,7 +51,7 @@ namespace osuTaikoSvTool
 
 
         /// <summary>
-        /// ‰æ–Êƒ[ƒh‚Ìˆ—
+        /// ç”»é¢ãƒ­ãƒ¼ãƒ‰æ™‚ã®å‡¦ç†
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -60,7 +60,7 @@ namespace osuTaikoSvTool
             pictureBox5.Controls.Add(label1);
             Application.ApplicationExit += new EventHandler(Application_ApplicationExit);
             currentDateTime = DateTime.Now;
-            // V‹Kƒtƒ@ƒCƒ‹‚Ìâ‘ÎƒpƒX
+            // æ–°è¦ãƒ•ã‚¡ã‚¤ãƒ«ã®çµ¶å¯¾ãƒ‘ã‚¹
             infoLogPath = Directory.GetCurrentDirectory() + INFO_LOG_DIRECTORY + "\\Info_" + String.Format("{0:yyyyMMdd}", currentDateTime) + LOG_EXTENSION;
             if (!Directory.Exists(Directory.GetCurrentDirectory() + BACKUP_DIRECTORY))
             {
@@ -76,7 +76,7 @@ namespace osuTaikoSvTool
             }
             if (!File.Exists(infoLogPath))
             {
-                // V‹Kƒtƒ@ƒCƒ‹ì¬
+                // æ–°è¦ãƒ•ã‚¡ã‚¤ãƒ«ä½œæˆ
                 File.Create(infoLogPath).Close();
             }
             errorLogPath = Directory.GetCurrentDirectory() + ERROR_LOG_DIRECTORY + "\\error_" + String.Format("{0:yyyyMMdd}", currentDateTime) + LOG_EXTENSION;
@@ -86,10 +86,10 @@ namespace osuTaikoSvTool
             }
             if (!File.Exists(errorLogPath))
             {
-                // V‹Kƒtƒ@ƒCƒ‹ì¬
+                // æ–°è¦ãƒ•ã‚¡ã‚¤ãƒ«ä½œæˆ
                 File.Create(errorLogPath).Close();
             }
-            WriteInfoMessage("ƒAƒvƒŠƒP[ƒVƒ‡ƒ“‚ğŠJn‚µ‚Ü‚·B");
+            WriteInfoMessage("ã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³ã‚’é–‹å§‹ã—ã¾ã™ã€‚");
             isStartKialButton.Enabled = false;
             isEndKialButton.Enabled = false;
             this.FormBorderStyle = FormBorderStyle.FixedSingle;
@@ -97,20 +97,20 @@ namespace osuTaikoSvTool
         }
 
         /// <summary>
-        /// ƒAƒvƒŠƒP[ƒVƒ‡ƒ“I—¹‚Ìˆ—
+        /// ã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³çµ‚äº†æ™‚ã®å‡¦ç†
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void Application_ApplicationExit(object sender, EventArgs e)
         {
-            WriteInfoMessage("ƒAƒvƒŠƒP[ƒVƒ‡ƒ“‚ğI—¹‚µ‚Ü‚·B");
+            WriteInfoMessage("ã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³ã‚’çµ‚äº†ã—ã¾ã™ã€‚");
 
-            //ApplicationExitƒCƒxƒ“ƒgƒnƒ“ƒhƒ‰‚ğíœ
+            //ApplicationExitã‚¤ãƒ™ãƒ³ãƒˆãƒãƒ³ãƒ‰ãƒ©ã‚’å‰Šé™¤
             Application.ApplicationExit -= new EventHandler(Application_ApplicationExit);
         }
 
         /// <summary>
-        /// InfoƒƒbƒZ[ƒW‚Ì‘‚«‚İˆ—
+        /// Infoãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã®æ›¸ãè¾¼ã¿å‡¦ç†
         /// </summary>
         /// <param name="message"></param>
         private void WriteInfoMessage(string message)
@@ -122,7 +122,7 @@ namespace osuTaikoSvTool
             }
             if (!File.Exists(infoLogPath))
             {
-                // V‹Kƒtƒ@ƒCƒ‹ì¬
+                // æ–°è¦ãƒ•ã‚¡ã‚¤ãƒ«ä½œæˆ
                 File.Create(infoLogPath).Close();
             }
             using (StreamWriter writer = new StreamWriter(infoLogPath, true, Encoding.GetEncoding("utf-8")))
@@ -132,7 +132,7 @@ namespace osuTaikoSvTool
         }
 
         /// <summary>
-        /// ErrorƒƒbƒZ[ƒW‚Ì‘‚«‚İˆ—
+        /// Errorãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã®æ›¸ãè¾¼ã¿å‡¦ç†
         /// </summary>
         /// <param name="message"></param>
         private void WriteErrorMessage(string message)
@@ -144,7 +144,7 @@ namespace osuTaikoSvTool
             }
             if (!File.Exists(errorLogPath))
             {
-                // V‹Kƒtƒ@ƒCƒ‹ì¬
+                // æ–°è¦ãƒ•ã‚¡ã‚¤ãƒ«ä½œæˆ
                 File.Create(errorLogPath).Close();
             }
             using (StreamWriter writer = new StreamWriter(errorLogPath, true, Encoding.GetEncoding("utf-8")))
@@ -154,7 +154,7 @@ namespace osuTaikoSvTool
         }
 
         /// <summary>
-        /// "ƒtƒ@ƒCƒ‹‚ğŠJ‚­"ƒ{ƒ^ƒ“‰Ÿ‰º‚Ìˆ—
+        /// "ãƒ•ã‚¡ã‚¤ãƒ«ã‚’é–‹ã"ãƒœã‚¿ãƒ³æŠ¼ä¸‹æ™‚ã®å‡¦ç†
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -206,12 +206,12 @@ namespace osuTaikoSvTool
                     System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
                 image.Dispose();
                 g.Dispose();
-                //PictureBox1‚É•\¦‚·‚é
+                //PictureBox1ã«è¡¨ç¤ºã™ã‚‹
                 pictureBox5.Image = canvas;
             }
             else
             {
-                WriteInfoMessage("BG‚Ìæ“¾‚É¸”s‚µ‚Ü‚µ‚½B");
+                WriteInfoMessage("BGã®å–å¾—ã«å¤±æ•—ã—ã¾ã—ãŸã€‚");
             }
             //pictureBox5.Image = System.Drawing.Image.FromFile(Path.GetDirectoryName(path) + "\\" + imageName);
             string fileName = Path.GetFileName(path);
@@ -219,20 +219,20 @@ namespace osuTaikoSvTool
         }
 
         /// <summary>
-        /// "ƒtƒ@ƒCƒ‹ŠJ‚­"ƒ{ƒ^ƒ“‰Ÿ‰º‚Ìƒ_ƒCƒAƒƒOˆ—
+        /// "ãƒ•ã‚¡ã‚¤ãƒ«é–‹ã"ãƒœã‚¿ãƒ³æŠ¼ä¸‹æ™‚ã®ãƒ€ã‚¤ã‚¢ãƒ­ã‚°å‡¦ç†
         /// </summary>
-        /// <returns>ŠJ‚¢‚½ƒtƒ@ƒCƒ‹‚ÌƒpƒX</returns>
+        /// <returns>é–‹ã„ãŸãƒ•ã‚¡ã‚¤ãƒ«ã®ãƒ‘ã‚¹</returns>
         private string SelectFile()
         {
             string ret = string.Empty;
 
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
-                openFileDialog.Title = "ƒtƒ@ƒCƒ‹‘I‘ğƒ_ƒCƒAƒƒO";
-                openFileDialog.Filter = "osuƒtƒ@ƒCƒ‹(*.osu)|*.osu";
+                openFileDialog.Title = "ãƒ•ã‚¡ã‚¤ãƒ«é¸æŠãƒ€ã‚¤ã‚¢ãƒ­ã‚°";
+                openFileDialog.Filter = "osuãƒ•ã‚¡ã‚¤ãƒ«(*.osu)|*.osu";
                 openFileDialog.InitialDirectory = @"D:\osu!\Songs\";
 
-                //ƒtƒ@ƒCƒ‹‘I‘ğƒ_ƒCƒAƒƒO‚ğŠJ‚­
+                //ãƒ•ã‚¡ã‚¤ãƒ«é¸æŠãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‚’é–‹ã
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
                     ret = openFileDialog.FileName;
@@ -242,11 +242,11 @@ namespace osuTaikoSvTool
         }
 
         /// <summary>
-        /// ƒ†[ƒU‚ª“ü—Í‚µ‚½ƒ^ƒCƒ~ƒ“ƒO‚ğ•ÏŠ·‚·‚éˆ—
+        /// ãƒ¦ãƒ¼ã‚¶ãŒå…¥åŠ›ã—ãŸã‚¿ã‚¤ãƒŸãƒ³ã‚°ã‚’å¤‰æ›ã™ã‚‹å‡¦ç†
         /// </summary>
-        /// <param name="baseTiming">“ü—Í‚µ‚½ƒ^ƒCƒ~ƒ“ƒO (mm:ss:fff (notes))</param>
-        /// <param name="returnTiming">•ÏŠ·Œã‚Ìƒ^ƒCƒ~ƒ“ƒO (mmssfff)</param>
-        /// <returns>ˆ—‚ª³íI—¹‚µ‚½ê‡‚ÍtrueAˆÙíI—¹‚µ‚½ê‡‚Ífalse</returns>
+        /// <param name="baseTiming">å…¥åŠ›ã—ãŸã‚¿ã‚¤ãƒŸãƒ³ã‚° (mm:ss:fff (notes))</param>
+        /// <param name="returnTiming">å¤‰æ›å¾Œã®ã‚¿ã‚¤ãƒŸãƒ³ã‚° (mmssfff)</param>
+        /// <returns>å‡¦ç†ãŒæ­£å¸¸çµ‚äº†ã—ãŸå ´åˆã¯trueã€ç•°å¸¸çµ‚äº†ã—ãŸå ´åˆã¯false</returns>
         private bool ConvertTiming(string baseTiming, ref int returnTiming)
         {
             try
@@ -260,7 +260,7 @@ namespace osuTaikoSvTool
             }
             catch (Exception e)
             {
-                WriteErrorMessage("—áŠOƒGƒ‰[‚ª”­¶‚µ‚Ü‚µ‚½B");
+                WriteErrorMessage("ä¾‹å¤–ã‚¨ãƒ©ãƒ¼ãŒç™ºç”Ÿã—ã¾ã—ãŸã€‚");
                 WriteErrorMessage(e.Message + "\n" + e.StackTrace);
                 return false;
             }
@@ -282,7 +282,7 @@ namespace osuTaikoSvTool
             }
             catch (Exception e)
             {
-                WriteErrorMessage("—áŠOƒGƒ‰[‚ª”­¶‚µ‚Ü‚µ‚½B");
+                WriteErrorMessage("ä¾‹å¤–ã‚¨ãƒ©ãƒ¼ãŒç™ºç”Ÿã—ã¾ã—ãŸã€‚");
                 WriteErrorMessage(e.Message + "\n" + e.StackTrace);
                 return false;
             }
@@ -294,7 +294,7 @@ namespace osuTaikoSvTool
         {
             try
             {
-                // ƒoƒŠƒf[ƒVƒ‡ƒ“ƒ`ƒFƒbƒN(‹ó—“)
+                // ãƒãƒªãƒ‡ãƒ¼ã‚·ãƒ§ãƒ³ãƒã‚§ãƒƒã‚¯(ç©ºæ¬„)
                 if (timingFrom.Text == "" || timingFrom.Text == null ||
                     timingTo.Text == "" || timingTo.Text == null ||
                     (((SVFrom.Text == "" || SVFrom.Text == null) &&
@@ -304,7 +304,7 @@ namespace osuTaikoSvTool
                     path == "" || path == null
                     )
                 {
-                    throw new Exception("ƒoƒŠƒf[ƒVƒ‡ƒ“ƒGƒ‰[‚ª”­¶‚µ‚Ü‚µ‚½B");
+                    throw new Exception("ãƒãƒªãƒ‡ãƒ¼ã‚·ãƒ§ãƒ³ã‚¨ãƒ©ãƒ¼ãŒç™ºç”Ÿã—ã¾ã—ãŸã€‚");
                 }
                 if (offsetTextbox.Text == "" || offsetTextbox.Text == null)
                 {
@@ -315,20 +315,20 @@ namespace osuTaikoSvTool
                     offsetValue = Convert.ToInt32(offsetTextbox.Text);
                 }
 
-                // ƒoƒŠƒf[ƒVƒ‡ƒ“ƒ`ƒFƒbƒN(Timing‚Ì“ü—ÍƒtƒH[ƒ}ƒbƒg)
+                // ãƒãƒªãƒ‡ãƒ¼ã‚·ãƒ§ãƒ³ãƒã‚§ãƒƒã‚¯(Timingã®å…¥åŠ›ãƒ•ã‚©ãƒ¼ãƒãƒƒãƒˆ)
                 if (!ConvertTiming(timingFrom.Text, ref inputTimings[0]) || !ConvertTiming(timingTo.Text, ref inputTimings[1]))
                 {
-                    throw new Exception("ƒoƒŠƒf[ƒVƒ‡ƒ“ƒGƒ‰[‚ª”­¶‚µ‚Ü‚µ‚½B");
+                    throw new Exception("ãƒãƒªãƒ‡ãƒ¼ã‚·ãƒ§ãƒ³ã‚¨ãƒ©ãƒ¼ãŒç™ºç”Ÿã—ã¾ã—ãŸã€‚");
                 }
-                // ƒoƒŠƒf[ƒVƒ‡ƒ“ƒ`ƒFƒbƒN(Timing‚ªFrom>To)
+                // ãƒãƒªãƒ‡ãƒ¼ã‚·ãƒ§ãƒ³ãƒã‚§ãƒƒã‚¯(TimingãŒFrom>To)
                 if (inputTimings[0] > inputTimings[1])
                 {
-                    throw new Exception("ƒoƒŠƒf[ƒVƒ‡ƒ“ƒGƒ‰[‚ª”­¶‚µ‚Ü‚µ‚½B");
+                    throw new Exception("ãƒãƒªãƒ‡ãƒ¼ã‚·ãƒ§ãƒ³ã‚¨ãƒ©ãƒ¼ãŒç™ºç”Ÿã—ã¾ã—ãŸã€‚");
                 }
             }
             catch (Exception e)
             {
-                WriteErrorMessage("—áŠOƒGƒ‰[‚ª”­¶‚µ‚Ü‚µ‚½B");
+                WriteErrorMessage("ä¾‹å¤–ã‚¨ãƒ©ãƒ¼ãŒç™ºç”Ÿã—ã¾ã—ãŸã€‚");
                 WriteErrorMessage(e.Message + "\n" + e.StackTrace);
                 return false;
             }
@@ -369,7 +369,7 @@ namespace osuTaikoSvTool
         }
 
         /// <summary>
-        /// ’Ç‰Áƒ{ƒ^ƒ“‰Ÿ‰º‚Ìˆ—
+        /// è¿½åŠ ãƒœã‚¿ãƒ³æŠ¼ä¸‹æ™‚ã®å‡¦ç†
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -385,7 +385,7 @@ namespace osuTaikoSvTool
                 int[] inputTimings = new int[2];
                 if (!validationCheck(ref inputTimings))
                 {
-                    WriteInfoMessage("ˆ—‚É¸”s‚µ‚Ü‚µ‚½B");
+                    WriteInfoMessage("å‡¦ç†ã«å¤±æ•—ã—ã¾ã—ãŸã€‚");
                     return;
                 }
 
@@ -431,24 +431,24 @@ namespace osuTaikoSvTool
                 }
                 if (AddGreenLine(timingPointsList, hitObjectsList, inputTimings))
                 {
-                    if (MessageBox.Show("ˆ—‚É¬Œ÷‚µ‚Ü‚µ‚½B\nCtrl+L‚ğ‰Ÿ‚µA•ˆ–Ê‚ğXV‚µ‚Ä‚­‚¾‚³‚¢B", "Œ‹‰Ê", MessageBoxButtons.OK, MessageBoxIcon.Asterisk) == DialogResult.OK)
+                    if (MessageBox.Show("å‡¦ç†ã«æˆåŠŸã—ã¾ã—ãŸã€‚\nCtrl+Lã‚’æŠ¼ã—ã€è­œé¢ã‚’æ›´æ–°ã—ã¦ãã ã•ã„ã€‚", "çµæœ", MessageBoxButtons.OK, MessageBoxIcon.Asterisk) == DialogResult.OK)
                     {
-                        WriteInfoMessage("ˆ—‚É¬Œ÷‚µ‚Ü‚µ‚½B");
+                        WriteInfoMessage("å‡¦ç†ã«æˆåŠŸã—ã¾ã—ãŸã€‚");
                         return;
                     };
                 }
                 else
                 {
-                    if (MessageBox.Show("ˆ—‚É¬Œ÷‚µ‚Ü‚µ‚½B\nCtrl+L‚ğ‰Ÿ‚µA•ˆ–Ê‚ğXV‚µ‚Ä‚­‚¾‚³‚¢B", "Œ‹‰Ê", MessageBoxButtons.OK, MessageBoxIcon.Asterisk) == DialogResult.OK)
+                    if (MessageBox.Show("å‡¦ç†ã«æˆåŠŸã—ã¾ã—ãŸã€‚\nCtrl+Lã‚’æŠ¼ã—ã€è­œé¢ã‚’æ›´æ–°ã—ã¦ãã ã•ã„ã€‚", "çµæœ", MessageBoxButtons.OK, MessageBoxIcon.Asterisk) == DialogResult.OK)
                     {
-                        WriteInfoMessage("ˆ—‚É¸”s‚µ‚Ü‚µ‚½B");
+                        WriteInfoMessage("å‡¦ç†ã«å¤±æ•—ã—ã¾ã—ãŸã€‚");
                         return;
                     }
                 }
             }
             catch (Exception ex)
             {
-                WriteErrorMessage("—áŠOƒGƒ‰[‚ª”­¶‚µ‚Ü‚µ‚½B");
+                WriteErrorMessage("ä¾‹å¤–ã‚¨ãƒ©ãƒ¼ãŒç™ºç”Ÿã—ã¾ã—ãŸã€‚");
                 WriteErrorMessage(ex.Message + "\n" + ex.StackTrace);
                 return;
             }
@@ -462,11 +462,11 @@ namespace osuTaikoSvTool
             int[] inputTimings = new int[2];
             if (!validationCheck(ref inputTimings))
             {
-                WriteInfoMessage("ˆ—‚É¸”s‚µ‚Ü‚µ‚½B");
+                WriteInfoMessage("å‡¦ç†ã«å¤±æ•—ã—ã¾ã—ãŸã€‚");
                 return;
             }
 
-            // 1s‚¸‚Â“Ç‚İ‚ñ‚Å•\¦
+            // 1è¡Œãšã¤èª­ã¿è¾¼ã‚“ã§è¡¨ç¤º
             foreach (var line in lines)
             {
                 if (line == "")
@@ -497,17 +497,17 @@ namespace osuTaikoSvTool
             }
             if (ModifyGreenLine(timingPointsList, inputTimings))
             {
-                if (MessageBox.Show("ˆ—‚É¬Œ÷‚µ‚Ü‚µ‚½B\nCtrl+L‚ğ‰Ÿ‚µA•ˆ–Ê‚ğXV‚µ‚Ä‚­‚¾‚³‚¢B", "Œ‹‰Ê", MessageBoxButtons.OK, MessageBoxIcon.Asterisk) == DialogResult.OK)
+                if (MessageBox.Show("å‡¦ç†ã«æˆåŠŸã—ã¾ã—ãŸã€‚\nCtrl+Lã‚’æŠ¼ã—ã€è­œé¢ã‚’æ›´æ–°ã—ã¦ãã ã•ã„ã€‚", "çµæœ", MessageBoxButtons.OK, MessageBoxIcon.Asterisk) == DialogResult.OK)
                 {
-                    WriteInfoMessage("ˆ—‚É¬Œ÷‚µ‚Ü‚µ‚½B");
+                    WriteInfoMessage("å‡¦ç†ã«æˆåŠŸã—ã¾ã—ãŸã€‚");
                     return;
                 };
             }
             else
             {
-                if (MessageBox.Show("ˆ—‚É¸”s‚µ‚Ü‚µ‚½B", "Œ‹‰Ê", MessageBoxButtons.OK, MessageBoxIcon.Asterisk) == DialogResult.OK)
+                if (MessageBox.Show("å‡¦ç†ã«å¤±æ•—ã—ã¾ã—ãŸã€‚", "çµæœ", MessageBoxButtons.OK, MessageBoxIcon.Asterisk) == DialogResult.OK)
                 {
-                    WriteInfoMessage("ˆ—‚É¸”s‚µ‚Ü‚µ‚½B");
+                    WriteInfoMessage("å‡¦ç†ã«å¤±æ•—ã—ã¾ã—ãŸã€‚");
                     return;
                 }
             }
@@ -523,11 +523,11 @@ namespace osuTaikoSvTool
                 int[] inputTimings = new int[2];
                 if (!validationCheck(ref inputTimings))
                 {
-                    WriteInfoMessage("ˆ—‚É¸”s‚µ‚Ü‚µ‚½B");
+                    WriteInfoMessage("å‡¦ç†ã«å¤±æ•—ã—ã¾ã—ãŸã€‚");
                     return;
                 }
 
-                // 1s‚¸‚Â“Ç‚İ‚ñ‚Å•\¦
+                // 1è¡Œãšã¤èª­ã¿è¾¼ã‚“ã§è¡¨ç¤º
                 foreach (var line in lines)
                 {
                     if (line == "")
@@ -558,47 +558,47 @@ namespace osuTaikoSvTool
                 }
                 if (RemoveGreenLine(timingPointsList, inputTimings))
                 {
-                    if (MessageBox.Show("ˆ—‚É¬Œ÷‚µ‚Ü‚µ‚½B\nCtrl+L‚ğ‰Ÿ‚µA•ˆ–Ê‚ğXV‚µ‚Ä‚­‚¾‚³‚¢B", "Œ‹‰Ê", MessageBoxButtons.OK, MessageBoxIcon.Asterisk) == DialogResult.OK)
+                    if (MessageBox.Show("å‡¦ç†ã«æˆåŠŸã—ã¾ã—ãŸã€‚\nCtrl+Lã‚’æŠ¼ã—ã€è­œé¢ã‚’æ›´æ–°ã—ã¦ãã ã•ã„ã€‚", "çµæœ", MessageBoxButtons.OK, MessageBoxIcon.Asterisk) == DialogResult.OK)
                     {
-                        WriteInfoMessage("ˆ—‚É¬Œ÷‚µ‚Ü‚µ‚½B");
+                        WriteInfoMessage("å‡¦ç†ã«æˆåŠŸã—ã¾ã—ãŸã€‚");
                         return;
                     };
                 }
                 else
                 {
-                    if (MessageBox.Show("ˆ—‚É¸”s‚µ‚Ü‚µ‚½B", "Œ‹‰Ê", MessageBoxButtons.OK, MessageBoxIcon.Asterisk) == DialogResult.OK)
+                    if (MessageBox.Show("å‡¦ç†ã«å¤±æ•—ã—ã¾ã—ãŸã€‚", "çµæœ", MessageBoxButtons.OK, MessageBoxIcon.Asterisk) == DialogResult.OK)
                     {
-                        WriteInfoMessage("ˆ—‚É¸”s‚µ‚Ü‚µ‚½B");
+                        WriteInfoMessage("å‡¦ç†ã«å¤±æ•—ã—ã¾ã—ãŸã€‚");
                         return;
                     }
                 }
             }
             catch (Exception ex)
             {
-                if (MessageBox.Show("•ˆ–Ê‚ğ‘I‘ğ‚µ‚Ä‚­‚¾‚³‚¢B", "ƒGƒ‰[", MessageBoxButtons.OK, MessageBoxIcon.Exclamation) == DialogResult.OK)
+                if (MessageBox.Show("è­œé¢ã‚’é¸æŠã—ã¦ãã ã•ã„ã€‚", "ã‚¨ãƒ©ãƒ¼", MessageBoxButtons.OK, MessageBoxIcon.Exclamation) == DialogResult.OK)
                 {
-                    WriteErrorMessage("—áŠOƒGƒ‰[‚ª”­¶‚µ‚Ü‚µ‚½B");
+                    WriteErrorMessage("ä¾‹å¤–ã‚¨ãƒ©ãƒ¼ãŒç™ºç”Ÿã—ã¾ã—ãŸã€‚");
                     WriteErrorMessage(ex.Message + "\n" + ex.StackTrace);
-                    WriteInfoMessage("ˆ—‚É¸”s‚µ‚Ü‚µ‚½B");
+                    WriteInfoMessage("å‡¦ç†ã«å¤±æ•—ã—ã¾ã—ãŸã€‚");
                     return;
                 }
                 return;
             }
         }
 
-        // ƒfƒoƒbƒO—p
+        // ãƒ‡ãƒãƒƒã‚°ç”¨
         //bool AddGreenLine(List<TimingPoint> timingPointsList, List<HitObject> hitObjectsList, int[] inputTimings)
         //{
         //    return true;
         //}
 
         /// <summary>
-        /// —Îü’Ç‰Áˆ—(Add)
+        /// ç·‘ç·šè¿½åŠ å‡¦ç†(Add)
         /// </summary>
-        /// <param name="timingPointsList">ƒ^ƒCƒ~ƒ“ƒOƒ|ƒCƒ“ƒg‚ÌƒŠƒXƒg</param>
-        /// <param name="hitObjectsList">ƒqƒbƒgƒIƒuƒWƒFƒNƒg‚ÌƒŠƒXƒg</param>
-        /// <param name="inputTimings">ƒ†[ƒU[‚ª“ü—Í‚µ‚½ƒ^ƒCƒ~ƒ“ƒO([0]:n“_ [1]:I“_)</param>
-        /// <returns>ˆ—‚ª³íI—¹‚µ‚½ê‡‚ÍtrueAˆÙíI—¹‚µ‚½ê‡‚Ífalse</returns>
+        /// <param name="timingPointsList">ã‚¿ã‚¤ãƒŸãƒ³ã‚°ãƒã‚¤ãƒ³ãƒˆã®ãƒªã‚¹ãƒˆ</param>
+        /// <param name="hitObjectsList">ãƒ’ãƒƒãƒˆã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ãƒªã‚¹ãƒˆ</param>
+        /// <param name="inputTimings">ãƒ¦ãƒ¼ã‚¶ãƒ¼ãŒå…¥åŠ›ã—ãŸã‚¿ã‚¤ãƒŸãƒ³ã‚°([0]:å§‹ç‚¹ [1]:çµ‚ç‚¹)</param>
+        /// <returns>å‡¦ç†ãŒæ­£å¸¸çµ‚äº†ã—ãŸå ´åˆã¯trueã€ç•°å¸¸çµ‚äº†ã—ãŸå ´åˆã¯false</returns>
         /// 
         bool AddGreenLine(List<TimingPoint> timingPointsList, List<HitObject> hitObjectsList, int[] inputTimings)
         {
@@ -618,9 +618,9 @@ namespace osuTaikoSvTool
 
             try
             {
-                // Œ»‚Ìæ“¾
+                // ç¾æ™‚åˆ»ã®å–å¾—
                 currentDateTime = DateTime.Now;
-                // Še‹È‚Ì‹È–¼‚Ìæ“¾
+                // å„æ›²ã®æ›²åã®å–å¾—
                 int slashIndex = Path.GetDirectoryName(path).LastIndexOf("\\");
 
                 if (slashIndex != -1)
@@ -629,18 +629,18 @@ namespace osuTaikoSvTool
                 }
                 if (!Directory.Exists(Directory.GetCurrentDirectory() + BACKUP_DIRECTORY + "\\" + mapTitleDirectory))
                 {
-                    // ƒoƒbƒNƒAƒbƒvƒtƒHƒ‹ƒ_‚Ìì¬
+                    // ãƒãƒƒã‚¯ã‚¢ãƒƒãƒ—ãƒ•ã‚©ãƒ«ãƒ€ã®ä½œæˆ
                     Directory.CreateDirectory(Directory.GetCurrentDirectory() + BACKUP_DIRECTORY + "\\" + mapTitleDirectory);
                 }
                 var currentPath = Directory.GetCurrentDirectory() + BACKUP_DIRECTORY + "\\" + mapTitleDirectory + "\\" + String.Format("{0:yyyy_MM_dd_HH_mm_ss_fff}", currentDateTime) + OSU_EXTENSION;
-                // ƒoƒbƒNƒAƒbƒvƒtƒHƒ‹ƒ_‚ÉŒ»İ‚Ìosuƒtƒ@ƒCƒ‹‚ğƒRƒs[
+                // ãƒãƒƒã‚¯ã‚¢ãƒƒãƒ—ãƒ•ã‚©ãƒ«ãƒ€ã«ç¾åœ¨ã®osuãƒ•ã‚¡ã‚¤ãƒ«ã‚’ã‚³ãƒ”ãƒ¼
                 File.Copy(path, currentPath);
 
                 timingPointsList = timingPointsList.OrderBy(t => t.Time).ThenByDescending(i => i.Uninherited).ToList();
                 hitObjectsList = hitObjectsList.OrderBy(t => t.Time).ToList();
                 for (global::System.Int32 i = (timingPointsList.Count) - (1); i >= 0; i--)
                 {
-                    // “ü—Í’l‚Ìn“_‚Ì1ŒÂ‘O‚ÌTimingPoint‚ğ‹‚ß‚é
+                    // å…¥åŠ›å€¤ã®å§‹ç‚¹ã®1å€‹å‰ã®TimingPointã‚’æ±‚ã‚ã‚‹
                     if (timingPointsList[i - 1].Time < inputTimings[0])
                     {
                         outRangeIndex = i - 1;
@@ -653,7 +653,7 @@ namespace osuTaikoSvTool
                             break;
                         }
                     }
-                    // “ü—Í’l‚Ìn“_‚ÌBPM‚ğ‹‚ß‚é
+                    // å…¥åŠ›å€¤ã®å§‹ç‚¹ã®BPMã‚’æ±‚ã‚ã‚‹
                     if ((timingPointsList[i].Uninherited == 1) && (timingPointsList[i].Time <= inputTimings[1]))
                     {
                         if (timingPointsList[i].Time <= inputTimings[0])
@@ -664,14 +664,14 @@ namespace osuTaikoSvTool
 
                 }
                 bool isIgnore = false;
-                // ‘ÎÛ‚Æ‚È‚éƒqƒbƒgƒIƒuƒWƒFƒNƒg‚ÌZo
+                // å¯¾è±¡ã¨ãªã‚‹ãƒ’ãƒƒãƒˆã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ç®—å‡º
                 for (global::System.Int32 i = 0; i < hitObjectsList.Count; i++)
                 {
                     if ((hitObjectsList[i].Time >= inputTimings[0]) && (hitObjectsList[i].Time <= inputTimings[1]))
                     {
                         if (isCertainObject)
                         {
-                            // Slider‚Ìê‡
+                            // Sliderã®å ´åˆ
                             if (((hitObjectsList[i].Type & 0b00000010) != 0) &&
                                 ((hitObjectsList[i].HitSound & 0b00000001) != 0) &&
                                 isSliderSelected)
@@ -680,7 +680,7 @@ namespace osuTaikoSvTool
                                 targetHitObjectList.Add(hitObjectsList[i]);
                                 continue;
                             }
-                            // Slider(finisher)‚Ìê‡
+                            // Slider(finisher)ã®å ´åˆ
                             if (((hitObjectsList[i].Type & 0b00000010) != 0) &&
                                 ((hitObjectsList[i].HitSound & 0b00000100) != 0) &&
                                 isSliderSelected)
@@ -689,7 +689,7 @@ namespace osuTaikoSvTool
                                 targetHitObjectList.Add(hitObjectsList[i]);
                                 continue;
                             }
-                            // Dong‚Ìê‡
+                            // Dongã®å ´åˆ
                             if (((hitObjectsList[i].HitSound & 0b11111111) == 0) &&
                                 isDSelected)
                             {
@@ -697,7 +697,7 @@ namespace osuTaikoSvTool
                                 targetHitObjectList.Add(hitObjectsList[i]);
                                 continue;
                             }
-                            // Ka‚Ìê‡
+                            // Kaã®å ´åˆ
                             if ((((hitObjectsList[i].HitSound & 0b00000010) != 0) ||
                                 ((hitObjectsList[i].HitSound & 0b00001000) != 0)) &&
                                 isKSelected)
@@ -706,7 +706,7 @@ namespace osuTaikoSvTool
                                 targetHitObjectList.Add(hitObjectsList[i]);
                                 continue;
                             }
-                            // Dong(finisher)‚Ìê‡
+                            // Dong(finisher)ã®å ´åˆ
                             if (((hitObjectsList[i].HitSound & 0b11111011) == 0) &&
                                 ((hitObjectsList[i].HitSound & 0b00000100) != 0) &&
                                 isBigDSelected)
@@ -715,7 +715,7 @@ namespace osuTaikoSvTool
                                 targetHitObjectList.Add(hitObjectsList[i]);
                                 continue;
                             }
-                            // Ka(finisher)‚Ìê‡
+                            // Ka(finisher)ã®å ´åˆ
                             if (((((hitObjectsList[i].HitSound & 0b00000010) != 0) &&
                                 ((hitObjectsList[i].HitSound & 0b00000100) != 0)) ||
                                 (((hitObjectsList[i].HitSound & 0b00000100) != 0) &&
@@ -769,7 +769,7 @@ namespace osuTaikoSvTool
                         }
                     }
                 }
-                // ‰ŠúBPM,Œ»BPM,ÅIBPMî•ñ‚Ìæ“¾
+                // åˆæœŸBPM,ç¾BPM,æœ€çµ‚BPMæƒ…å ±ã®å–å¾—
                 baseBPM = 60000 / bpmList[0].BeatLength;
                 currentBPM = 60000 / bpmList[0].BeatLength;
                 lastBPM = 60000 / bpmList[bpmList.Count - 1].BeatLength;
@@ -779,7 +779,7 @@ namespace osuTaikoSvTool
                     double[] inputSVs = { Convert.ToDouble(SVFrom.Text), Convert.ToDouble(SVTo.Text) };
                     switch (calculationCode)
                     {
-                        // “™·SV
+                        // ç­‰å·®SV
                         case 1:
                             double art_svPerMs = (inputSVs[1] - inputSVs[0]) / (inputTimings[1] - inputTimings[0]);
                             for (global::System.Int32 i = 0; i < bpmList.Count; i++)
@@ -805,7 +805,7 @@ namespace osuTaikoSvTool
                             }
 
                             break;
-                        // “™”äSV
+                        // ç­‰æ¯”SV
                         case 2:
                             double geo_svPerMs = Math.Pow((inputSVs[1] - inputSVs[0]), 1 / (inputTimings[1] - inputTimings[0]));
                             for (global::System.Int32 i = 0; i < bpmList.Count; i++)
@@ -878,7 +878,7 @@ namespace osuTaikoSvTool
             }
             catch (Exception e)
             {
-                WriteErrorMessage("—áŠOƒGƒ‰[‚ª”­¶‚µ‚Ü‚µ‚½B");
+                WriteErrorMessage("ä¾‹å¤–ã‚¨ãƒ©ãƒ¼ãŒç™ºç”Ÿã—ã¾ã—ãŸã€‚");
                 WriteErrorMessage(e.Message + "\n" + e.StackTrace);
                 return false;
             }
@@ -898,9 +898,9 @@ namespace osuTaikoSvTool
             string mapTitleDirectory = "";
             try
             {
-                // Œ»‚Ìæ“¾
+                // ç¾æ™‚åˆ»ã®å–å¾—
                 currentDateTime = DateTime.Now;
-                // Še‹È‚Ì‹È–¼‚Ìæ“¾
+                // å„æ›²ã®æ›²åã®å–å¾—
                 int slashIndex = Path.GetDirectoryName(path).LastIndexOf("\\");
 
                 if (slashIndex != -1)
@@ -909,13 +909,13 @@ namespace osuTaikoSvTool
                 }
                 if (!Directory.Exists(Directory.GetCurrentDirectory() + BACKUP_DIRECTORY + "\\" + mapTitleDirectory))
                 {
-                    // ƒoƒbƒNƒAƒbƒvƒtƒHƒ‹ƒ_‚Ìì¬
+                    // ãƒãƒƒã‚¯ã‚¢ãƒƒãƒ—ãƒ•ã‚©ãƒ«ãƒ€ã®ä½œæˆ
                     Directory.CreateDirectory(Directory.GetCurrentDirectory() + BACKUP_DIRECTORY + "\\" + mapTitleDirectory);
                 }
                 var currentPath = Directory.GetCurrentDirectory() + BACKUP_DIRECTORY + "\\" + mapTitleDirectory + "\\" + String.Format("{0:yyyy_MM_dd_HH_mm_ss_fff}", currentDateTime) + OSU_EXTENSION;
-                // ƒoƒbƒNƒAƒbƒvƒtƒHƒ‹ƒ_‚ÉŒ»İ‚Ìosuƒtƒ@ƒCƒ‹‚ğƒRƒs[
+                // ãƒãƒƒã‚¯ã‚¢ãƒƒãƒ—ãƒ•ã‚©ãƒ«ãƒ€ã«ç¾åœ¨ã®osuãƒ•ã‚¡ã‚¤ãƒ«ã‚’ã‚³ãƒ”ãƒ¼
                 File.Copy(path, currentPath);
-                // —]•ª‚Ès‚ÌÁ‹‚·‚é
+                // ä½™åˆ†ãªè¡Œã®æ¶ˆå»ã™ã‚‹
                 foreach (var objects in hitObjectsList)
                 {
                     if (objects == "")
@@ -934,7 +934,7 @@ namespace osuTaikoSvTool
                     }
                     List<string> splitTiming = new List<string>(timingPointsList[i].Split(','));
                     splitTimingList.Add(splitTiming);
-                    // æ“¾‚µ‚½ƒ^ƒCƒ~ƒ“ƒO‚ªƒ†[ƒU[‚ª“ü—Í‚µ‚½ŠJnˆÊ’u‚æ‚èŒã‚¾‚Á‚½ê‡
+                    // å–å¾—ã—ãŸã‚¿ã‚¤ãƒŸãƒ³ã‚°ãŒãƒ¦ãƒ¼ã‚¶ãƒ¼ãŒå…¥åŠ›ã—ãŸé–‹å§‹ä½ç½®ã‚ˆã‚Šå¾Œã ã£ãŸå ´åˆ
                     if ((Convert.ToInt32(splitTiming[0]) >= inputTimings[0]) && !isRangeStart)
                     {
                         for (int j = i; j >= 0; j--)
@@ -1043,7 +1043,7 @@ namespace osuTaikoSvTool
                     double[] inputSVs = { Convert.ToDouble(SVFrom.Text), Convert.ToDouble(SVTo.Text) };
                     switch (calculationCode)
                     {
-                        //“™·SV
+                        //ç­‰å·®SV
                         case 1:
                             double art_svPerMs = (inputSVs[1] * (Convert.ToDouble(rangeRedLines[0][1]) / Convert.ToDouble(rangeBPMList[rangeBPMList.Count - 1])) - inputSVs[0]) / (Convert.ToDouble(inputTimings[1]) - Convert.ToDouble(inputTimings[0]));
                             for (int i = 0; i < timingList.Count; i++)
@@ -1058,7 +1058,7 @@ namespace osuTaikoSvTool
                                 }
                             }
                             break;
-                        //“™”äSV
+                        //ç­‰æ¯”SV
                         case 2:
                             double geo_svPerMs = Math.Pow((inputSVs[1] * (Convert.ToDouble(rangeRedLines[0][1]) / Convert.ToDouble(rangeBPMList[rangeBPMList.Count - 1]))) / inputSVs[0],
                                                           1 / (Convert.ToDouble(inputTimings[1]) - Convert.ToDouble(inputTimings[0])));
@@ -1124,7 +1124,7 @@ namespace osuTaikoSvTool
                 File.Delete(path);
                 var lines = File.ReadAllLines(currentPath);
                 StreamWriter file = new StreamWriter(path, true, Encoding.GetEncoding("utf-8"));
-                // 1s‚¸‚Â“Ç‚İ‚ñ‚Å•\¦
+                // 1è¡Œãšã¤èª­ã¿è¾¼ã‚“ã§è¡¨ç¤º
                 for (global::System.Int32 i = 0; i < lines.Length; i++)
                 {
                     file.WriteLine(lines[i]);
@@ -1214,18 +1214,18 @@ namespace osuTaikoSvTool
             }
             catch (Exception e)
             {
-                WriteErrorMessage("—áŠOƒGƒ‰[‚ª”­¶‚µ‚Ü‚µ‚½B");
+                WriteErrorMessage("ä¾‹å¤–ã‚¨ãƒ©ãƒ¼ãŒç™ºç”Ÿã—ã¾ã—ãŸã€‚");
                 WriteErrorMessage(e.Message + "\n" + e.StackTrace);
                 return false;
             }
         }
 
         /// <summary>
-        /// —Îü•ÏXˆ—(Modify)
+        /// ç·‘ç·šå¤‰æ›´å‡¦ç†(Modify)
         /// </summary>
-        /// <param name="timingPointsList">ƒ^ƒCƒ~ƒ“ƒOƒ|ƒCƒ“ƒg‚ÌƒŠƒXƒg</param>
-        /// <param name="inputTimings">ƒ†[ƒU[‚ª“ü—Í‚µ‚½ƒ^ƒCƒ~ƒ“ƒO([0]:n“_ [1]:I“_)</param>
-        /// <returns>ˆ—‚ª³íI—¹‚µ‚½ê‡‚ÍtrueAˆÙíI—¹‚µ‚½ê‡‚Ífalse</returns>
+        /// <param name="timingPointsList">ã‚¿ã‚¤ãƒŸãƒ³ã‚°ãƒã‚¤ãƒ³ãƒˆã®ãƒªã‚¹ãƒˆ</param>
+        /// <param name="inputTimings">ãƒ¦ãƒ¼ã‚¶ãƒ¼ãŒå…¥åŠ›ã—ãŸã‚¿ã‚¤ãƒŸãƒ³ã‚°([0]:å§‹ç‚¹ [1]:çµ‚ç‚¹)</param>
+        /// <returns>å‡¦ç†ãŒæ­£å¸¸çµ‚äº†ã—ãŸå ´åˆã¯trueã€ç•°å¸¸çµ‚äº†ã—ãŸå ´åˆã¯false</returns>
         bool ModifyGreenLine(List<TimingPoint> timingPointsList, int[] inputTimings)
         {
             List<TimingPoint> redLines = new List<TimingPoint>();
@@ -1259,8 +1259,8 @@ namespace osuTaikoSvTool
                 var currentPath = Directory.GetCurrentDirectory() + BACKUP_DIRECTORY + "\\" + mapTitleDirectory + "\\" + String.Format("{0:yyyy_MM_dd_HH_mm_ss_fff}", currentDateTime) + OSU_EXTENSION;
                 File.Copy(path, currentPath);
                 timingPointsList = timingPointsList.OrderBy(t => t.Time).ThenByDescending(i => i.Uninherited).ToList();
-                // Œã‚ë‚©‚çÔü‚Æ—Îü‚ğ‘I‚è•ª‚¯‚é
-                // ƒ‹[ƒvI—¹ğŒ : Ôü‚Ìƒ^ƒCƒ~ƒ“ƒO‚ªn“_‚Ìƒ^ƒCƒ~ƒ“ƒO‚ğã‰ñ‚Á‚½ê‡
+                // å¾Œã‚ã‹ã‚‰èµ¤ç·šã¨ç·‘ç·šã‚’é¸ã‚Šåˆ†ã‘ã‚‹
+                // ãƒ«ãƒ¼ãƒ—çµ‚äº†æ¡ä»¶ : èµ¤ç·šã®ã‚¿ã‚¤ãƒŸãƒ³ã‚°ãŒå§‹ç‚¹ã®ã‚¿ã‚¤ãƒŸãƒ³ã‚°ã‚’ä¸Šå›ã£ãŸå ´åˆ
                 for (global::System.Int32 i = (timingPointsList.Count) - (1); i >= 0; i--)
                 {
                     if (timingPointsList[i - 1].Time < inputTimings[0])
@@ -1276,7 +1276,7 @@ namespace osuTaikoSvTool
                         }
                     }
                 }
-                // I“_”ÍˆÍŠO‚ÌÔüA—Îü‚Ìœ‹
+                // çµ‚ç‚¹ç¯„å›²å¤–ã®èµ¤ç·šã€ç·‘ç·šã®é™¤å»
                 for (global::System.Int32 i = (redLines.Count) - (1); i >= 0; i--)
                 {
                     if (redLines[i].Time <= inputTimings[1])
@@ -1293,18 +1293,18 @@ namespace osuTaikoSvTool
                     }
                     greenLines.RemoveAt(i);
                 }
-                // ‰ŠúBPM,Œ»BPM,ÅIBPMî•ñ‚Ìæ“¾
+                // åˆæœŸBPM,ç¾BPM,æœ€çµ‚BPMæƒ…å ±ã®å–å¾—
                 baseBPM = 60000 / redLines[0].BeatLength;
                 currentBPM = 60000 / redLines[0].BeatLength;
                 lastBPM = 60000 / redLines[redLines.Count - 1].BeatLength;
-                // SVì¬ˆ—
+                // SVä½œæˆå‡¦ç†
                 if (!isSV)
                 {
                     double[] inputSVs = { Convert.ToDouble(SVFrom.Text), Convert.ToDouble(SVTo.Text) };
                     int currentGreenLineIndex = 0;
                     switch (calculationCode)
                     {
-                        // “™·SV
+                        // ç­‰å·®SV
                         case 1:
                             double art_svPerMs = (inputSVs[1] * (lastBPM / currentBPM) - inputSVs[0]) / (inputTimings[1] - inputTimings[0]);
                             for (global::System.Int32 i = 0; i < redLines.Count; i++)
@@ -1325,7 +1325,7 @@ namespace osuTaikoSvTool
                             }
 
                             break;
-                        // “™”äSV
+                        // ç­‰æ¯”SV
                         case 2:
                             double geo_svPerMs = Math.Pow((inputSVs[1] * (lastBPM / currentBPM)) / inputSVs[0],
                                                            1 / (inputTimings[1] - inputTimings[0]));
@@ -1420,33 +1420,33 @@ namespace osuTaikoSvTool
                     }
                 }
                 file.Close();
-                // •ÏX‘O‚Ìƒtƒ@ƒCƒ‹‚ğíœ‚·‚é
+                // å¤‰æ›´å‰ã®ãƒ•ã‚¡ã‚¤ãƒ«ã‚’å‰Šé™¤ã™ã‚‹
                 File.Delete(path);
-                // ì¬‚µ‚½ƒtƒ@ƒCƒ‹‚ğsongƒtƒHƒ‹ƒ_‚ÉˆÚ“®‚·‚é
+                // ä½œæˆã—ãŸãƒ•ã‚¡ã‚¤ãƒ«ã‚’songãƒ•ã‚©ãƒ«ãƒ€ã«ç§»å‹•ã™ã‚‹
                 File.Move(workPath, path);
                 return true;
             }
             catch (Exception e)
             {
-                WriteErrorMessage("—áŠOƒGƒ‰[‚ª”­¶‚µ‚Ü‚µ‚½B");
+                WriteErrorMessage("ä¾‹å¤–ã‚¨ãƒ©ãƒ¼ãŒç™ºç”Ÿã—ã¾ã—ãŸã€‚");
                 WriteErrorMessage(e.Message + "\n" + e.StackTrace);
                 return false;
             }
         }
 
         /// <summary>
-        /// —Îüíœˆ—(Remove)
+        /// ç·‘ç·šå‰Šé™¤å‡¦ç†(Remove)
         /// </summary>
-        /// <param name="timingPointsList">ƒ^ƒCƒ~ƒ“ƒOƒ|ƒCƒ“ƒg‚ÌƒŠƒXƒg</param>
-        /// <param name="inputTimings">ƒ†[ƒU[‚ª“ü—Í‚µ‚½ƒ^ƒCƒ~ƒ“ƒO([0]:n“_ [1]:I“_)</param>
-        /// <returns>ˆ—‚ª³íI—¹‚µ‚½ê‡‚ÍtrueAˆÙíI—¹‚µ‚½ê‡‚Ífalse</returns>
+        /// <param name="timingPointsList">ã‚¿ã‚¤ãƒŸãƒ³ã‚°ãƒã‚¤ãƒ³ãƒˆã®ãƒªã‚¹ãƒˆ</param>
+        /// <param name="inputTimings">ãƒ¦ãƒ¼ã‚¶ãƒ¼ãŒå…¥åŠ›ã—ãŸã‚¿ã‚¤ãƒŸãƒ³ã‚°([0]:å§‹ç‚¹ [1]:çµ‚ç‚¹)</param>
+        /// <returns>å‡¦ç†ãŒæ­£å¸¸çµ‚äº†ã—ãŸå ´åˆã¯trueã€ç•°å¸¸çµ‚äº†ã—ãŸå ´åˆã¯false</returns>
         bool RemoveGreenLine(List<TimingPoint> timingPointsList, int[] inputTimings)
         {
             string mapTitleDirectory = "";
             TimingPoint timingBuff;
             try
             {
-                // ƒoƒbƒNƒAƒbƒvƒtƒ@ƒCƒ‹‚Ìì¬
+                // ãƒãƒƒã‚¯ã‚¢ãƒƒãƒ—ãƒ•ã‚¡ã‚¤ãƒ«ã®ä½œæˆ
                 currentDateTime = DateTime.Now;
                 int slashIndex = Path.GetDirectoryName(path).LastIndexOf("\\");
 
@@ -1461,11 +1461,11 @@ namespace osuTaikoSvTool
                 }
                 var currentPath = Directory.GetCurrentDirectory() + BACKUP_DIRECTORY + "\\" + mapTitleDirectory + "\\" + String.Format("{0:yyyy_MM_dd_HH_mm_ss_fff}", currentDateTime) + OSU_EXTENSION;
                 File.Copy(path, currentPath);
-                // w’è”ÍˆÍ“à‚Ì—Îü‚Ìíœ
+                // æŒ‡å®šç¯„å›²å†…ã®ç·‘ç·šã®å‰Šé™¤
                 for (global::System.Int32 i = (timingPointsList.Count) - (1); i >= 0; i--)
                 {
                     timingBuff = timingPointsList[i];
-                    // ‚à‚µÔü‚Å‚È‚¢‚©‚ÂAw’è”ÍˆÍ“à‚¾‚Á‚½‚çíœ
+                    // ã‚‚ã—èµ¤ç·šã§ãªã„ã‹ã¤ã€æŒ‡å®šç¯„å›²å†…ã ã£ãŸã‚‰å‰Šé™¤
                     if (timingBuff.Uninherited != 1)
                     {
                         if (timingBuff.Time >= inputTimings[0] &&
@@ -1478,7 +1478,7 @@ namespace osuTaikoSvTool
                 string timingStringBuff = "";
                 string workPath = Directory.GetCurrentDirectory() + WORK_DIRECTORY + "\\" + Path.GetFileName(path);
                 StreamWriter file = new StreamWriter(workPath, true, Encoding.GetEncoding("utf-8"));
-                // ƒtƒ@ƒCƒ‹o—Íˆ—
+                // ãƒ•ã‚¡ã‚¤ãƒ«å‡ºåŠ›å‡¦ç†
                 for (global::System.Int32 i = 0; i < lines.Length; i++)
                 {
                     if (lines[i] == "[HitObjects]")
@@ -1506,15 +1506,15 @@ namespace osuTaikoSvTool
                     }
                 }
                 file.Close();
-                // •ÏX‘O‚Ìƒtƒ@ƒCƒ‹‚ğíœ‚·‚é
+                // å¤‰æ›´å‰ã®ãƒ•ã‚¡ã‚¤ãƒ«ã‚’å‰Šé™¤ã™ã‚‹
                 File.Delete(path);
-                // ì¬‚µ‚½ƒtƒ@ƒCƒ‹‚ğsongƒtƒHƒ‹ƒ_‚ÉˆÚ“®‚·‚é
+                // ä½œæˆã—ãŸãƒ•ã‚¡ã‚¤ãƒ«ã‚’songãƒ•ã‚©ãƒ«ãƒ€ã«ç§»å‹•ã™ã‚‹
                 File.Move(workPath, path);
                 return true;
             }
             catch (Exception e)
             {
-                WriteErrorMessage("—áŠOƒGƒ‰[‚ª”­¶‚µ‚Ü‚µ‚½B");
+                WriteErrorMessage("ä¾‹å¤–ã‚¨ãƒ©ãƒ¼ãŒç™ºç”Ÿã—ã¾ã—ãŸã€‚");
                 WriteErrorMessage(e.Message + "\n" + e.StackTrace);
                 return false;
             }
@@ -1612,7 +1612,7 @@ namespace osuTaikoSvTool
         }
 
         /// <summary>
-        /// "ƒoƒbƒNƒAƒbƒvƒtƒHƒ‹ƒ_"ƒ{ƒ^ƒ“‰Ÿ‰ºƒoƒbƒNƒAƒbƒvƒtƒHƒ‹ƒ_‚ğŠJ‚­
+        /// "ãƒãƒƒã‚¯ã‚¢ãƒƒãƒ—ãƒ•ã‚©ãƒ«ãƒ€"ãƒœã‚¿ãƒ³æŠ¼ä¸‹æ™‚ãƒãƒƒã‚¯ã‚¢ãƒƒãƒ—ãƒ•ã‚©ãƒ«ãƒ€ã‚’é–‹ã
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -1772,9 +1772,9 @@ class TimingPoint()
     public double timingPoint;
     public double BPM;
     public double SV;
-    public double BarLength; //1¬ß‚Ì’·‚³(ms)
+    public double BarLength; //1å°ç¯€ã®é•·ã•(ms)
     public bool isRedLine;
-    public double Volume; //‘¼,”q,kiaiİ’è‚È‚Ç
+    public double Volume; //ä»–,æ‹å­,kiaiè¨­å®šãªã©
 }
 
 
@@ -1782,8 +1782,8 @@ class Note
 {
     Note()
     {
-        //s‚©‚çƒm[ƒcî•ñ‚ğæ“¾‚·‚é
-        //TimingPoint‚ğQÆ‚µABPMASV‚ğ‰Šú‰»‚·‚é
+        //è¡Œã‹ã‚‰ãƒãƒ¼ãƒ„æƒ…å ±ã‚’å–å¾—ã™ã‚‹
+        //TimingPointã‚’å‚ç…§ã—ã€BPMã€SVã‚’åˆæœŸåŒ–ã™ã‚‹
         GetTimingInfoOfNote(this)
     }
     public double BPM;
@@ -1803,8 +1803,8 @@ class Note
 
 struct Notetype
 {
-    blank, //¬ßü‚Ì‚İ‚Ìê‡
-    note,  //ƒqƒbƒgƒm[ƒc
+    blank, //å°ç¯€ç·šã®ã¿ã®å ´åˆ
+    note,  //ãƒ’ãƒƒãƒˆãƒãƒ¼ãƒ„
     slider,
     spinner
 }
