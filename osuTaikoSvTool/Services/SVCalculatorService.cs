@@ -4,7 +4,7 @@ using osuTaikoSvTool.Utils;
 
 namespace osuTaikoSvTool.Services
 {
-    internal class SVCalculatorSevice
+    internal class SVCalculatorService
     {
         public static bool Add(UserInputData userInputData, Beatmap beatmap)
         {

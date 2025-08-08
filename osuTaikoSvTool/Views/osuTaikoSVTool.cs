@@ -212,7 +212,7 @@ namespace osuTaikoSvTool
                 {
                     return;
                 }
-                if (!SVCalculatorSevice.Add(userInputData, beatmapInfo))
+                if (!SVCalculatorService.Add(userInputData, beatmapInfo))
                 {
                     beatmapInfo = null;
                     return;
@@ -309,7 +309,7 @@ namespace osuTaikoSvTool
                 {
                     return;
                 }
-                if (SVCalculatorSevice.Remove(userInputData, ref beatmapInfo))
+                if (SVCalculatorService.Remove(userInputData, ref beatmapInfo))
                 {
                     if (BeatmapHelper.ExportToOsuFile(beatmapInfo))
                     {
@@ -564,11 +564,24 @@ namespace osuTaikoSvTool
         }
         private void rdoArithmetic_CheckedChanged(object sender, EventArgs e)
         {
-            calculationCode = 1;
+            if(rdoArithmetic.Checked)
+            {
+                calculationCode = 1;
+            } else if (!rdoGeometric.Checked)
+            {
+                calculationCode = 0;
+            }
         }
         private void rdoGeometric_CheckedChanged(object sender, EventArgs e)
         {
-            calculationCode = 2;
+            if (rdoGeometric.Checked)
+            {
+                calculationCode = 2;
+            }
+            else if (!rdoArithmetic.Checked)
+            {
+                calculationCode = 0;
+            }
         }
         private void rdoOnlySpecificHitObject_CheckedChanged(object sender, EventArgs e)
         {
