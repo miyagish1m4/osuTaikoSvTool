@@ -30,25 +30,6 @@ namespace osuTaikoSvTool.Properties
         internal const string LOG_EXTENSION = ".log";
         // xmlファイル拡張子
         internal const string XML_EXTENSION = ".xml";
-        // コンフィグファイル名
-        internal const string CONFIG_FILE_NAME = "config.cfg";
-        #region コンフィグファイルのセクション
-        internal const string SONGS_DIRECTORY = "[SongsDirectory]";
-        #endregion
-        #region 計算コード
-        internal const int CALCULATION_ARITHMETIC = 1; // 等差
-        internal const int CALCULATION_GEOMETRIC = 2; // 等比
-        #endregion
-        #region 実行コード
-        internal const int EXECUTE_ADD = 0;
-        internal const int EXECUTE_MODIFY = 1;
-        internal const int EXECUTE_REMOVE = 2;
-        #endregion
-        #region ログレベル
-        internal const string LOG_LEVEL_INFO = "INFO";
-        internal const string LOG_LEVEL_WARNING = "WARNING";
-        internal const string LOG_LEVEL_ERROR = "ERROR";
-        #endregion
         #region osuファイルのセクション
         internal const string GENERAL = "[General]";
         internal const string EDITOR = "[Editor]";
@@ -67,6 +48,20 @@ namespace osuTaikoSvTool.Properties
         internal const int TIMING_POINTS_CODE = 6;
         internal const int COLOURS_CODE = 7;
         internal const int HIT_OBJECTS_CODE = 8;
+        #endregion
+        #region 実行コード
+        internal const int EXECUTE_ADD = 0;
+        internal const int EXECUTE_MODIFY = 1;
+        internal const int EXECUTE_REMOVE = 2;
+        #endregion
+        #region 計算コード
+        internal const int CALCULATION_ARITHMETIC = 1; // 等差
+        internal const int CALCULATION_GEOMETRIC = 2; // 等比
+        #endregion
+        #region ログレベル
+        internal const string LOG_LEVEL_INFO = "INFO";
+        internal const string LOG_LEVEL_WARNING = "WARNING";
+        internal const string LOG_LEVEL_ERROR = "ERROR";
         #endregion
     }
 }

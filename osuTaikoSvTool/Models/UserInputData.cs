@@ -27,8 +27,6 @@ namespace osuTaikoSvTool.Models
         public int volumeFrom { set; get; }
         // 音量(終了)
         public int volumeTo { set; get; }
-        // 小節線有効化設定
-        public bool isIncludeBarline { set; get; }
         // オフセット有効化設定
         public bool isOffset { set; get; }
         // オフセット値
@@ -80,7 +78,6 @@ namespace osuTaikoSvTool.Models
                                int volumeFrom,
                                int volumeTo,
                                int calculationCode,
-                               bool isIncludeBarline,
                                bool isOffset,
                                int offset,
                                bool isBeatSnap,
@@ -104,7 +101,6 @@ namespace osuTaikoSvTool.Models
             this.volumeFrom = volumeFrom;
             this.volumeTo = volumeTo;
             this.calculationCode = calculationCode;
-            this.isIncludeBarline = isIncludeBarline;
             this.isOffset = isOffset;
             this.offset = offset;
             this.isBeatSnap = isBeatSnap;

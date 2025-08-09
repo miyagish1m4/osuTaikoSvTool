@@ -48,6 +48,11 @@
         internal TimingPoint(string line)
         {
             string[] buff = line.Split(",");
+            // タイミングポイントが小数だった場合は切り捨て
+            if (buff[0].IndexOf(".") != -1)
+            {
+                buff[0] = buff[0].Substring(0, buff[0].IndexOf("."));
+            }
             time = int.Parse(buff[0]);          //タイミング
             meter = int.Parse(buff[2]);         //拍子
             sampleSet = int.Parse(buff[3]);     //サンプルセット(Normal,Soft,Drum 等)
@@ -67,6 +72,9 @@
                 sv = -100 / decimal.Parse(buff[1]);
             }
 
+        }
+        internal TimingPoint()
+        {
         }
     }
 }

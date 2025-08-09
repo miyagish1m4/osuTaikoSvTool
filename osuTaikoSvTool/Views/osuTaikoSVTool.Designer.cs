@@ -31,10 +31,8 @@ namespace osuTaikoSvTool
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(osuTaikoSVTool));
-            btnOpenFile = new Button();
             pnlBeatmapInfoGroup = new Panel();
             lblFileName = new Label();
-            pnlDragDropArea = new Panel();
             picDisplayBg = new PictureBox();
             txtTimingFrom = new TextBox();
             txtTimingTo = new TextBox();
@@ -49,7 +47,6 @@ namespace osuTaikoSvTool
             rdoArithmetic = new RadioButton();
             rdoGeometric = new RadioButton();
             chkEnableVolume = new CheckBox();
-            chkEnableIncludeBarline = new CheckBox();
             pnlCalcurationTypeGroup = new Panel();
             btnAdd = new Button();
             chkEnableOffset = new CheckBox();
@@ -94,12 +91,7 @@ namespace osuTaikoSvTool
             rdoOnlySpecificHitObject = new RadioButton();
             tabBeatSnap = new TabPage();
             tabModifyPage = new TabPage();
-            chkEnableKiaiModify = new CheckBox();
-            lblKiaiStartModify = new Label();
             lblKiaiModify = new Label();
-            lblKiaiEndModify = new Label();
-            chkEnableKiaiEndModify = new CheckBox();
-            chkEnableKiaiStartModify = new CheckBox();
             pnlSpecificGroupModify = new Panel();
             rdoAllHitObjectsModify = new RadioButton();
             rdoOnlyBookMarkModify = new RadioButton();
@@ -107,7 +99,6 @@ namespace osuTaikoSvTool
             rdoOnlySpecificHitObjectModify = new RadioButton();
             lblSpecificNormalModify = new Label();
             picSpecificNormalSpinnerModify = new PictureBox();
-            chkEnableIncludeBarlineModify = new CheckBox();
             lblSpecificFinisherModify = new Label();
             picSpecificNormalSliderModify = new PictureBox();
             picSpecificFinisherKaModify = new PictureBox();
@@ -117,8 +108,11 @@ namespace osuTaikoSvTool
             picSpecificNormalKaModify = new PictureBox();
             picSpecificNormalDongModify = new PictureBox();
             lblSpecificGridLineModify = new Label();
+            chkEnableKiaiModify = new CheckBox();
             tabRemovePage = new TabPage();
             lblCalculationType = new Label();
+            btnGetTimingFrom = new Button();
+            btnGetTimingTo = new Button();
             pnlBeatmapInfoGroup.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)picDisplayBg).BeginInit();
             pnlCalcurationTypeGroup.SuspendLayout();
@@ -147,29 +141,10 @@ namespace osuTaikoSvTool
             tabRemovePage.SuspendLayout();
             SuspendLayout();
             // 
-            // btnOpenFile
-            // 
-            btnOpenFile.AllowDrop = true;
-            btnOpenFile.BackColor = Color.DarkCyan;
-            btnOpenFile.FlatStyle = FlatStyle.Flat;
-            btnOpenFile.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
-            btnOpenFile.ForeColor = Color.Cyan;
-            btnOpenFile.Location = new Point(130, 133);
-            btnOpenFile.Name = "btnOpenFile";
-            btnOpenFile.Size = new Size(128, 39);
-            btnOpenFile.TabIndex = 0;
-            btnOpenFile.Text = "ファイルを開く";
-            btnOpenFile.UseVisualStyleBackColor = false;
-            btnOpenFile.Click += btnOpenFile_Click;
-            btnOpenFile.DragDrop += commonDragDrop;
-            btnOpenFile.DragEnter += commonDragEnter;
-            // 
             // pnlBeatmapInfoGroup
             // 
             pnlBeatmapInfoGroup.BackColor = SystemColors.ControlDarkDark;
             pnlBeatmapInfoGroup.Controls.Add(lblFileName);
-            pnlBeatmapInfoGroup.Controls.Add(btnOpenFile);
-            pnlBeatmapInfoGroup.Controls.Add(pnlDragDropArea);
             pnlBeatmapInfoGroup.Controls.Add(picDisplayBg);
             pnlBeatmapInfoGroup.Location = new Point(12, 12);
             pnlBeatmapInfoGroup.Name = "pnlBeatmapInfoGroup";
@@ -182,30 +157,17 @@ namespace osuTaikoSvTool
             lblFileName.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             lblFileName.BackColor = Color.Transparent;
             lblFileName.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
-            lblFileName.ForeColor = Color.Gray;
-            lblFileName.Location = new Point(2, 47);
+            lblFileName.ForeColor = Color.White;
+            lblFileName.Location = new Point(1, 63);
             lblFileName.Name = "lblFileName";
-            lblFileName.Size = new Size(382, 83);
+            lblFileName.Size = new Size(382, 90);
             lblFileName.TabIndex = 0;
             lblFileName.Text = "ファイルを選択してください";
             lblFileName.TextAlign = ContentAlignment.MiddleCenter;
-            lblFileName.DragDrop += commonDragDrop;
-            lblFileName.DragEnter += commonDragEnter;
-            // 
-            // pnlDragDropArea
-            // 
-            pnlDragDropArea.AllowDrop = true;
-            pnlDragDropArea.BackColor = Color.Transparent;
-            pnlDragDropArea.Location = new Point(0, 0);
-            pnlDragDropArea.Name = "pnlDragDropArea";
-            pnlDragDropArea.Size = new Size(384, 216);
-            pnlDragDropArea.TabIndex = 1;
-            pnlDragDropArea.DragDrop += commonDragDrop;
-            pnlDragDropArea.DragEnter += commonDragEnter;
             // 
             // picDisplayBg
             // 
-            picDisplayBg.BackColor = SystemColors.InactiveCaption;
+            picDisplayBg.BackColor = SystemColors.GrayText;
             picDisplayBg.Location = new Point(0, 0);
             picDisplayBg.Name = "picDisplayBg";
             picDisplayBg.Size = new Size(384, 216);
@@ -236,7 +198,7 @@ namespace osuTaikoSvTool
             txtSvFrom.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             txtSvFrom.BackColor = SystemColors.Window;
             txtSvFrom.BorderStyle = BorderStyle.FixedSingle;
-            txtSvFrom.Location = new Point(93, 279);
+            txtSvFrom.Location = new Point(93, 308);
             txtSvFrom.Name = "txtSvFrom";
             txtSvFrom.Size = new Size(120, 23);
             txtSvFrom.TabIndex = 5;
@@ -245,7 +207,7 @@ namespace osuTaikoSvTool
             // 
             txtSvTo.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             txtSvTo.BorderStyle = BorderStyle.FixedSingle;
-            txtSvTo.Location = new Point(276, 279);
+            txtSvTo.Location = new Point(276, 308);
             txtSvTo.Name = "txtSvTo";
             txtSvTo.Size = new Size(120, 23);
             txtSvTo.TabIndex = 7;
@@ -254,7 +216,7 @@ namespace osuTaikoSvTool
             // 
             txtVolumeFrom.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             txtVolumeFrom.BorderStyle = BorderStyle.FixedSingle;
-            txtVolumeFrom.Location = new Point(93, 308);
+            txtVolumeFrom.Location = new Point(93, 337);
             txtVolumeFrom.Name = "txtVolumeFrom";
             txtVolumeFrom.Size = new Size(120, 23);
             txtVolumeFrom.TabIndex = 9;
@@ -263,7 +225,7 @@ namespace osuTaikoSvTool
             // 
             txtVolumeTo.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             txtVolumeTo.BorderStyle = BorderStyle.FixedSingle;
-            txtVolumeTo.Location = new Point(276, 308);
+            txtVolumeTo.Location = new Point(276, 337);
             txtVolumeTo.Name = "txtVolumeTo";
             txtVolumeTo.Size = new Size(120, 23);
             txtVolumeTo.TabIndex = 11;
@@ -284,7 +246,7 @@ namespace osuTaikoSvTool
             lblSv.AutoSize = true;
             lblSv.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold);
             lblSv.ForeColor = Color.White;
-            lblSv.Location = new Point(29, 279);
+            lblSv.Location = new Point(29, 308);
             lblSv.Name = "lblSv";
             lblSv.Size = new Size(27, 20);
             lblSv.TabIndex = 41;
@@ -295,7 +257,7 @@ namespace osuTaikoSvTool
             lblVolume.AutoSize = true;
             lblVolume.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold);
             lblVolume.ForeColor = Color.White;
-            lblVolume.Location = new Point(30, 308);
+            lblVolume.Location = new Point(30, 337);
             lblVolume.Name = "lblVolume";
             lblVolume.Size = new Size(61, 20);
             lblVolume.TabIndex = 40;
@@ -307,7 +269,7 @@ namespace osuTaikoSvTool
             chkEnableSv.CheckState = CheckState.Checked;
             chkEnableSv.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold);
             chkEnableSv.ForeColor = Color.White;
-            chkEnableSv.Location = new Point(14, 278);
+            chkEnableSv.Location = new Point(14, 307);
             chkEnableSv.Name = "chkEnableSv";
             chkEnableSv.Size = new Size(15, 24);
             chkEnableSv.TabIndex = 4;
@@ -346,31 +308,19 @@ namespace osuTaikoSvTool
             chkEnableVolume.CheckState = CheckState.Checked;
             chkEnableVolume.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold);
             chkEnableVolume.ForeColor = Color.White;
-            chkEnableVolume.Location = new Point(14, 308);
+            chkEnableVolume.Location = new Point(14, 337);
             chkEnableVolume.Name = "chkEnableVolume";
             chkEnableVolume.Size = new Size(15, 24);
             chkEnableVolume.TabIndex = 8;
             chkEnableVolume.UseVisualStyleBackColor = true;
             chkEnableVolume.CheckedChanged += chkEnableVolume_CheckedChanged;
             // 
-            // chkEnableIncludeBarline
-            // 
-            chkEnableIncludeBarline.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold);
-            chkEnableIncludeBarline.ForeColor = Color.White;
-            chkEnableIncludeBarline.Location = new Point(158, 8);
-            chkEnableIncludeBarline.Name = "chkEnableIncludeBarline";
-            chkEnableIncludeBarline.Size = new Size(192, 37);
-            chkEnableIncludeBarline.TabIndex = 14;
-            chkEnableIncludeBarline.Text = "ノーツが置かれていない小節線にもSVをつける";
-            chkEnableIncludeBarline.TextAlign = ContentAlignment.BottomLeft;
-            chkEnableIncludeBarline.UseVisualStyleBackColor = true;
-            // 
             // pnlCalcurationTypeGroup
             // 
             pnlCalcurationTypeGroup.BorderStyle = BorderStyle.Fixed3D;
             pnlCalcurationTypeGroup.Controls.Add(rdoArithmetic);
             pnlCalcurationTypeGroup.Controls.Add(rdoGeometric);
-            pnlCalcurationTypeGroup.Location = new Point(14, 363);
+            pnlCalcurationTypeGroup.Location = new Point(14, 392);
             pnlCalcurationTypeGroup.Name = "pnlCalcurationTypeGroup";
             pnlCalcurationTypeGroup.Size = new Size(81, 66);
             pnlCalcurationTypeGroup.TabIndex = 39;
@@ -378,10 +328,12 @@ namespace osuTaikoSvTool
             // btnAdd
             // 
             btnAdd.BackColor = Color.DarkCyan;
+            btnAdd.FlatAppearance.BorderColor = Color.Cyan;
+            btnAdd.FlatAppearance.BorderSize = 2;
             btnAdd.FlatStyle = FlatStyle.Flat;
             btnAdd.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
-            btnAdd.ForeColor = Color.Cyan;
-            btnAdd.Location = new Point(96, 264);
+            btnAdd.ForeColor = SystemColors.ControlLightLight;
+            btnAdd.Location = new Point(96, 235);
             btnAdd.Name = "btnAdd";
             btnAdd.Size = new Size(189, 39);
             btnAdd.TabIndex = 31;
@@ -435,9 +387,11 @@ namespace osuTaikoSvTool
             // btnBackup
             // 
             btnBackup.BackColor = Color.DarkCyan;
+            btnBackup.FlatAppearance.BorderColor = Color.Cyan;
+            btnBackup.FlatAppearance.BorderSize = 2;
             btnBackup.FlatStyle = FlatStyle.Flat;
             btnBackup.Font = new Font("Yu Gothic UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 128);
-            btnBackup.ForeColor = Color.Cyan;
+            btnBackup.ForeColor = SystemColors.ControlLightLight;
             btnBackup.Location = new Point(210, 848);
             btnBackup.Name = "btnBackup";
             btnBackup.Size = new Size(189, 39);
@@ -455,7 +409,7 @@ namespace osuTaikoSvTool
             btnSwapTiming.ForeColor = Color.Cyan;
             btnSwapTiming.Location = new Point(212, 250);
             btnSwapTiming.Name = "btnSwapTiming";
-            btnSwapTiming.Size = new Size(64, 23);
+            btnSwapTiming.Size = new Size(65, 23);
             btnSwapTiming.TabIndex = 2;
             btnSwapTiming.Text = "⇔";
             btnSwapTiming.UseVisualStyleBackColor = true;
@@ -468,9 +422,9 @@ namespace osuTaikoSvTool
             btnSwapSv.FlatAppearance.MouseOverBackColor = Color.Transparent;
             btnSwapSv.FlatStyle = FlatStyle.Flat;
             btnSwapSv.ForeColor = Color.Cyan;
-            btnSwapSv.Location = new Point(212, 279);
+            btnSwapSv.Location = new Point(212, 308);
             btnSwapSv.Name = "btnSwapSv";
-            btnSwapSv.Size = new Size(64, 23);
+            btnSwapSv.Size = new Size(65, 23);
             btnSwapSv.TabIndex = 6;
             btnSwapSv.Text = "⇔";
             btnSwapSv.UseVisualStyleBackColor = true;
@@ -483,9 +437,9 @@ namespace osuTaikoSvTool
             btnSwapVolume.FlatAppearance.MouseOverBackColor = Color.Transparent;
             btnSwapVolume.FlatStyle = FlatStyle.Flat;
             btnSwapVolume.ForeColor = Color.Cyan;
-            btnSwapVolume.Location = new Point(212, 308);
+            btnSwapVolume.Location = new Point(212, 337);
             btnSwapVolume.Name = "btnSwapVolume";
-            btnSwapVolume.Size = new Size(64, 23);
+            btnSwapVolume.Size = new Size(65, 23);
             btnSwapVolume.TabIndex = 10;
             btnSwapVolume.Text = "⇔";
             btnSwapVolume.UseVisualStyleBackColor = true;
@@ -517,7 +471,7 @@ namespace osuTaikoSvTool
             lblKiaiStart.AutoSize = true;
             lblKiaiStart.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold);
             lblKiaiStart.ForeColor = Color.White;
-            lblKiaiStart.Location = new Point(100, 16);
+            lblKiaiStart.Location = new Point(178, 10);
             lblKiaiStart.Name = "lblKiaiStart";
             lblKiaiStart.Size = new Size(64, 15);
             lblKiaiStart.TabIndex = 35;
@@ -526,7 +480,7 @@ namespace osuTaikoSvTool
             // chkEnableKiaiStart
             // 
             chkEnableKiaiStart.AutoSize = true;
-            chkEnableKiaiStart.Location = new Point(80, 17);
+            chkEnableKiaiStart.Location = new Point(158, 11);
             chkEnableKiaiStart.Name = "chkEnableKiaiStart";
             chkEnableKiaiStart.Size = new Size(15, 14);
             chkEnableKiaiStart.TabIndex = 20;
@@ -537,7 +491,7 @@ namespace osuTaikoSvTool
             lblKiaiEnd.AutoSize = true;
             lblKiaiEnd.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold);
             lblKiaiEnd.ForeColor = Color.White;
-            lblKiaiEnd.Location = new Point(100, 46);
+            lblKiaiEnd.Location = new Point(178, 40);
             lblKiaiEnd.Name = "lblKiaiEnd";
             lblKiaiEnd.Size = new Size(64, 15);
             lblKiaiEnd.TabIndex = 34;
@@ -546,7 +500,7 @@ namespace osuTaikoSvTool
             // chkEnableKiaiEnd
             // 
             chkEnableKiaiEnd.AutoSize = true;
-            chkEnableKiaiEnd.Location = new Point(80, 47);
+            chkEnableKiaiEnd.Location = new Point(158, 41);
             chkEnableKiaiEnd.Name = "chkEnableKiaiEnd";
             chkEnableKiaiEnd.Size = new Size(15, 14);
             chkEnableKiaiEnd.TabIndex = 21;
@@ -555,9 +509,11 @@ namespace osuTaikoSvTool
             // btnModify
             // 
             btnModify.BackColor = Color.DarkCyan;
+            btnModify.FlatAppearance.BorderColor = Color.Cyan;
+            btnModify.FlatAppearance.BorderSize = 2;
             btnModify.FlatStyle = FlatStyle.Flat;
             btnModify.Font = new Font("Yu Gothic UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 128);
-            btnModify.ForeColor = Color.Cyan;
+            btnModify.ForeColor = SystemColors.ControlLightLight;
             btnModify.Location = new Point(96, 264);
             btnModify.Name = "btnModify";
             btnModify.Size = new Size(189, 39);
@@ -569,9 +525,11 @@ namespace osuTaikoSvTool
             // btnRemove
             // 
             btnRemove.BackColor = Color.DarkCyan;
+            btnRemove.FlatAppearance.BorderColor = Color.Cyan;
+            btnRemove.FlatAppearance.BorderSize = 2;
             btnRemove.FlatStyle = FlatStyle.Flat;
             btnRemove.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
-            btnRemove.ForeColor = Color.Cyan;
+            btnRemove.ForeColor = SystemColors.ControlLightLight;
             btnRemove.Location = new Point(96, 264);
             btnRemove.Name = "btnRemove";
             btnRemove.Size = new Size(189, 39);
@@ -708,9 +666,11 @@ namespace osuTaikoSvTool
             // btnViewHistory
             // 
             btnViewHistory.BackColor = Color.DarkCyan;
+            btnViewHistory.FlatAppearance.BorderColor = Color.Cyan;
+            btnViewHistory.FlatAppearance.BorderSize = 2;
             btnViewHistory.FlatStyle = FlatStyle.Flat;
             btnViewHistory.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
-            btnViewHistory.ForeColor = Color.Cyan;
+            btnViewHistory.ForeColor = SystemColors.ControlLightLight;
             btnViewHistory.Location = new Point(10, 848);
             btnViewHistory.Name = "btnViewHistory";
             btnViewHistory.Size = new Size(189, 39);
@@ -744,10 +704,10 @@ namespace osuTaikoSvTool
             tabExecuteType.Controls.Add(tabRemovePage);
             tabExecuteType.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
             tabExecuteType.ItemSize = new Size(130, 40);
-            tabExecuteType.Location = new Point(8, 446);
+            tabExecuteType.Location = new Point(8, 475);
             tabExecuteType.Name = "tabExecuteType";
             tabExecuteType.SelectedIndex = 0;
-            tabExecuteType.Size = new Size(393, 372);
+            tabExecuteType.Size = new Size(393, 343);
             tabExecuteType.SizeMode = TabSizeMode.Fixed;
             tabExecuteType.TabIndex = 49;
             tabExecuteType.SelectedIndexChanged += tabExecuteType_SelectedIndexChanged;
@@ -759,24 +719,19 @@ namespace osuTaikoSvTool
             tabAddPage.Controls.Add(btnAdd);
             tabAddPage.Controls.Add(chkEnableKiai);
             tabAddPage.Controls.Add(tabSetType);
-            tabAddPage.Controls.Add(lblKiaiStart);
             tabAddPage.Controls.Add(chkEnableOffset);
             tabAddPage.Controls.Add(lblKiai);
             tabAddPage.Controls.Add(txtOffset);
-            tabAddPage.Controls.Add(lblKiaiEnd);
             tabAddPage.Controls.Add(lblMiliSecond);
-            tabAddPage.Controls.Add(chkEnableKiaiEnd);
             tabAddPage.Controls.Add(lblOffset);
-            tabAddPage.Controls.Add(chkEnableKiaiStart);
             tabAddPage.ForeColor = Color.DarkCyan;
             tabAddPage.Location = new Point(4, 44);
             tabAddPage.Name = "tabAddPage";
             tabAddPage.Padding = new Padding(3);
             tabAddPage.RightToLeft = RightToLeft.No;
-            tabAddPage.Size = new Size(385, 324);
+            tabAddPage.Size = new Size(385, 295);
             tabAddPage.TabIndex = 0;
             tabAddPage.Text = "追加";
-            tabAddPage.Click += tabPage1_Click;
             // 
             // tabSetType
             // 
@@ -784,7 +739,7 @@ namespace osuTaikoSvTool
             tabSetType.Controls.Add(tabBeatSnap);
             tabSetType.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
             tabSetType.ItemSize = new Size(190, 40);
-            tabSetType.Location = new Point(0, 79);
+            tabSetType.Location = new Point(0, 50);
             tabSetType.Name = "tabSetType";
             tabSetType.SelectedIndex = 0;
             tabSetType.Size = new Size(383, 168);
@@ -796,10 +751,13 @@ namespace osuTaikoSvTool
             // 
             tabHitObjectsPage.BackColor = Color.FromArgb(0, 64, 64);
             tabHitObjectsPage.BorderStyle = BorderStyle.Fixed3D;
+            tabHitObjectsPage.Controls.Add(lblKiaiStart);
+            tabHitObjectsPage.Controls.Add(lblKiaiEnd);
+            tabHitObjectsPage.Controls.Add(chkEnableKiaiEnd);
+            tabHitObjectsPage.Controls.Add(chkEnableKiaiStart);
             tabHitObjectsPage.Controls.Add(pnlSpecificGroup);
             tabHitObjectsPage.Controls.Add(lblSpecificNormal);
             tabHitObjectsPage.Controls.Add(picSpecificNormalSpinner);
-            tabHitObjectsPage.Controls.Add(chkEnableIncludeBarline);
             tabHitObjectsPage.Controls.Add(lblSpecificFinisher);
             tabHitObjectsPage.Controls.Add(picSpecificNormalSlider);
             tabHitObjectsPage.Controls.Add(picSpecificFinisherKa);
@@ -854,6 +812,7 @@ namespace osuTaikoSvTool
             rdoOnlyBookMark.TabIndex = 23;
             rdoOnlyBookMark.Text = "BookMark上のみ";
             rdoOnlyBookMark.UseVisualStyleBackColor = true;
+            rdoOnlyBookMark.CheckedChanged += rdoOnlyBookMark_CheckedChanged;
             // 
             // rdoOnlyBarline
             // 
@@ -901,16 +860,10 @@ namespace osuTaikoSvTool
             // 
             tabModifyPage.BackColor = Color.FromArgb(0, 64, 64);
             tabModifyPage.BorderStyle = BorderStyle.Fixed3D;
-            tabModifyPage.Controls.Add(chkEnableKiaiModify);
-            tabModifyPage.Controls.Add(lblKiaiStartModify);
             tabModifyPage.Controls.Add(lblKiaiModify);
-            tabModifyPage.Controls.Add(lblKiaiEndModify);
-            tabModifyPage.Controls.Add(chkEnableKiaiEndModify);
-            tabModifyPage.Controls.Add(chkEnableKiaiStartModify);
             tabModifyPage.Controls.Add(pnlSpecificGroupModify);
             tabModifyPage.Controls.Add(lblSpecificNormalModify);
             tabModifyPage.Controls.Add(picSpecificNormalSpinnerModify);
-            tabModifyPage.Controls.Add(chkEnableIncludeBarlineModify);
             tabModifyPage.Controls.Add(lblSpecificFinisherModify);
             tabModifyPage.Controls.Add(picSpecificNormalSliderModify);
             tabModifyPage.Controls.Add(picSpecificFinisherKaModify);
@@ -921,35 +874,15 @@ namespace osuTaikoSvTool
             tabModifyPage.Controls.Add(picSpecificNormalDongModify);
             tabModifyPage.Controls.Add(lblSpecificGridLineModify);
             tabModifyPage.Controls.Add(btnModify);
+            tabModifyPage.Controls.Add(chkEnableKiaiModify);
             tabModifyPage.ForeColor = Color.DarkCyan;
             tabModifyPage.Location = new Point(4, 44);
             tabModifyPage.Name = "tabModifyPage";
             tabModifyPage.Padding = new Padding(3);
             tabModifyPage.RightToLeft = RightToLeft.No;
-            tabModifyPage.Size = new Size(385, 324);
+            tabModifyPage.Size = new Size(385, 295);
             tabModifyPage.TabIndex = 1;
             tabModifyPage.Text = "変更";
-            // 
-            // chkEnableKiaiModify
-            // 
-            chkEnableKiaiModify.AutoSize = true;
-            chkEnableKiaiModify.Location = new Point(16, 17);
-            chkEnableKiaiModify.Name = "chkEnableKiaiModify";
-            chkEnableKiaiModify.Size = new Size(15, 14);
-            chkEnableKiaiModify.TabIndex = 62;
-            chkEnableKiaiModify.UseVisualStyleBackColor = true;
-            chkEnableKiaiModify.CheckedChanged += chkEnableKiaiModify_CheckedChanged;
-            // 
-            // lblKiaiStartModify
-            // 
-            lblKiaiStartModify.AutoSize = true;
-            lblKiaiStartModify.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold);
-            lblKiaiStartModify.ForeColor = Color.White;
-            lblKiaiStartModify.Location = new Point(100, 16);
-            lblKiaiStartModify.Name = "lblKiaiStartModify";
-            lblKiaiStartModify.Size = new Size(64, 15);
-            lblKiaiStartModify.TabIndex = 66;
-            lblKiaiStartModify.Text = "kiaiの始点?";
             // 
             // lblKiaiModify
             // 
@@ -961,35 +894,6 @@ namespace osuTaikoSvTool
             lblKiaiModify.Size = new Size(25, 15);
             lblKiaiModify.TabIndex = 67;
             lblKiaiModify.Text = "kiai";
-            // 
-            // lblKiaiEndModify
-            // 
-            lblKiaiEndModify.AutoSize = true;
-            lblKiaiEndModify.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold);
-            lblKiaiEndModify.ForeColor = Color.White;
-            lblKiaiEndModify.Location = new Point(100, 46);
-            lblKiaiEndModify.Name = "lblKiaiEndModify";
-            lblKiaiEndModify.Size = new Size(64, 15);
-            lblKiaiEndModify.TabIndex = 65;
-            lblKiaiEndModify.Text = "kiaiの終点?";
-            // 
-            // chkEnableKiaiEndModify
-            // 
-            chkEnableKiaiEndModify.AutoSize = true;
-            chkEnableKiaiEndModify.Location = new Point(80, 47);
-            chkEnableKiaiEndModify.Name = "chkEnableKiaiEndModify";
-            chkEnableKiaiEndModify.Size = new Size(15, 14);
-            chkEnableKiaiEndModify.TabIndex = 64;
-            chkEnableKiaiEndModify.UseVisualStyleBackColor = true;
-            // 
-            // chkEnableKiaiStartModify
-            // 
-            chkEnableKiaiStartModify.AutoSize = true;
-            chkEnableKiaiStartModify.Location = new Point(80, 17);
-            chkEnableKiaiStartModify.Name = "chkEnableKiaiStartModify";
-            chkEnableKiaiStartModify.Size = new Size(15, 14);
-            chkEnableKiaiStartModify.TabIndex = 63;
-            chkEnableKiaiStartModify.UseVisualStyleBackColor = true;
             // 
             // pnlSpecificGroupModify
             // 
@@ -1013,7 +917,6 @@ namespace osuTaikoSvTool
             rdoAllHitObjectsModify.TabIndex = 25;
             rdoAllHitObjectsModify.Text = "すべてのHitObject";
             rdoAllHitObjectsModify.UseVisualStyleBackColor = true;
-            rdoAllHitObjectsModify.CheckedChanged += rdoAllHitObjectsModify_CheckedChanged;
             // 
             // rdoOnlyBookMarkModify
             // 
@@ -1072,18 +975,6 @@ namespace osuTaikoSvTool
             picSpecificNormalSpinnerModify.Size = new Size(42, 42);
             picSpecificNormalSpinnerModify.TabIndex = 61;
             picSpecificNormalSpinnerModify.TabStop = false;
-            // 
-            // chkEnableIncludeBarlineModify
-            // 
-            chkEnableIncludeBarlineModify.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold);
-            chkEnableIncludeBarlineModify.ForeColor = Color.White;
-            chkEnableIncludeBarlineModify.Location = new Point(165, 75);
-            chkEnableIncludeBarlineModify.Name = "chkEnableIncludeBarlineModify";
-            chkEnableIncludeBarlineModify.Size = new Size(192, 37);
-            chkEnableIncludeBarlineModify.TabIndex = 49;
-            chkEnableIncludeBarlineModify.Text = "ノーツが置かれていない小節線にもSVをつける";
-            chkEnableIncludeBarlineModify.TextAlign = ContentAlignment.BottomLeft;
-            chkEnableIncludeBarlineModify.UseVisualStyleBackColor = true;
             // 
             // lblSpecificFinisherModify
             // 
@@ -1175,6 +1066,13 @@ namespace osuTaikoSvTool
             lblSpecificGridLineModify.TabIndex = 58;
             lblSpecificGridLineModify.Text = " ";
             // 
+            // chkEnableKiaiModify
+            // 
+            chkEnableKiaiModify.Location = new Point(16, 12);
+            chkEnableKiaiModify.Name = "chkEnableKiaiModify";
+            chkEnableKiaiModify.Size = new Size(104, 24);
+            chkEnableKiaiModify.TabIndex = 0;
+            // 
             // tabRemovePage
             // 
             tabRemovePage.BackColor = Color.FromArgb(0, 64, 64);
@@ -1184,7 +1082,7 @@ namespace osuTaikoSvTool
             tabRemovePage.Location = new Point(4, 44);
             tabRemovePage.Name = "tabRemovePage";
             tabRemovePage.Padding = new Padding(3);
-            tabRemovePage.Size = new Size(385, 324);
+            tabRemovePage.Size = new Size(385, 295);
             tabRemovePage.TabIndex = 2;
             tabRemovePage.Text = "削除";
             // 
@@ -1193,11 +1091,45 @@ namespace osuTaikoSvTool
             lblCalculationType.AutoSize = true;
             lblCalculationType.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
             lblCalculationType.ForeColor = Color.White;
-            lblCalculationType.Location = new Point(20, 340);
+            lblCalculationType.Location = new Point(20, 369);
             lblCalculationType.Name = "lblCalculationType";
             lblCalculationType.Size = new Size(69, 20);
             lblCalculationType.TabIndex = 50;
             lblCalculationType.Text = "計算方法";
+            // 
+            // btnGetTimingFrom
+            // 
+            btnGetTimingFrom.FlatAppearance.BorderColor = Color.Cyan;
+            btnGetTimingFrom.FlatAppearance.MouseDownBackColor = Color.Transparent;
+            btnGetTimingFrom.FlatAppearance.MouseOverBackColor = Color.Transparent;
+            btnGetTimingFrom.FlatStyle = FlatStyle.Flat;
+            btnGetTimingFrom.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 128);
+            btnGetTimingFrom.ForeColor = SystemColors.Control;
+            btnGetTimingFrom.ImageAlign = ContentAlignment.TopCenter;
+            btnGetTimingFrom.Location = new Point(93, 272);
+            btnGetTimingFrom.Name = "btnGetTimingFrom";
+            btnGetTimingFrom.Size = new Size(120, 28);
+            btnGetTimingFrom.TabIndex = 51;
+            btnGetTimingFrom.Text = "Get Start Timing";
+            btnGetTimingFrom.UseVisualStyleBackColor = true;
+            btnGetTimingFrom.Click += btnGetTimingFrom_Click;
+            // 
+            // btnGetTimingTo
+            // 
+            btnGetTimingTo.FlatAppearance.BorderColor = Color.Cyan;
+            btnGetTimingTo.FlatAppearance.MouseDownBackColor = Color.Transparent;
+            btnGetTimingTo.FlatAppearance.MouseOverBackColor = Color.Transparent;
+            btnGetTimingTo.FlatStyle = FlatStyle.Flat;
+            btnGetTimingTo.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 128);
+            btnGetTimingTo.ForeColor = SystemColors.Control;
+            btnGetTimingTo.ImageAlign = ContentAlignment.TopCenter;
+            btnGetTimingTo.Location = new Point(276, 272);
+            btnGetTimingTo.Name = "btnGetTimingTo";
+            btnGetTimingTo.Size = new Size(120, 28);
+            btnGetTimingTo.TabIndex = 52;
+            btnGetTimingTo.Text = "Get End Timing";
+            btnGetTimingTo.UseVisualStyleBackColor = true;
+            btnGetTimingTo.Click += btnGetTimingTo_Click;
             // 
             // osuTaikoSVTool
             // 
@@ -1205,6 +1137,8 @@ namespace osuTaikoSvTool
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(0, 64, 64);
             ClientSize = new Size(408, 918);
+            Controls.Add(btnGetTimingTo);
+            Controls.Add(btnGetTimingFrom);
             Controls.Add(lblCalculationType);
             Controls.Add(tabExecuteType);
             Controls.Add(btnViewHistory);
@@ -1245,6 +1179,7 @@ namespace osuTaikoSvTool
             tabAddPage.PerformLayout();
             tabSetType.ResumeLayout(false);
             tabHitObjectsPage.ResumeLayout(false);
+            tabHitObjectsPage.PerformLayout();
             pnlSpecificGroup.ResumeLayout(false);
             pnlSpecificGroup.PerformLayout();
             tabBeatSnap.ResumeLayout(false);
@@ -1266,8 +1201,6 @@ namespace osuTaikoSvTool
         }
 
         #endregion
-
-        private Button btnOpenFile;
         private Panel pnlBeatmapInfoGroup;
         private Label lblFileName;
         private TextBox txtTimingTo;
@@ -1283,7 +1216,6 @@ namespace osuTaikoSvTool
         private RadioButton rdoArithmetic;
         private RadioButton rdoGeometric;
         private CheckBox chkEnableVolume;
-        private CheckBox chkEnableIncludeBarline;
         private Panel pnlCalcurationTypeGroup;
         private Button btnAdd;
         private CheckBox chkEnableOffset;
@@ -1315,7 +1247,6 @@ namespace osuTaikoSvTool
         private PictureBox picDisplayBg;
         private PictureBox picSpecificNormalSlider;
         private PictureBox picSpecificFinisherSlider;
-        private Panel pnlDragDropArea;
         private Button btnViewHistory;
         private Label lblSpecificGridLine2;
         private PictureBox picSpecificNormalSpinner;
@@ -1332,12 +1263,7 @@ namespace osuTaikoSvTool
         private TabPage tabBeatSnap;
         private RadioButton rdoAllHitObjects;
         private Label lblCalculationType;
-        private CheckBox chkEnableKiaiModify;
-        private Label lblKiaiStartModify;
         private Label lblKiaiModify;
-        private Label lblKiaiEndModify;
-        private CheckBox chkEnableKiaiEndModify;
-        private CheckBox chkEnableKiaiStartModify;
         private Panel pnlSpecificGroupModify;
         private RadioButton rdoAllHitObjectsModify;
         private RadioButton rdoOnlyBookMarkModify;
@@ -1345,7 +1271,6 @@ namespace osuTaikoSvTool
         private RadioButton rdoOnlySpecificHitObjectModify;
         private Label lblSpecificNormalModify;
         private PictureBox picSpecificNormalSpinnerModify;
-        private CheckBox chkEnableIncludeBarlineModify;
         private Label lblSpecificFinisherModify;
         private PictureBox picSpecificNormalSliderModify;
         private PictureBox picSpecificFinisherKaModify;
@@ -1355,5 +1280,8 @@ namespace osuTaikoSvTool
         private PictureBox picSpecificNormalKaModify;
         private PictureBox picSpecificNormalDongModify;
         private Label lblSpecificGridLineModify;
+        private Button btnGetTimingFrom;
+        private Button btnGetTimingTo;
+        private CheckBox chkEnableKiaiModify;
     }
 }

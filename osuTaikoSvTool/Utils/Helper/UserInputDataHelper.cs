@@ -1,3 +1,4 @@
+using System.Xml.Serialization;
 using osuTaikoSvTool.Models;
 
 namespace osuTaikoSvTool.Utils.Helper
@@ -46,13 +47,21 @@ namespace osuTaikoSvTool.Utils.Helper
                 string[] files = Directory.GetFiles(Directory.GetCurrentDirectory() + "\\" +
                                                     Properties.Constants.HISTORY_DIRECTORY, "history_*.xml");
                 DateTime date = DateTime.Now;
-                var serializer = new System.Xml.Serialization.XmlSerializer(typeof(UserInputData));
+                XmlSerializer serializer = new System.Xml.Serialization.XmlSerializer(typeof(UserInputData));
+                if(files.Length == 0)
+                {
+                    return false;
+                }
                 foreach (var file in files)
                 {
                     using (var sw = new StreamReader(file,
                                                      new System.Text.UTF8Encoding(false)))
                     {
-                        userInputData.Add((UserInputData)serializer.Deserialize(sw));
+                        UserInputData? tempUserInputData = (UserInputData?)serializer?.Deserialize(sw);
+                        if (tempUserInputData != null)
+                        {
+                            userInputData?.Add(tempUserInputData);
+                        }
                     }
                 }
                 return true;
@@ -65,7 +74,7 @@ namespace osuTaikoSvTool.Utils.Helper
             }
         }
         /// <summary>
-        /// 入力値を元にUserInputDataを生成する関数
+        /// 入力値を検証し、UserInputDataを作成する関数
         /// </summary>
         /// <param name="timingFrom">Timing(始点)</param>
         /// <param name="timingTo">Timing(終点)</param>
@@ -90,30 +99,31 @@ namespace osuTaikoSvTool.Utils.Helper
         /// <param name="isOnlyHitObject">特定のオブジェクトのみ有効化フラグ</param>
         /// <param name="OnlyHitObjectCode">特定のオブジェクトコード</param>
         /// <param name="excecuteCode">実行コード</param>
-        /// <returns>作成したUserInputData</returns>
-        internal static UserInputData SetUserInputData(string timingFrom,
-                                                       string timingTo,
-                                                       bool isSv,
-                                                       string svFrom,
-                                                       string svTo,
-                                                       bool isVolume,
-                                                       string volumeFrom,
-                                                       string volumeTo,
-                                                       int calculationCode,
-                                                       bool isIncludeBarline,
-                                                       bool isOffset,
-                                                       string offset,
-                                                       bool isBeatSnap,
-                                                       string beatSnap,
-                                                       bool isKiai,
-                                                       bool isKiaiStart,
-                                                       bool isKiaiEnd,
-                                                       bool isAllHitObjects,
-                                                       bool isOnlyBarline,
-                                                       bool isOnlyBookmark,
-                                                       bool isOnlyHitObject,
-                                                       int OnlyHitObjectCode,
-                                                       int executeCode)
+        /// <param name="userInputData">検証したデータの格納先</param>
+        /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
+        internal static bool SetUserInputData(string timingFrom,
+                                              string timingTo,
+                                              bool isSv,
+                                              string svFrom,
+                                              string svTo,
+                                              bool isVolume,
+                                              string volumeFrom,
+                                              string volumeTo,
+                                              int calculationCode,
+                                              bool isOffset,
+                                              string offset,
+                                              bool isBeatSnap,
+                                              string beatSnap,
+                                              bool isKiai,
+                                              bool isKiaiStart,
+                                              bool isKiaiEnd,
+                                              bool isAllHitObjects,
+                                              bool isOnlyBarline,
+                                              bool isOnlyBookmark,
+                                              bool isOnlyHitObject,
+                                              int OnlyHitObjectCode,
+                                              int excecuteCode,
+                                              ref UserInputData? userInputData)
         {
             int retTimingFrom = -1;
             int retTimingTo = -1;
@@ -133,8 +143,8 @@ namespace osuTaikoSvTool.Utils.Helper
                 {
                     throw new Exception();
                 }
-                if ((executeCode == Properties.Constants.EXCECUTE_ADD) ||
-                    (executeCode == Properties.Constants.EXCECUTE_MODIFY))
+                if ((excecuteCode == Properties.Constants.EXECUTE_ADD) ||
+                    (excecuteCode == Properties.Constants.EXECUTE_MODIFY))
                 {
                     if (!validateSv(svFrom,
                                     svTo,
@@ -168,36 +178,35 @@ namespace osuTaikoSvTool.Utils.Helper
                         throw new Exception();
                     }
                 }
-                return new UserInputData(retTimingFrom,
-                                         retTimingTo,
-                                         isSv,
-                                         retSvFrom,
-                                         retSvTo,
-                                         isVolume,
-                                         retVolumeFrom,
-                                         retVolumeTo,
-                                         calculationCode,
-                                         isIncludeBarline,
-                                         isOffset,
-                                         retOffset,
-                                         isBeatSnap,
-                                         retBeatSnap,
-                                         isKiai,
-                                         isKiaiStart,
-                                         isKiaiEnd,
-                                         isAllHitObjects,
-                                         isOnlyBarline,
-                                         isOnlyBookmark,
-                                         isOnlyHitObject,
-                                         OnlyHitObjectCode,
-                                         date);
-
+                userInputData = new UserInputData(retTimingFrom,
+                                                  retTimingTo,
+                                                  isSv,
+                                                  retSvFrom,
+                                                  retSvTo,
+                                                  isVolume,
+                                                  retVolumeFrom,
+                                                  retVolumeTo,
+                                                  calculationCode,
+                                                  isOffset,
+                                                  retOffset,
+                                                  isBeatSnap,
+                                                  retBeatSnap,
+                                                  isKiai,
+                                                  isKiaiStart,
+                                                  isKiaiEnd,
+                                                  isAllHitObjects,
+                                                  isOnlyBarline,
+                                                  isOnlyBookmark,
+                                                  isOnlyHitObject,
+                                                  OnlyHitObjectCode,
+                                                  date);
+                return true;
             }
             catch (Exception ex)
             {
                 Common.WriteErrorMessage("LOG_E-GET-INPUT");
                 Common.WriteExceptionMessage(ex);
-                return null;
+                return false;
             }
 
 
@@ -217,28 +226,22 @@ namespace osuTaikoSvTool.Utils.Helper
         {
             try
             {
-                if ((timingFrom != string.Empty) || (timingTo != string.Empty))
-                {
-                    if (Common.ConvertTiming(timingFrom, ref retTimingFrom) && Common.ConvertTiming(timingTo, ref retTimingTo))
-                    {
-                        if (retTimingFrom > retTimingTo)
-                        {
-                            //タイミングの開始位置が終了位置より大きい
-                            MessageBox.Show(Common.WriteDialogMessage("E_V-C-002"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            return false;
-                        }
-                    }
-                    else
-                    {
-                        //タイミングのフォーマットが間違えている
-                        MessageBox.Show(Common.WriteDialogMessage("E_V-C-001"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        return false;
-                    }
-                }
-                else
+                if ((timingFrom == string.Empty) || (timingTo == string.Empty))
                 {
                     //タイミングの入力がない
                     MessageBox.Show(Common.WriteDialogMessage("E_V-EM-002"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return false;
+                }
+                if (!Common.ConvertTiming(timingFrom, ref retTimingFrom) || !Common.ConvertTiming(timingTo, ref retTimingTo))
+                {
+                    //タイミングのフォーマットが間違えている
+                    MessageBox.Show(Common.WriteDialogMessage("E_V-C-001"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return false;
+                }
+                if (retTimingFrom > retTimingTo)
+                {
+                    //タイミングの開始位置が終了位置より大きい
+                    MessageBox.Show(Common.WriteDialogMessage("E_V-C-002"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return false;
                 }
                 return true;

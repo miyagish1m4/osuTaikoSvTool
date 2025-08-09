@@ -2,8 +2,6 @@
 {
     class Beatmap
     {
-        // ファイルパス
-        public string path { set; get; }
         // バージョン
         public string version { set; get; }
         // General
@@ -23,9 +21,8 @@
         // ヒットオブジェクト
         public List<HitObject> hitObjects { set; get; }
         // ブックマーク
-        public List<int> bookmarks { set; get; }
-        public Beatmap(string path,
-                       string version,
+        public List<Bookmarks> bookmarks { set; get; }
+        public Beatmap(string version,
                        List<string> general,
                        List<string> editor,
                        List<string> metadata,
@@ -34,9 +31,8 @@
                        List<TimingPoint> timingPoints,
                        List<string> colours,
                        List<HitObject> hitObject,
-                       List<int> bookmarks)
+                       List<Bookmarks> bookmarks)
         {
-            this.path = path;
             this.version = version;
             this.general = general;
             this.editor = editor;
