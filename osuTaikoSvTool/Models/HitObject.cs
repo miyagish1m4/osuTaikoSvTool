@@ -24,7 +24,7 @@ namespace osuTaikoSvTool.Models
         // NewComboの判定
         public bool isNewCombo { set; get; }
         // 小節線の判定
-        public bool isBarline { set; get; }
+        public bool isOnBarline { set; get; }
 
         #region 全ヒットオブジェクト共通変数
         // ヒットオブジェクトのx座標
@@ -96,7 +96,7 @@ namespace osuTaikoSvTool.Models
             {
                 isNewCombo = true;
             }
-            isBarline = false;
+            isOnBarline = false;
             SetNoteHitSound(buff);
         }
         internal HitObject(int time)
@@ -110,7 +110,7 @@ namespace osuTaikoSvTool.Models
             hitSound = "0";  // 未使用
             type = "0";      // 未使用
             isNewCombo = false;
-            isBarline = true;
+            isOnBarline = true;
         }
         /// <summary>
         /// ヒットサウンドの種類を設定する
