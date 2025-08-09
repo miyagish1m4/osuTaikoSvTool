@@ -7,14 +7,21 @@ namespace osuTaikoSvTool.Utils.Helper
 {
     internal class Debug
     {
-        internal static bool ExportToCsvFile(Beatmap beatmap, string beatmapPath)
+        internal static bool ExportToCsvFile(Beatmap beatmap, string backupDirectory)
         {
-            StreamWriter file = new StreamWriter(beatmapPath.Replace(".osu", ".csv"), false, Encoding.GetEncoding("utf-8"));
+            string path = Directory.GetCurrentDirectory() + Constants.BACKUP_DIRECTORY + "\\" + backupDirectory;
+            DateTime now = DateTime.Now;
+            string backupFileName = $"{now:yyyy_MM_dd_HH_mm_ss_fff}.csv";
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+            StreamWriter file = new StreamWriter(path + "\\" + backupFileName, false, Encoding.GetEncoding("utf-8"));
+            beatmap.timingPoints = beatmap.timingPoints.OrderBy(a => a.time).ThenByDescending(b => b.isRedLine ? 1 : 0).ToList();
+            string Header = "time,bpm,sv,barLength,meter,sampleSet,sampleIndex,volume,isRedLine,effect";
+            file.WriteLine(Header);
             try
             {
-                beatmap.timingPoints = beatmap.timingPoints.OrderBy(a => a.time).ThenByDescending(b => b.isRedLine ? 1 : 0).ToList();
-                string Header = "time,bpm,sv,barLength,meter,sampleSet,sampleIndex,volume,isRedLine,effect";
-                file.WriteLine(Header);
                 foreach (var timingPoint in beatmap.timingPoints)
                 {
 

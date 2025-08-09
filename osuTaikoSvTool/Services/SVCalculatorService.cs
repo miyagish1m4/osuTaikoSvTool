@@ -306,7 +306,7 @@ namespace osuTaikoSvTool.Services
                             volume = beatmap.timingPoints[inheritedIndex].volume;
                         }
                         // 緑線を追加
-                        outTimingPoints.Add(new TimingPoint(time - offset,
+                        outTimingPoints.Add(new TimingPoint(time,
                                                             beatmap.timingPoints[inheritedIndex].bpm,
                                                             sv,
                                                             beatmap.timingPoints[inheritedIndex].barLength,
