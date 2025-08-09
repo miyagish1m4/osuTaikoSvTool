@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using osuTaikoSvTool.Models;
 using osuTaikoSvTool.Properties;
 
@@ -36,31 +36,25 @@ namespace osuTaikoSvTool.Utils.Helper
         /// <returns>BGデータ</returns>
         internal static Bitmap SetBgOnForm(string path, List<string> eventsList)
         {
+            string imageName = string.Empty;
+            bool isGetBG = false;
             try
             {
-                string imageName = string.Empty;
-                bool isGetBG = false;
                 for (global::System.Int32 i = 0; i < eventsList.Count; i++)
                 {
                     if (eventsList[i] == "//Background and Video events")
                     {
-                        try
+                        while (true)
                         {
-                            while (true)
+                            string[] buff = eventsList[i + 1].Split(",");
+                            if (buff[0] == "Video")
                             {
-                                string[] buff = eventsList[i + 1].Split(",");
-                                if (buff[0] == "Video")
-                                {
-                                    i++;
-                                    continue;
-                                }
-                                imageName = buff[2].Replace("\"", "");
-                                isGetBG = true;
-                                break;
+                                i++;
+                                continue;
                             }
-                        }
-                        catch (Exception ex)
-                        {
+                            imageName = buff[2].Replace("\"", "");
+                            isGetBG = true;
+                            break;
                         }
                         break;
                     }
@@ -81,13 +75,12 @@ namespace osuTaikoSvTool.Utils.Helper
                 }
                 else
                 {
-                    Common.WriteWarningMessage("LOG-WARNING-BG-FAIL");
+                    throw new Exception("背景画像が見つかりませんでした。");
                 }
-                return null;
-            }
-            catch (Exception ex)
+            } catch (Exception ex)
             {
-                Common.WriteErrorMessage("LOG-ERROR-EXCEPTION");
+                Common.WriteWarningMessage("LOG_W-GET-BG");
+                Common.WriteExceptionMessage(ex);
                 return null;
             }
         }
@@ -109,7 +102,6 @@ namespace osuTaikoSvTool.Utils.Helper
             var uninheritedTimingPointList = new List<TimingPoint>();
             var hitObjectList = new List<HitObject>();
             List<int> bookmarks = new List<int>();
-            bool ret = true;
             try
             {
                 var lines = File.ReadAllLines(path);
@@ -156,6 +148,8 @@ namespace osuTaikoSvTool.Utils.Helper
             }
             catch (Exception ex)
             {
+                Common.WriteErrorMessage("LOG_E-GET-BEATMAP");
+                Common.WriteExceptionMessage(ex);
                 return null;
             }
         }
@@ -184,100 +178,99 @@ namespace osuTaikoSvTool.Utils.Helper
                                                     ref List<string> coloursList,
                                                     ref List<HitObject> hitObjectList,
                                                     ref List<int> bookmarks)
-    {
-        int structureCode = Constants.VERSION_CODE;
-        try
         {
-            foreach (var line in lines)
+            int structureCode = Constants.VERSION_CODE;
+            try
             {
-                if (line == "")
+                foreach (var line in lines)
                 {
-                    continue;
-                }
-                if (line.Length >= 9)
-                {
-                    if (line.Substring(0, 9) == "Bookmarks")
+                    if (line == "")
                     {
-                        string[] bookmarkParts = line.Split(':');
-                        List<string> stringBookmarks = new List<string>(bookmarkParts[1].Replace(" ", "").Split(","));
-                        foreach (var timing in stringBookmarks)
+                        continue;
+                    }
+                    if (line.Length >= 9)
+                    {
+                        if (line.Substring(0, 9) == "Bookmarks")
                         {
-                            bookmarks.Add(int.Parse(timing));
+                            string[] bookmarkParts = line.Split(':');
+                            List<string> stringBookmarks = new List<string>(bookmarkParts[1].Replace(" ", "").Split(","));
+                            foreach (var timing in stringBookmarks)
+                            {
+                                bookmarks.Add(int.Parse(timing));
+                            }
                         }
                     }
+                    switch (line)
+                    {
+                        case Constants.GENERAL:
+                            structureCode = Constants.GENERAL_CODE;
+                            continue;
+                        case Constants.EDITOR:
+                            structureCode = Constants.EDITOR_CODE;
+                            continue;
+                        case Constants.METADATA:
+                            structureCode = Constants.METADATA_CODE;
+                            continue;
+                        case Constants.DIFFICULTY:
+                            structureCode = Constants.DIFFICULTY_CODE;
+                            continue;
+                        case Constants.EVENTS:
+                            structureCode = Constants.EVENTS_CODE;
+                            continue;
+                        case Constants.TIMING_POINTS:
+                            structureCode = Constants.TIMING_POINTS_CODE;
+                            continue;
+                        case Constants.COLOURS:
+                            structureCode = Constants.COLOURS_CODE;
+                            continue;
+                        case Constants.HIT_OBJECTS:
+                            structureCode = Constants.HIT_OBJECTS_CODE;
+                            continue;
+                        default:
+                            break;
+                    }
+                    switch (structureCode)
+                    {
+                        case Constants.VERSION_CODE:
+                            version = line;
+                            break;
+                        case Constants.GENERAL_CODE:
+                            generalList.Add(line);
+                            break;
+                        case Constants.EDITOR_CODE:
+                            editorList.Add(line);
+                            break;
+                        case Constants.METADATA_CODE:
+                            metadataList.Add(line);
+                            break;
+                        case Constants.DIFFICULTY_CODE:
+                            difficultyList.Add(line);
+                            break;
+                        case Constants.EVENTS_CODE:
+                            eventsList.Add(line);
+                            break;
+                        case Constants.TIMING_POINTS_CODE:
+                            timingPointList.Add(new TimingPoint(line));
+                            break;
+                        case Constants.COLOURS_CODE:
+                            coloursList.Add(line);
+                            break;
+                        case Constants.HIT_OBJECTS_CODE:
+                            hitObjectList.Add(new HitObject(line));
+                            break;
+                        default:
+                            break;
+                    }
                 }
-                switch (line)
-                {
-                    case Constants.GENERAL:
-                        structureCode = Constants.GENERAL_CODE;
-                        continue;
-                    case Constants.EDITOR:
-                        structureCode = Constants.EDITOR_CODE;
-                        continue;
-                    case Constants.METADATA:
-                        structureCode = Constants.METADATA_CODE;
-                        continue;
-                    case Constants.DIFFICULTY:
-                        structureCode = Constants.DIFFICULTY_CODE;
-                        continue;
-                    case Constants.EVENTS:
-                        structureCode = Constants.EVENTS_CODE;
-                        continue;
-                    case Constants.TIMING_POINTS:
-                        structureCode = Constants.TIMING_POINTS_CODE;
-                        continue;
-                    case Constants.COLOURS:
-                        structureCode = Constants.COLOURS_CODE;
-                        continue;
-                    case Constants.HIT_OBJECTS:
-                        structureCode = Constants.HIT_OBJECTS_CODE;
-                        continue;
-                    default:
-                        break;
-                }
-                switch (structureCode)
-                {
-                    case Constants.VERSION_CODE:
-                        version = line;
-                        break;
-                    case Constants.GENERAL_CODE:
-                        generalList.Add(line);
-                        break;
-                    case Constants.EDITOR_CODE:
-                        editorList.Add(line);
-                        break;
-                    case Constants.METADATA_CODE:
-                        metadataList.Add(line);
-                        break;
-                    case Constants.DIFFICULTY_CODE:
-                        difficultyList.Add(line);
-                        break;
-                    case Constants.EVENTS_CODE:
-                        eventsList.Add(line);
-                        break;
-                    case Constants.TIMING_POINTS_CODE:
-                        timingPointList.Add(new TimingPoint(line));
-                        break;
-                    case Constants.COLOURS_CODE:
-                        coloursList.Add(line);
-                        break;
-                    case Constants.HIT_OBJECTS_CODE:
-                        hitObjectList.Add(new HitObject(line));
-                        break;
-                    default:
-                        break;
-                }
+                return true;
             }
-            return true;
+            catch (Exception ex)
+            {
+                Common.WriteErrorMessage("LOG_E-EXCEPTION");
+                Common.WriteExceptionMessage(ex);
+                return false;
+            }
         }
-        catch (Exception ex)
-        {
-            Common.WriteErrorMessage("LOG-ERROR-EXCEPTION");
-            Common.WriteErrorMessage(ex.Message);
-            Common.WriteErrorMessage(ex.StackTrace);
-            return false;
-        }
-    }
 
         /// <summary>
         /// 赤線と小節線を取得する
@@ -334,8 +327,10 @@ namespace osuTaikoSvTool.Utils.Helper
                 hitObjectList.Sort((a, b) => a.time.CompareTo(b.time));
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
+                Common.WriteErrorMessage("LOG_E-EXCEPTION");
+                Common.WriteExceptionMessage(ex);
                 return false;
             }
 
@@ -352,6 +347,7 @@ namespace osuTaikoSvTool.Utils.Helper
             int timingIndex = 0;
             decimal currentBpm = 0;
             decimal currentSv = 1.0m;
+            int svApplyTime = 0;
             try
             {
                 foreach (var hitObject in hitObjectList)
@@ -379,20 +375,25 @@ namespace osuTaikoSvTool.Utils.Helper
                     if (green != null)
                     {
                         currentSv = green.sv;
+                        svApplyTime = green.time;
                     }
                     else if (red != null)
                     {
                         // 赤線のみある場合、SVは1.0
                         currentSv = 1.0m;
+                        svApplyTime = red.time;
                     }
 
                     hitObject.bpm = currentBpm;
                     hitObject.sv = currentSv;
+                    hitObject.svApplyTime = svApplyTime;
                 }
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
+                Common.WriteErrorMessage("LOG_E-EXCEPTION");
+                Common.WriteExceptionMessage(ex);
                 return false;
             }
         }
@@ -457,8 +458,8 @@ namespace osuTaikoSvTool.Utils.Helper
             }
             catch (Exception ex)
             {
-                Common.WriteErrorMessage("LOG-EXPORT-FAIL");
-                Common.WriteErrorMessage(ex.Message + "\n" + ex.StackTrace);
+                Common.WriteErrorMessage("LOG_E-EXPORT-OSU");
+                Common.WriteExceptionMessage(ex);
                 return false;
             }
             finally
@@ -510,3 +511,4 @@ namespace osuTaikoSvTool.Utils.Helper
         }
     }
 }
+

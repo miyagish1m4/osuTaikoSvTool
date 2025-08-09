@@ -1,8 +1,4 @@
-﻿using System.Configuration;
-using System.IO;
-using System.Security.Cryptography;
 using System.Text;
-using System.Windows.Forms;
 using osuTaikoSvTool.Properties;
 
 namespace osuTaikoSvTool.Utils
@@ -10,58 +6,76 @@ namespace osuTaikoSvTool.Utils
     class Common
     {
         /// <summary>
-        /// ログファイルの初期化設定
+        /// ファイル,フォルダの初期化設定
         /// </summary>
-        /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
-        internal static bool InitializeLogDirectory()
+        internal static void InitializeDirectoryAndFiles()
         {
-            try
+            DateTime currentDateTime = DateTime.Now;
+            string infoLogPath = Directory.GetCurrentDirectory() + Constants.INFO_LOG_DIRECTORY + "\\info_" + currentDateTime.ToString("yyyyMMdd") + Constants.LOG_EXTENSION;
+            string warningLogPath = Directory.GetCurrentDirectory() + Constants.WARNING_LOG_DIRECTORY + "\\warning_" + currentDateTime.ToString("yyyyMMdd") + Constants.LOG_EXTENSION;
+            string errorLogPath = Directory.GetCurrentDirectory() + Constants.ERROR_LOG_DIRECTORY + "\\error_" + currentDateTime.ToString("yyyyMMdd") + Constants.LOG_EXTENSION;
+            // Logディレクトリの作成
+            if (!Directory.Exists(Directory.GetCurrentDirectory() + Constants.LOG_DIRECTORY))
             {
-                DateTime currentDateTime = DateTime.Now;
-                string infoMessagePath = Directory.GetCurrentDirectory() + Constants.INFO_MESSAGE_DIRECTORY + "\\info_" + currentDateTime.ToString("yyyyMMdd") + Constants.LOG_EXTENSION;
-                string errorMessagePath = Directory.GetCurrentDirectory() + Constants.ERROR_MESSAGE_DIRECTORY + "\\error_" + currentDateTime.ToString("yyyyMMdd") + Constants.LOG_EXTENSION;
-                if (!Directory.Exists(Directory.GetCurrentDirectory() + Constants.BACKUP_DIRECTORY))
-                {
-                    Directory.CreateDirectory(Directory.GetCurrentDirectory() + Constants.BACKUP_DIRECTORY);
-                }
-                if (!Directory.Exists(Directory.GetCurrentDirectory() + Constants.WORK_DIRECTORY))
-                {
-                    Directory.CreateDirectory(Directory.GetCurrentDirectory() + Constants.WORK_DIRECTORY);
-                }
-                if (!Directory.Exists(Directory.GetCurrentDirectory() + Constants.INFO_MESSAGE_DIRECTORY))
-                {
-                    Directory.CreateDirectory(Directory.GetCurrentDirectory() + Constants.INFO_MESSAGE_DIRECTORY);
-                }
-                if (!File.Exists(infoMessagePath))
-                {
-                    // 新規ファイル作成
-                    File.Create(infoMessagePath).Close();
-                }
-                if (!Directory.Exists(Directory.GetCurrentDirectory() + Constants.WARNING_MESSAGE_DIRECTORY))
-                {
-                    Directory.CreateDirectory(Directory.GetCurrentDirectory() + Constants.WARNING_MESSAGE_DIRECTORY);
-                }
-                if (!File.Exists(infoMessagePath))
-                {
-                    // 新規ファイル作成
-                    File.Create(infoMessagePath).Close();
-                }
-                if (!Directory.Exists(Directory.GetCurrentDirectory() + Constants.ERROR_MESSAGE_DIRECTORY))
-                {
-                    Directory.CreateDirectory(Directory.GetCurrentDirectory() + Constants.ERROR_MESSAGE_DIRECTORY);
-                }
-                if (!File.Exists(errorMessagePath))
-                {
-                    // 新規ファイル作成
-                    File.Create(errorMessagePath).Close();
-                }
-                return true;
+                string folderpath = Directory.GetCurrentDirectory() + Constants.LOG_DIRECTORY;
+                Directory.CreateDirectory(folderpath);
+                var folder_attr = File.GetAttributes(folderpath);
+                File.SetAttributes(folderpath, folder_attr | FileAttributes.Hidden);
             }
-            catch
+            // INFOログディレクトリの作成
+            if (!Directory.Exists(Directory.GetCurrentDirectory() + Constants.INFO_LOG_DIRECTORY))
             {
-                return false;
+                string folderpath = Directory.GetCurrentDirectory() + Constants.INFO_LOG_DIRECTORY;
+                Directory.CreateDirectory(folderpath);
+                var folder_attr = File.GetAttributes(folderpath);
+                File.SetAttributes(folderpath, folder_attr | FileAttributes.Hidden);
             }
-
+            // INFOログファイルの作成
+            if (!File.Exists(infoLogPath))
+            {
+                File.Create(infoLogPath).Close();
+            }
+            // WARNINGログディレクトリの作成
+            if (!Directory.Exists(Directory.GetCurrentDirectory() + Constants.WARNING_LOG_DIRECTORY))
+            {
+                string folderpath = Directory.GetCurrentDirectory() + Constants.WARNING_LOG_DIRECTORY;
+                Directory.CreateDirectory(folderpath);
+                var folder_attr = File.GetAttributes(folderpath);
+                File.SetAttributes(folderpath, folder_attr | FileAttributes.Hidden);
+            }
+            // WARNINGログファイルの作成
+            if (!File.Exists(warningLogPath))
+            {
+                File.Create(warningLogPath).Close();
+            }
+            // ERRORログディレクトリの作成
+            if (!Directory.Exists(Directory.GetCurrentDirectory() + Constants.ERROR_LOG_DIRECTORY))
+            {
+                string folderpath = Directory.GetCurrentDirectory() + Constants.ERROR_LOG_DIRECTORY;
+                Directory.CreateDirectory(folderpath);
+                var folder_attr = File.GetAttributes(folderpath);
+                File.SetAttributes(folderpath, folder_attr | FileAttributes.Hidden);
+            }
+            // ERRORログファイルの作成
+            if (!File.Exists(errorLogPath))
+            {
+                File.Create(errorLogPath).Close();
+            }
+            // 履歴ディレクトリの作成
+            if (!Directory.Exists(Directory.GetCurrentDirectory() + Constants.HISTORY_DIRECTORY))
+            {
+                Directory.CreateDirectory(Directory.GetCurrentDirectory() + Constants.HISTORY_DIRECTORY);
+            }
+            // バックアップディレクトリの作成
+            if (!Directory.Exists(Directory.GetCurrentDirectory() + Constants.BACKUP_DIRECTORY))
+            {
+                Directory.CreateDirectory(Directory.GetCurrentDirectory() + Constants.BACKUP_DIRECTORY);
+            }
+            // 作業ディレクトリの作成
+            if (!Directory.Exists(Directory.GetCurrentDirectory() + Constants.WORK_DIRECTORY))
+            {
+                Directory.CreateDirectory(Directory.GetCurrentDirectory() + Constants.WORK_DIRECTORY);
+            }
         }
         /// <summary>
         /// コンフィグファイルの初期化設定
@@ -72,14 +86,14 @@ namespace osuTaikoSvTool.Utils
             try
             {
                 string configPath = Directory.GetCurrentDirectory() + "\\" + Constants.CONFIG_FILE_NAME;
-                string songsPath = "";
+                string? songsPath = "";
                 if (!File.Exists(configPath) || File.ReadAllText(configPath) == "" || File.ReadAllText(configPath) == null)
                 {
-                    if (MessageBox.Show(WriteDialogMessage("I-003"), "情報", MessageBoxButtons.OK, MessageBoxIcon.Asterisk) != DialogResult.OK)
-                    {
-                        MessageBox.Show(WriteDialogMessage("E-002"), "結果", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        return "";
-                    }
+                    MessageBox.Show(WriteDialogMessage("I_A-EM-001"), "Information", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+                    //{
+                    //    MessageBox.Show(WriteDialogMessage("E_A-P-002"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    //    return "";
+                    //}
                     using (var OpenFolderDialog = new OpenFileDialog()
                     {
                         Title = "フォルダ選択ダイアログ",
@@ -97,7 +111,7 @@ namespace osuTaikoSvTool.Utils
                                 // 新規ファイル作成
                                 File.Create(configPath).Close();
                             }
-                            MessageBox.Show(WriteDialogMessage("I-002"), "結果", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+                            MessageBox.Show(WriteDialogMessage("I_A-P-002"), "Information", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
                             StreamWriter configFile = new StreamWriter(configPath);
                             configFile.WriteLine(Constants.SONGS_DIRECTORY);
                             configFile.WriteLine(songsPath);
@@ -105,8 +119,8 @@ namespace osuTaikoSvTool.Utils
                         }
                         else
                         {
-                            MessageBox.Show(WriteDialogMessage("E-002"), "結果", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            return "";
+                            MessageBox.Show(WriteDialogMessage("E_A-P-002"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            throw new Exception("Songsフォルダの設定がキャンセルされました。");
                         }
                     }
                 }
@@ -121,12 +135,12 @@ namespace osuTaikoSvTool.Utils
                         }
                     }
                 }
-                return songsPath;
+                return songsPath == null ? "" : songsPath;
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                WriteErrorMessage("LOG-ERROR-EXCEPTION");
-                WriteErrorMessage(e.Message + "\n" + e.StackTrace);
+                WriteErrorMessage("LOG_E-DIRECTORY-SONGS");
+                WriteExceptionMessage(ex);
                 return "";
             }
 
@@ -150,66 +164,49 @@ namespace osuTaikoSvTool.Utils
             return message;
         }
         /// <summary>
+        /// 例外エラー発生時のメッセージ書き込み処理
+        /// </summary>
+        /// <param name="ex">Exceptionクラス</param>
+        internal static void WriteExceptionMessage(Exception ex)
+        {
+            DateTime currentDateTime = DateTime.Now;
+            string errorLogPath = Directory.GetCurrentDirectory() + Constants.ERROR_LOG_DIRECTORY + "\\error_" + currentDateTime.ToString("yyyyMMdd") + Constants.LOG_EXTENSION;
+            if (!Directory.Exists(Directory.GetCurrentDirectory() + Constants.ERROR_LOG_DIRECTORY))
+            {
+                Directory.CreateDirectory(Directory.GetCurrentDirectory() + Constants.ERROR_LOG_DIRECTORY);
+            }
+            WriteMessage(ex.Message + "\r\n" +
+                         ex.TargetSite + "\r\n" +
+                         ex.StackTrace,
+                         Constants.LOG_LEVEL_ERROR, errorLogPath, currentDateTime);
+        }
+        /// <summary>
         /// Infoメッセージの書き込み処理
         /// </summary>
         /// <param name="messageCode">メッセージコード、またはメッセージ</param>
         internal static void WriteInfoMessage(string messageCode)
         {
             DateTime currentDateTime = DateTime.Now;
-            string infoMessagePath = Directory.GetCurrentDirectory() + Constants.INFO_MESSAGE_DIRECTORY + "\\info_" + currentDateTime.ToString("yyyyMMdd") + Constants.LOG_EXTENSION;
-            string message;
-            if (Messages.LogMessages.ContainsKey(messageCode))
+            string infoLogPath = Directory.GetCurrentDirectory() + Constants.INFO_LOG_DIRECTORY + "\\info_" + currentDateTime.ToString("yyyyMMdd") + Constants.LOG_EXTENSION;
+            if (!Directory.Exists(Directory.GetCurrentDirectory() + Constants.INFO_LOG_DIRECTORY))
             {
-                message = Messages.LogMessages[messageCode];
+                Directory.CreateDirectory(Directory.GetCurrentDirectory() + Constants.INFO_LOG_DIRECTORY);
             }
-            else
-            {
-                message = messageCode;
-            }
-            if (!Directory.Exists(Directory.GetCurrentDirectory() + Constants.INFO_MESSAGE_DIRECTORY))
-            {
-                Directory.CreateDirectory(Directory.GetCurrentDirectory() + Constants.INFO_MESSAGE_DIRECTORY);
-            }
-            if (!File.Exists(infoMessagePath))
-            {
-                // 新規ファイル作成
-                File.Create(infoMessagePath).Close();
-            }
-            using (StreamWriter writer = new StreamWriter(infoMessagePath, true, Encoding.GetEncoding("utf-8")))
-            {
-                writer.WriteLine(currentDateTime.ToString("[HH:mm:ss.fff]") + " " + message);
-            }
+            WriteMessage(messageCode, Constants.LOG_LEVEL_INFO, infoLogPath, currentDateTime);
         }
         /// <summary>
-        /// Errorメッセージの書き込み処理
+        /// Warningメッセージの書き込み処理
         /// </summary>
         /// <param name="messageCode">メッセージコード、またはメッセージ</param>
         internal static void WriteWarningMessage(string messageCode)
         {
             DateTime currentDateTime = DateTime.Now;
-            string errorMessagePath = Directory.GetCurrentDirectory() + Constants.WARNING_MESSAGE_DIRECTORY + "\\error_" + currentDateTime.ToString("yyyyMMdd") + Constants.LOG_EXTENSION;
-            string message;
-            if (Messages.LogMessages.ContainsKey(messageCode))
+            string warningLogPath = Directory.GetCurrentDirectory() + Constants.WARNING_LOG_DIRECTORY + "\\warning_" + currentDateTime.ToString("yyyyMMdd") + Constants.LOG_EXTENSION;
+            if (!Directory.Exists(Directory.GetCurrentDirectory() + Constants.WARNING_LOG_DIRECTORY))
             {
-                message = Messages.LogMessages[messageCode];
+                Directory.CreateDirectory(Directory.GetCurrentDirectory() + Constants.WARNING_LOG_DIRECTORY);
             }
-            else
-            {
-                message = messageCode;
-            }
-            if (!Directory.Exists(Directory.GetCurrentDirectory() + Constants.WARNING_MESSAGE_DIRECTORY))
-            {
-                Directory.CreateDirectory(Directory.GetCurrentDirectory() + Constants.WARNING_MESSAGE_DIRECTORY);
-            }
-            if (!File.Exists(errorMessagePath))
-            {
-                // 新規ファイル作成
-                File.Create(errorMessagePath).Close();
-            }
-            using (StreamWriter writer = new StreamWriter(errorMessagePath, true, Encoding.GetEncoding("utf-8")))
-            {
-                writer.WriteLine(currentDateTime.ToString("[HH:mm:ss.fff]") + " " + message);
-            }
+            WriteMessage(messageCode, Constants.LOG_LEVEL_WARNING, warningLogPath, currentDateTime);
         }
         /// <summary>
         /// Errorメッセージの書き込み処理
@@ -218,30 +215,46 @@ namespace osuTaikoSvTool.Utils
         internal static void WriteErrorMessage(string messageCode)
         {
             DateTime currentDateTime = DateTime.Now;
-            string errorMessagePath = Directory.GetCurrentDirectory() + Constants.ERROR_MESSAGE_DIRECTORY + "\\error_" + currentDateTime.ToString("yyyyMMdd") + Constants.LOG_EXTENSION;
-            string message;
+            string errorLogPath = Directory.GetCurrentDirectory() + Constants.ERROR_LOG_DIRECTORY + "\\error_" + currentDateTime.ToString("yyyyMMdd") + Constants.LOG_EXTENSION;
+            if (!Directory.Exists(Directory.GetCurrentDirectory() + Constants.ERROR_LOG_DIRECTORY))
+            {
+                Directory.CreateDirectory(Directory.GetCurrentDirectory() + Constants.ERROR_LOG_DIRECTORY);
+            }
+            WriteMessage(messageCode, Constants.LOG_LEVEL_ERROR, errorLogPath, currentDateTime);
+        }
+        /// <summary>
+        /// ログメッセージ書き込み共通処理
+        /// </summary>
+        /// <param name="messageCode">メッセージコード、またはメッセージ</param>
+        /// <param name="logLevel">ログレベル</param>
+        /// <param name="logPath">ログのパス</param>
+        /// <param name="date">現時刻</param>
+        internal static void WriteMessage(string messageCode, string logLevel, string logPath, DateTime date)
+        {
+            string message = "";
+            if (!File.Exists(logPath))
+            {
+                // 新規ファイル作成
+                File.Create(logPath).Close();
+            }
             if (Messages.LogMessages.ContainsKey(messageCode))
             {
                 message = Messages.LogMessages[messageCode];
+                using (StreamWriter writer = new StreamWriter(logPath, true, Encoding.GetEncoding("utf-8")))
+                {
+                    writer.WriteLine(date.ToString("[HH:mm:ss.fff]") + " " + logLevel + " : " + message);
+                }
             }
             else
             {
                 message = messageCode;
-            }
-            if (!Directory.Exists(Directory.GetCurrentDirectory() + Constants.ERROR_MESSAGE_DIRECTORY))
-            {
-                Directory.CreateDirectory(Directory.GetCurrentDirectory() + Constants.ERROR_MESSAGE_DIRECTORY);
-            }
-            if (!File.Exists(errorMessagePath))
-            {
-                // 新規ファイル作成
-                File.Create(errorMessagePath).Close();
-            }
-            using (StreamWriter writer = new StreamWriter(errorMessagePath, true, Encoding.GetEncoding("utf-8")))
-            {
-                writer.WriteLine(currentDateTime.ToString("[HH:mm:ss.fff]") + " " + message);
+                using (StreamWriter writer = new StreamWriter(logPath, true, Encoding.GetEncoding("utf-8")))
+                {
+                    writer.WriteLine(message);
+                }
             }
         }
+
         /// <summary>
         /// ユーザが入力したタイミングを変換する処理
         /// </summary>
@@ -259,7 +272,7 @@ namespace osuTaikoSvTool.Utils
                                Convert.ToInt32(arr[0]) * 60000;
                 return true;
             }
-            catch (Exception e)
+            catch
             {
                 return false;
             }

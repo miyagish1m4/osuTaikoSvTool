@@ -8,6 +8,8 @@ namespace osuTaikoSvTool.Models
         public decimal bpm { set; get; }
         // SV
         public decimal sv { set; get; }
+        // SVが掛かるタイミング
+        public int svApplyTime { set; get; }
         // ヒットオブジェクトの種類
         public Constants.NoteType noteType;
         // ノーツの種類
@@ -90,10 +92,6 @@ namespace osuTaikoSvTool.Models
                 endTime = int.Parse(buff[5]);
                 hitSample = buff[6];
             }
-            else
-            {
-                noteType = Constants.NoteType.BARLINE;
-            }
             if ((int.Parse(buff[3]) & 0b00000100) != 0)
             {
                 isNewCombo = true;
@@ -105,6 +103,7 @@ namespace osuTaikoSvTool.Models
         {
             // 小節線の場合
             this.time = time;
+            this.svApplyTime = time;
             noteType = Constants.NoteType.BARLINE;
             positionX = 0;   // 未使用
             positionY = 0;   // 未使用
