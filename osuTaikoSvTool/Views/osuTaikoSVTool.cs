@@ -274,7 +274,7 @@ namespace osuTaikoSvTool
                 MessageBox.Show(Common.WriteDialogMessage("E_A-P-001"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-            // デバッグ用csv出力
+            // デバッグ用CSV出力
             // 内容確認などに使ってね
             //if (!Utils.Helper.Debug.ExportToCsvFile(beatmapData, this.backupDirectoryName))
             if (!BeatmapHelper.ExportToOsuFile(beatmapData, this.beatmapInfo.beatmapPath))

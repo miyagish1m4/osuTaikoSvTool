@@ -252,10 +252,10 @@ namespace osuTaikoSvTool.Services
                         // ベースのBPMを求める
                         if (isFirst)
                         {
-                            baseBpm = beatmap.hitObjects[i].bpm;
+                            baseBpm = beatmap.bookmarks[i].bpm;
                             isFirst = false;
                         }
-                        int time = beatmap.hitObjects[i].time;
+                        int time = beatmap.bookmarks[i].time;
                         decimal sv = 0;
                         int volume = 0;
                         int timingIndex = 0;
@@ -286,7 +286,7 @@ namespace osuTaikoSvTool.Services
                                              userInputData.timingFrom,
                                              beatmap.bookmarks[i].time,
                                              userInputData.calculationCode) *
-                                 (baseBpm / beatmap.hitObjects[i].bpm);
+                                 (baseBpm / beatmap.bookmarks[i].bpm);
                         }
                         else
                         {
@@ -297,8 +297,8 @@ namespace osuTaikoSvTool.Services
                         if (userInputData.isVolume)
                         {
                             // Volumeは等差固定で計算
-                            volume = (int)(userInputData.volumeFrom +
-                                          (volumePerMs * (beatmap.bookmarks[i].time - userInputData.timingFrom)));
+                            volume = Convert.ToInt32(userInputData.volumeFrom +
+                                                    (volumePerMs * (beatmap.bookmarks[i].time - userInputData.timingFrom)));
                         }
                         else
                         {
@@ -331,103 +331,30 @@ namespace osuTaikoSvTool.Services
         private static bool AddAllBarLines(UserInputData userInputData, Beatmap beatmap, ref List<TimingPoint> outTimingPoints)
         {
             decimal baseBpm = 0;
-            bool isFirst = true;
-            int offset = userInputData.isOffset ? userInputData.offset : 0;
             // 1msあたりのSV,Volumeを計算
-            decimal svPerMs = GetSvPerMs(userInputData.svFrom,
-                                         userInputData.svTo,
-                                         userInputData.timingFrom,
-                                         userInputData.timingTo,
-                                         userInputData.calculationCode);
-            decimal volumePerMs = (decimal)(userInputData.volumeTo - userInputData.volumeFrom) /
-                                  (decimal)(userInputData.timingTo - userInputData.timingFrom);
-            int effectCode = userInputData.isKiai ? 1 : 0;
             try
             {
-                for (global::System.Int32 i = 0; i < beatmap.hitObjects.Count; i++)
-                {
-                    if ((beatmap.hitObjects[i].time >= userInputData.timingFrom) &&
-                        (beatmap.hitObjects[i].time <= userInputData.timingTo))
-                    {
-                        // 小節線以外の場合、スルーする
-                        if ((beatmap.hitObjects[i].isOnBarline))
-                        {
-                            continue;
-                        }
-                        // ベースのBPMを求める
-                        if (isFirst)
-                        {
-                            baseBpm = beatmap.hitObjects[i].bpm;
-                            isFirst = false;
-                        }
-                        int time = beatmap.hitObjects[i].time;
-                        decimal sv = 0;
-                        int volume = 0;
-                        int timingIndex = 0;
-                        int inheritedIndex = 0;
-                        bool isSetInheritedIndex = false;
-                        // 小節線に適応されているTimingPointのインデックスを取得する
-                        for (global::System.Int32 j = (beatmap.timingPoints.Count) - (1); j >= 0; j--)
-                        {
-                            if (beatmap.timingPoints[j].time <= beatmap.hitObjects[i].time)
-                            {
-                                if (!isSetInheritedIndex)
-                                {
-                                    inheritedIndex = j;
-                                    isSetInheritedIndex = true;
-                                }
-                                if (beatmap.timingPoints[j].isRedLine)
-                                {
-                                    timingIndex = j;
-                                    break;
-                                }
-                            }
-                        }
-                        // SV有効化フラグが有効の場合、SVを計算する
-                        if (userInputData.isSv)
-                        {
-                            sv = CalculateSv(userInputData.svFrom,
-                                             svPerMs,
+                decimal svPerMs = GetSvPerMs(userInputData.svFrom,
+                                             userInputData.svTo,
                                              userInputData.timingFrom,
-                                             beatmap.hitObjects[i].time,
-                                             userInputData.calculationCode) *
-                                 (baseBpm / beatmap.hitObjects[i].bpm);
-                        }
-                        else
-                        {
-                            // 無効の場合は元から適応されているSVを設定する
-                            sv = beatmap.timingPoints[inheritedIndex].sv;
-                        }
-                        // Volume有効化フラグが有効の場合、音量を計算する
-                        if (userInputData.isVolume)
-                        {
-                            // Volumeは等差固定で計算
-                            volume = (int)(userInputData.volumeFrom +
-                                          (volumePerMs * (beatmap.hitObjects[i].time - userInputData.timingFrom)));
-                        }
-                        else
-                        {
-                            // 無効の場合は元から適応されている音量を設定する
-                            volume = beatmap.timingPoints[inheritedIndex].volume;
-                        }
-                        // スライダーの場合はsliderLengthを調整する
-                        if (beatmap.hitObjects[i].noteType == Constants.NoteType.SLIDER)
-                        {
-                            beatmap.hitObjects[i].sliderLength = beatmap.hitObjects[i].sliderLength *
-                                                                 (sv / beatmap.hitObjects[i].sv);
-                        }
-                        // 緑線を追加
-                        outTimingPoints.Add(new TimingPoint(time - offset,
-                                                            beatmap.timingPoints[inheritedIndex].bpm,
-                                                            sv,
-                                                            beatmap.timingPoints[inheritedIndex].barLength,
-                                                            beatmap.timingPoints[inheritedIndex].meter,
-                                                            beatmap.timingPoints[inheritedIndex].sampleSet,
-                                                            beatmap.timingPoints[inheritedIndex].sampleIndex,
-                                                            volume,
-                                                            false,
-                                                            effectCode));
-                    }
+                                             userInputData.timingTo,
+                                             userInputData.calculationCode);
+                decimal volumePerMs = (decimal)(userInputData.volumeTo - userInputData.volumeFrom) /
+                                      (decimal)(userInputData.timingTo - userInputData.timingFrom);
+                int effectCode = userInputData.isKiai ? 1 : 0;
+                if (!SetSvOnBarlines(userInputData, beatmap, ref outTimingPoints, svPerMs, volumePerMs, ref baseBpm, effectCode))
+                {
+                    throw new Exception("");
+                }
+                if (!SetSvOnTimingPoints(userInputData,
+                         beatmap,
+                         ref outTimingPoints,
+                         svPerMs,
+                         volumePerMs,
+                         baseBpm,
+                         effectCode))
+                {
+                    throw new Exception("");
                 }
                 return true;
 
@@ -640,12 +567,129 @@ namespace osuTaikoSvTool.Services
 
         }
         /// <summary>
+        /// 小節線のタイミングにSVを設定する
+        /// </summary>
+        /// <param name="userInputData">入力値</param>
+        /// <param name="beatmap">譜面情報</param>
+        /// <param name="timingPointBuff">追加したSVの出力先</param>
+        /// <param name="svPerMs">1msあたりのSV</param>
+        /// <param name="volumePerMs">1msあたりのVolume</param>
+        /// <param name="baseBpm">始点のBPM</param>
+        /// <param name="effectCode">エフェクトコード</param>
+        /// <returns></returns>
+        private static bool SetSvOnBarlines(UserInputData userInputData,
+                                            Beatmap beatmap,
+                                            ref List<TimingPoint> timingPointBuff,
+                                            decimal svPerMs,
+                                            decimal volumePerMs,
+                                            ref decimal baseBpm,
+                                            int effectCode)
+        {
+            bool isFirst = true;
+            int offset = userInputData.isOffset ? userInputData.offset : 0;
+            try
+            {
+                for (global::System.Int32 i = 0; i < beatmap.hitObjects.Count; i++)
+                {
+                    if ((beatmap.hitObjects[i].time >= userInputData.timingFrom) &&
+                        (beatmap.hitObjects[i].time <= userInputData.timingTo))
+                    {
+                        // 小節線以外の場合、スルーする
+                        if (!beatmap.hitObjects[i].isOnBarline)
+                        {
+                            continue;
+                        }
+                        // ベースのBPMを求める
+                        if (isFirst)
+                        {
+                            baseBpm = beatmap.hitObjects[i].bpm;
+                            isFirst = false;
+                        }
+                        int time = beatmap.hitObjects[i].time;
+                        decimal sv = 0;
+                        int volume = 0;
+                        int timingIndex = 0;
+                        int inheritedIndex = 0;
+                        bool isSetInheritedIndex = false;
+                        // 小節線に適応されているTimingPointのインデックスを取得する
+                        for (global::System.Int32 j = (beatmap.timingPoints.Count) - (1); j >= 0; j--)
+                        {
+                            if (beatmap.timingPoints[j].time <= beatmap.hitObjects[i].time)
+                            {
+                                if (!isSetInheritedIndex)
+                                {
+                                    inheritedIndex = j;
+                                    isSetInheritedIndex = true;
+                                }
+                                if (beatmap.timingPoints[j].isRedLine)
+                                {
+                                    timingIndex = j;
+                                    break;
+                                }
+                            }
+                        }
+                        // SV有効化フラグが有効の場合、SVを計算する
+                        if (userInputData.isSv)
+                        {
+                            sv = CalculateSv(userInputData.svFrom,
+                                             svPerMs,
+                                             userInputData.timingFrom,
+                                             beatmap.hitObjects[i].time,
+                                             userInputData.calculationCode) *
+                                 (baseBpm / beatmap.hitObjects[i].bpm);
+                        }
+                        else
+                        {
+                            // 無効の場合は元から適応されているSVを設定する
+                            sv = beatmap.timingPoints[inheritedIndex].sv;
+                        }
+                        // Volume有効化フラグが有効の場合、音量を計算する
+                        if (userInputData.isVolume)
+                        {
+                            // Volumeは等差固定で計算
+                            volume = Convert.ToInt32(userInputData.volumeFrom +
+                                                    (volumePerMs * (beatmap.hitObjects[i].time - userInputData.timingFrom)));
+                        }
+                        else
+                        {
+                            // 無効の場合は元から適応されている音量を設定する
+                            volume = beatmap.timingPoints[inheritedIndex].volume;
+                        }
+                        // スライダーの場合はsliderLengthを調整する
+                        if (beatmap.hitObjects[i].noteType == Constants.NoteType.SLIDER)
+                        {
+                            beatmap.hitObjects[i].sliderLength = beatmap.hitObjects[i].sliderLength *
+                                                                 (sv / beatmap.hitObjects[i].sv);
+                        }
+                        // 緑線を追加
+                        timingPointBuff.Add(new TimingPoint(time - offset,
+                                                            beatmap.timingPoints[inheritedIndex].bpm,
+                                                            sv,
+                                                            beatmap.timingPoints[inheritedIndex].barLength,
+                                                            beatmap.timingPoints[inheritedIndex].meter,
+                                                            beatmap.timingPoints[inheritedIndex].sampleSet,
+                                                            beatmap.timingPoints[inheritedIndex].sampleIndex,
+                                                            volume,
+                                                            false,
+                                                            effectCode));
+                    }
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Common.WriteExceptionMessage(ex);
+                return false;
+            }
+        }
+
+        /// <summary>
         /// TimingPoints(赤線)が設定されているタイミングにSVを設定する
         /// </summary>
         /// <param name="userInputData">入力値</param>
         /// <param name="beatmap">譜面情報</param>
         /// <param name="timingPointBuff">追加したSVの出力先</param>
-        /// <param name="svPerMs">1msあたりのＳＶ</param>
+        /// <param name="svPerMs">1msあたりのSV</param>
         /// <param name="volumePerMs">1msあたりのVolume</param>
         /// <param name="baseBpm">始点のBPM</param>
         /// <param name="effectCode">エフェクトコード</param>
@@ -677,8 +721,9 @@ namespace osuTaikoSvTool.Services
                                 continue;
                             }
                         }
-                        if (beatmap.timingPoints[i].time == userInputData.timingFrom ||
-                            beatmap.timingPoints[i].time == userInputData.timingTo)
+                        if ((beatmap.timingPoints[i].time == userInputData.timingFrom ||
+                             beatmap.timingPoints[i].time == userInputData.timingTo) && 
+                             userInputData.isAllHitObjects)
                         {
                             if (hitObjects.Count() != 0)
                             {

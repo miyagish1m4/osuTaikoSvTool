@@ -342,7 +342,7 @@ namespace osuTaikoSvTool.Utils.Helper
                 {
                     for (global::System.Int32 j = (timingPointList.Count) - (1); j >= 0; j--)
                     {
-                        if ((timingPointList[j].time <= bookmarkList[i].time) && (bookmarkList[j].sv == -1))
+                        if ((timingPointList[j].time <= bookmarkList[i].time) && bookmarkList[i].sv == -1)
                         {
                             bookmarkList[i].sv = timingPointList[j].isRedLine ? 1 : timingPointList[j].sv;
                             bookmarkList[i].meter = timingPointList[j].meter;
