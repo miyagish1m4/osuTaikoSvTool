@@ -4,12 +4,12 @@
 
 1.VisualStudioの開発用PowerShellで下記2点のコマンドをosuTaikoSvTool.csprojがあるフォルダ内で実行する。
 
-[OsuMemoryDataProvider](https://www.nuget.org/packages/OsuMemoryDataProvider)
+[OsuMemoryDataProvider](https://www.nuget.org/packages/OsuMemoryDataProvider) ([GitHub](https://github.com/Piotrekol/ProcessMemoryDataFinder/tree/master))
 ```
 dotnet add package OsuMemoryDataProvider --version <バージョン>
 ```
 
-[OsuParsers](https://www.nuget.org/packages/OsuParsers)
+[OsuParsers](https://www.nuget.org/packages/OsuParsers) ([GitHub](https://github.com/mrflashstudio/OsuParsers))
 ```
 dotnet add package OsuParsers --version <バージョン>
 ```
