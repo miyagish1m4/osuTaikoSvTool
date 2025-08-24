@@ -1,5 +1,8 @@
 namespace osuTaikoSvTool.Properties
 {
+    /// <summary>
+    /// 定数クラス
+    /// </summary>
     internal class Constants
     {
         // ヒットオブジェクトの種類
@@ -10,6 +13,7 @@ namespace osuTaikoSvTool.Properties
             SLIDER,
             SPINNER
         }
+        #region ディレクトリ
         // バックアップディレクトリ
         internal const string BACKUP_DIRECTORY = "\\BackUp";
         // 作業ディレクトリ
@@ -24,12 +28,15 @@ namespace osuTaikoSvTool.Properties
         internal const string ERROR_LOG_DIRECTORY = "\\Log\\Error";
         // 履歴ディレクトリ
         internal const string HISTORY_DIRECTORY = "\\History";
+        #endregion
+        #region 拡張子
         // osuファイル拡張子
         internal const string OSU_EXTENSION = ".osu";
         // ログファイル拡張子
         internal const string LOG_EXTENSION = ".log";
         // xmlファイル拡張子
         internal const string XML_EXTENSION = ".xml";
+        #endregion
         #region osuファイルのセクション
         internal const string GENERAL = "[General]";
         internal const string EDITOR = "[Editor]";
@@ -51,8 +58,7 @@ namespace osuTaikoSvTool.Properties
         #endregion
         #region 実行コード
         internal const int EXECUTE_ADD = 0;
-        internal const int EXECUTE_MODIFY = 1;
-        internal const int EXECUTE_REMOVE = 2;
+        internal const int EXECUTE_REMOVE = 1;
         #endregion
         #region 計算コード
         internal const int CALCULATION_ARITHMETIC = 1; // 等差

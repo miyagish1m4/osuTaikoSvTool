@@ -27,6 +27,7 @@ namespace osuTaikoSvTool
         private bool isDirectoryLoaded = false;
         private bool isUpdate = true;
         private bool[] isOnlySpecificHitObjectArray = new bool[7] { false, false, false, false, false, false, false };
+        private bool[] isSetMode = new bool[2] { true, false };
         private int objectCode = 0;
         private int calculationCode = 0;
         private int beforeSelectedTabIndex = 0;
@@ -46,7 +47,7 @@ namespace osuTaikoSvTool
 
         }
         /// <summary>
-        /// osuのメモリデータを取得する
+        /// osu.exeのメモリデータ取得処理
         /// </summary>
         private void UpdateMemoryData()
         {
@@ -55,11 +56,13 @@ namespace osuTaikoSvTool
                 try
                 {
                     Thread.Sleep(15);
+                    // osu.exeを探す
                     var processes = Process.GetProcessesByName("osu!");
                     if (processes.Length == 0)
                     {
                         throw new Exception("osu!が起動されていません。");
                     }
+                    // osuフォルダ取得処理
                     if (!isDirectoryLoaded)
                     {
                         Process process = processes[0];
@@ -75,18 +78,27 @@ namespace osuTaikoSvTool
                             isDirectoryLoaded = !isDirectoryLoaded;
                         }
                     }
+                    // メモリから譜面の情報を取得する
                     sreader.TryRead(baseAddresses.Beatmap);
                     sreader.TryRead(baseAddresses.GeneralData);
                     currentTime = baseAddresses.GeneralData.AudioTime;
+                    // 譜面のフォルダを取得
                     string osuBeatmapPath = Path.Combine(songsPath ?? "",
                                                          baseAddresses.Beatmap.FolderName ?? "",
                                                          baseAddresses.Beatmap.OsuFileName ?? "");
+                    // 譜面のデータを取得
                     OsuParsers.Beatmaps.Beatmap beatmapData = BeatmapDecoder.Decode(osuBeatmapPath);
+                    // タイトル
                     beatmapInfo.title = beatmapData.Version <= 9 ? beatmapData.MetadataSection.Title : beatmapData.MetadataSection.TitleUnicode;
+                    // アーティスト
                     beatmapInfo.artist = beatmapData.Version <= 9 ? beatmapData.MetadataSection.Artist : beatmapData.MetadataSection.ArtistUnicode;
+                    // Diff名
                     beatmapInfo.version = beatmapData.MetadataSection.Version;
+                    // マッパー名
                     beatmapInfo.creator = beatmapData.MetadataSection.Creator;
+                    // 譜面のパス
                     beatmapInfo.beatmapPath = osuBeatmapPath;
+                    // BGのパス
                     string backgroundPath = Path.Combine(songsPath ?? "",
                                                          baseAddresses.Beatmap.FolderName ?? "",
                                                          beatmapData.EventsSection.BackgroundImage ?? "");
@@ -98,8 +110,9 @@ namespace osuTaikoSvTool
                 }
                 catch (Exception ex)
                 {
-                    Common.WriteErrorMessage("メモリ取得失敗してて草");
-                    Common.WriteExceptionMessage(ex);
+                    // このExceptionはErrorログに書き込むと容量が膨大になってしまうため、
+                    // Errorログには書かずConsoleログに出力
+                    Console.WriteLine(ex);
                 }
             }
         }
@@ -119,6 +132,7 @@ namespace osuTaikoSvTool
                     {
                         continue;
                     }
+                    // 前回取得したデータと同じ場合は処理を行わない
                     if (preBeatmapInfo.version == beatmapInfo.version &&
                         preBeatmapInfo.beatmapPath == beatmapInfo.beatmapPath)
                     {
@@ -129,29 +143,32 @@ namespace osuTaikoSvTool
                     preBeatmapInfo.title = beatmapInfo.title;
                     preBeatmapInfo.version = beatmapInfo.version;
                     preBeatmapInfo.creator = beatmapInfo.creator;
+                    // テキストラベルに譜面の情報を書き込む
                     lblFileName.Text = beatmapInfo.artist.Replace("&", "&&") + " - " +
                                        beatmapInfo.title.Replace("&", "&&") + " [" +
                                        beatmapInfo.version.Replace("&", "&&") + "]";
+                    // バックアップフォルダ名を設定する
                     backupDirectoryName = beatmapInfo.artist + " - " +
                                           beatmapInfo.title + " (" +
                                           beatmapInfo.creator + ") [" +
                                           beatmapInfo.version + "]";
                     preBeatmapInfo.beatmapPath = beatmapInfo.beatmapPath;
+                    // BGのパスが取得できている場合はBGをフォームに表示する
                     if (beatmapInfo.backgroundPath == null || beatmapInfo.backgroundPath == string.Empty)
                     {
                         picDisplayBg.Image = null;
-                        lblFileName.Text = "No Beatmap Selected";
                         Common.WriteWarningMessage("LOG_W-GET-BG");
                     }
                     else
                     {
                         picDisplayBg.Image = BeatmapHelper.SetBgOnForm(beatmapInfo.backgroundPath);
                     }
-
                 }
-                catch
+                catch (Exception ex)
                 {
-
+                    // このExceptionはErrorログに書き込むと容量が膨大になってしまうため、
+                    // Errorログには書かずConsoleログに出力
+                    Console.WriteLine(ex);
                 }
             }
         }
@@ -160,28 +177,11 @@ namespace osuTaikoSvTool
         /// </summary>
         private void InitializeAddControls()
         {
+            isSetMode[0] = true;
+            isSetMode[1] = false;
             tabSetType.SelectedIndex = 0;
             InitializeHitObjectsControls();
             InitializeBeatSnapControls();
-        }
-        /// <summary>
-        /// 実行項目タブが"変更"の時のコントロールの初期化処理
-        /// </summary>
-        private void InitializeModifyControls()
-        {
-            rdoAllHitObjectsModify.Checked = true;
-            picSpecificNormalDongModify.Visible = false;
-            picSpecificFinisherDongModify.Visible = false;
-            picSpecificNormalKaModify.Visible = false;
-            picSpecificFinisherKaModify.Visible = false;
-            picSpecificNormalSliderModify.Visible = false;
-            picSpecificFinisherSliderModify.Visible = false;
-            picSpecificNormalSpinnerModify.Visible = false;
-            lblSpecificNormalModify.Visible = false;
-            lblSpecificFinisherModify.Visible = false;
-            lblSpecificGridLineModify.Visible = false;
-            lblSpecificGridLine2Modify.Visible = false;
-            chkEnableKiaiModify.Checked = false;
         }
         /// <summary>
         /// 実行項目タブが"削除"の時のコントロールの初期化処理
@@ -239,55 +239,65 @@ namespace osuTaikoSvTool
             chkEnableBeatSnap.Checked = false;
         }
         /// <summary>
-        /// メイン処理
+        /// メイン処理(SV.Volume)
         /// </summary>
         /// <param name="executeCode">実行コード</param>
         private void ExecuteProcess(int executeCode)
         {
             bool isSvCalculation = false;
+            // 入力値と譜面情報が取得できていない場合はエラーダイアログを表示する
             if (userInputData == null || beatmapData == null)
             {
-                MessageBox.Show(Common.WriteDialogMessage("E_A-D-001"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Common.ShowMessageDialog("E_A-D-001");
                 return;
             }
+            // 実行コードにSV処理を行う
             switch (executeCode)
             {
+                // 追加
                 case Constants.EXECUTE_ADD:
                     isSvCalculation = SVCalculatorService.Add(userInputData, beatmapData, ref timingPoints);
                     beatmapData.timingPoints.AddRange(timingPoints);
+                    beatmapData.timingPoints = beatmapData.timingPoints.OrderBy(a => a.time).ThenByDescending(b => b.isRedLine ? 1 : 0).ToList();
                     timingPoints.Clear();
                     break;
-                case Constants.EXECUTE_MODIFY:
-                    isSvCalculation = SVCalculatorService.Modify(userInputData, beatmapData);
-                    break;
+                // 削除
                 case Constants.EXECUTE_REMOVE:
                     isSvCalculation = SVCalculatorService.Remove(userInputData, beatmapData);
                     break;
             }
             if (!isSvCalculation)
             {
-                MessageBox.Show(Common.WriteDialogMessage("E_A-P-001"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                // 失敗した場合はエラーダイアログを表示する
+                Common.ShowMessageDialog("E_A-P-001");
                 return;
             }
+            // バックアップを作成する
             if (!BeatmapHelper.CreateBackup(this.beatmapInfo.beatmapPath, this.backupDirectoryName))
             {
-                MessageBox.Show(Common.WriteDialogMessage("E_A-P-001"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                // 失敗した場合はエラーダイアログを表示する
+                Common.ShowMessageDialog("E_A-P-001");
                 return;
             }
             // デバッグ用CSV出力
             // 内容確認などに使ってね
             //if (!Utils.Helper.Debug.ExportToCsvFile(beatmapData, this.backupDirectoryName))
+            // osuファイルに上書きする
             if (!BeatmapHelper.ExportToOsuFile(beatmapData, this.beatmapInfo.beatmapPath))
             {
-                MessageBox.Show(Common.WriteDialogMessage("E_A-P-001"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                // 失敗した場合はエラーダイアログを表示する
+                Common.ShowMessageDialog("E_A-P-001");
                 return;
             }
+            // 入力値をxmlファイルにシリアライズする
             if (!UserInputDataHelper.SerializeUserInputData(userInputData))
             {
-                MessageBox.Show(Common.WriteDialogMessage("E_A-P-001"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                // 失敗した場合はエラーダイアログを表示する
+                Common.ShowMessageDialog("E_A-P-001");
                 return;
             }
-            MessageBox.Show(Common.WriteDialogMessage("I_A-P-001"), "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            // 成功した場合はメッセージダイアログを表示する
+            Common.ShowMessageDialog("I_A-P-001");
             return;
         }
         /// <summary>
@@ -296,15 +306,18 @@ namespace osuTaikoSvTool
         /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
         private bool GetBeatmap()
         {
+            // 譜面情報がリアルタイムで取得できていない場合はエラーダイアログを表示する
             if (this.beatmapInfo.beatmapPath == null || this.beatmapInfo.beatmapPath == string.Empty)
             {
-                MessageBox.Show(Common.WriteDialogMessage("E_V-EM-001"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Common.ShowMessageDialog("E_A-D-001");
                 return false;
             }
+            // 譜面の内容を取得する
             beatmapData = BeatmapHelper.GetBeatmapData(this.beatmapInfo.beatmapPath);
+            // 取得できなかった場合はエラーダイアログを表示する
             if (beatmapData.version == string.Empty)
             {
-                MessageBox.Show(Common.WriteDialogMessage("E_A-D-001"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Common.ShowMessageDialog("E_A-D-001");
                 return false;
             }
             return true;
@@ -315,15 +328,10 @@ namespace osuTaikoSvTool
         {
             Common.InitializeDirectoryAndFiles();
             Common.WriteInfoMessage("LOG_I-START");
-
-            //songsDirectory = Common.InitializeConfigDirectory();
-            //if (songsDirectory == "")
-            //{
-            //    Application.Exit();
-            //}
+            // ApplicationExitイベントハンドラを追加
             Application.ApplicationExit += new EventHandler(Application_ApplicationExit);
+            // それぞれのコントロールの初期化処理
             InitializeAddControls();
-            InitializeModifyControls();
             picDisplayBg.Controls.Add(lblFileName);
             this.FormBorderStyle = FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
@@ -350,36 +358,37 @@ namespace osuTaikoSvTool
         {
             try
             {
+                // 入力値をUserInputDataクラスに格納
                 if (!UserInputDataHelper.SetUserInputData(txtTimingFrom.Text,
-                                                         txtTimingTo.Text,
-                                                         chkEnableSv.Checked,
-                                                         txtSvFrom.Text,
-                                                         txtSvTo.Text,
-                                                         chkEnableVolume.Checked,
-                                                         txtVolumeFrom.Text,
-                                                         txtVolumeTo.Text,
-                                                         calculationCode,
-                                                         chkEnableOffset.Checked,
-                                                         txtOffset.Text,
-                                                         chkEnableBeatSnap.Checked,
-                                                         txtBeatSnap.Text,
-                                                         chkEnableKiai.Checked,
-                                                         chkEnableKiaiStart.Checked,
-                                                         chkEnableKiaiEnd.Checked,
-                                                         rdoAllHitObjects.Checked,
-                                                         rdoOnlyBarline.Checked,
-                                                         rdoOnlyBookMark.Checked,
-                                                         rdoOnlySpecificHitObject.Checked,
-                                                         objectCode,
-                                                         Constants.EXECUTE_ADD,
-                                                         ref userInputData))
+                                                          txtTimingTo.Text,
+                                                          chkEnableSv.Checked,
+                                                          txtSvFrom.Text,
+                                                          txtSvTo.Text,
+                                                          chkEnableVolume.Checked,
+                                                          txtVolumeFrom.Text,
+                                                          txtVolumeTo.Text,
+                                                          calculationCode,
+                                                          chkEnableKiai.Checked,
+                                                          chkEnableOffset.Checked,
+                                                          txtOffset.Text,
+                                                          isSetMode[0],
+                                                          isSetMode[1],
+                                                          objectCode,
+                                                          chkEnableKiaiStart.Checked,
+                                                          chkEnableKiaiEnd.Checked,
+                                                          chkEnableBeatSnap.Checked,
+                                                          txtBeatSnap.Text,
+                                                          Constants.EXECUTE_ADD,
+                                                          ref userInputData))
                 {
                     return;
                 }
+                // 譜面情報の取得
                 if (!GetBeatmap())
                 {
                     return;
                 }
+                // 追加処理の実行
                 ExecuteProcess(Constants.EXECUTE_ADD);
             }
             catch (Exception ex)
@@ -391,74 +400,41 @@ namespace osuTaikoSvTool
                 return;
             }
         }
-        private void btnModify_Click(object sender, EventArgs e)
-        {
-            if (!UserInputDataHelper.SetUserInputData(txtTimingFrom.Text,
-                                                      txtTimingTo.Text,
-                                                      chkEnableSv.Checked,
-                                                      txtSvFrom.Text,
-                                                      txtSvTo.Text,
-                                                      chkEnableVolume.Checked,
-                                                      txtVolumeFrom.Text,
-                                                      txtVolumeTo.Text,
-                                                      calculationCode,
-                                                      chkEnableOffset.Checked,
-                                                      txtOffset.Text,
-                                                      chkEnableBeatSnap.Checked,
-                                                      txtBeatSnap.Text,
-                                                      chkEnableKiaiModify.Checked,
-                                                      chkEnableKiaiStart.Checked,
-                                                      chkEnableKiaiEnd.Checked,
-                                                      rdoAllHitObjectsModify.Checked,
-                                                      rdoOnlyBarlineModify.Checked,
-                                                      rdoOnlyBookMarkModify.Checked,
-                                                      rdoOnlySpecificHitObjectModify.Checked,
-                                                      objectCode,
-                                                      Constants.EXECUTE_MODIFY,
-                                                      ref userInputData))
-            {
-                return;
-            }
-            if (!GetBeatmap())
-            {
-                return;
-            }
-            ExecuteProcess(Constants.EXECUTE_MODIFY);
-        }
         private void btnRemove_Click(object sender, EventArgs e)
         {
             try
             {
+                // 入力値をUserInputDataクラスに格納
                 if (!UserInputDataHelper.SetUserInputData(txtTimingFrom.Text,
-                                                         txtTimingTo.Text,
-                                                         chkEnableSv.Checked,
-                                                         txtSvFrom.Text,
-                                                         txtSvTo.Text,
-                                                         chkEnableVolume.Checked,
-                                                         txtVolumeFrom.Text,
-                                                         txtVolumeTo.Text,
-                                                         calculationCode,
-                                                         chkEnableOffset.Checked,
-                                                         txtOffset.Text,
-                                                         chkEnableBeatSnap.Checked,
-                                                         txtBeatSnap.Text,
-                                                         chkEnableKiai.Checked,
-                                                         chkEnableKiaiStart.Checked,
-                                                         chkEnableKiaiEnd.Checked,
-                                                         rdoAllHitObjects.Checked,
-                                                         rdoOnlyBarline.Checked,
-                                                         rdoOnlyBookMark.Checked,
-                                                         rdoOnlySpecificHitObject.Checked,
-                                                         objectCode,
-                                                         Constants.EXECUTE_REMOVE,
-                                                         ref userInputData))
+                                                          txtTimingTo.Text,
+                                                          chkEnableSv.Checked,
+                                                          txtSvFrom.Text,
+                                                          txtSvTo.Text,
+                                                          chkEnableVolume.Checked,
+                                                          txtVolumeFrom.Text,
+                                                          txtVolumeTo.Text,
+                                                          calculationCode,
+                                                          chkEnableKiai.Checked,
+                                                          chkEnableOffset.Checked,
+                                                          txtOffset.Text,
+                                                          isSetMode[0],
+                                                          isSetMode[1],
+                                                          objectCode,
+                                                          chkEnableKiaiStart.Checked,
+                                                          chkEnableKiaiEnd.Checked,
+                                                          chkEnableBeatSnap.Checked,
+                                                          txtBeatSnap.Text,
+                                                          Constants.EXECUTE_REMOVE,
+                                                          ref userInputData))
                 {
                     return;
                 }
+                // 譜面情報の取得
                 if (!GetBeatmap())
                 {
                     return;
                 }
+                // 削除処理の実行
                 ExecuteProcess(Constants.EXECUTE_REMOVE);
             }
             catch (Exception ex)
@@ -470,19 +446,22 @@ namespace osuTaikoSvTool
         }
         private void btnBackup_Click(object sender, EventArgs e)
         {
+            // バックアップフォルダをエクスプローラで開く
             System.Diagnostics.Process.Start("EXPLORER.EXE", Directory.GetCurrentDirectory() + Constants.BACKUP_DIRECTORY);
         }
         private void btnGetTimingFrom_Click(object sender, EventArgs e)
         {
+            // osuで流れている現時間を取得する
             txtTimingFrom.Text = currentTime.ToString();
-
         }
         private void btnGetTimingTo_Click(object sender, EventArgs e)
         {
+            // osuで流れている現時間を取得する
             txtTimingTo.Text = currentTime.ToString();
         }
         private void btnSwapTiming_Click(object sender, EventArgs e)
         {
+            // Timingの始点と終点を入れ替える
             string timingBuff = "";
             timingBuff = txtTimingFrom.Text;
             txtTimingFrom.Text = txtTimingTo.Text;
@@ -490,6 +469,7 @@ namespace osuTaikoSvTool
         }
         private void btnSwapSv_Click(object sender, EventArgs e)
         {
+            // SVの始点と終点を入れ替える
             string SVBuff = "";
             SVBuff = txtSvFrom.Text;
             txtSvFrom.Text = txtSvTo.Text;
@@ -497,6 +477,7 @@ namespace osuTaikoSvTool
         }
         private void btnSwapVolume_Click(object sender, EventArgs e)
         {
+            // Volumeの始点と終点を入れ替える
             string volumeBuff = "";
             volumeBuff = txtVolumeFrom.Text;
             txtVolumeFrom.Text = txtVolumeTo.Text;
@@ -507,6 +488,7 @@ namespace osuTaikoSvTool
         {
             if (chkEnableSv.Checked)
             {
+                // SV関連のコントロールを有効化
                 txtSvFrom.Enabled = true;
                 txtSvTo.Enabled = true;
                 txtSvFrom.BackColor = SystemColors.Window;
@@ -519,6 +501,7 @@ namespace osuTaikoSvTool
             }
             else
             {
+                // SV関連のコントロールを無効化
                 txtSvFrom.Text = string.Empty;
                 txtSvTo.Text = string.Empty;
                 txtSvFrom.Enabled = false;
@@ -535,8 +518,9 @@ namespace osuTaikoSvTool
         }
         private void chkEnableVolume_CheckedChanged(object sender, EventArgs e)
         {
-            if (chkEnableVolume.Checked == true)
+            if (chkEnableVolume.Checked)
             {
+                // Volume関連のコントロールを有効化
                 txtVolumeFrom.Enabled = true;
                 txtVolumeTo.Enabled = true;
                 txtVolumeFrom.BackColor = SystemColors.Window;
@@ -547,6 +531,7 @@ namespace osuTaikoSvTool
             }
             else
             {
+                // Volume関連のコントロールを無効化
                 txtVolumeFrom.Text = string.Empty;
                 txtVolumeTo.Text = string.Empty;
                 txtVolumeFrom.Enabled = false;
@@ -563,12 +548,14 @@ namespace osuTaikoSvTool
         {
             if (chkEnableOffset.Checked)
             {
+                // offset関連のコントロールを有効化
                 txtOffset.Text = string.Empty;
                 txtOffset.BackColor = SystemColors.Window;
                 txtOffset.Enabled = true;
             }
             else
             {
+                // offset関連のコントロールを無効化
                 txtOffset.BackColor = SystemColors.WindowFrame;
                 txtOffset.Enabled = false;
             }
@@ -577,12 +564,14 @@ namespace osuTaikoSvTool
         {
             if (chkEnableBeatSnap.Checked)
             {
+                // beatsnap関連のコントロールを有効化
                 txtBeatSnap.Text = string.Empty;
                 txtBeatSnap.BackColor = SystemColors.Window;
                 txtBeatSnap.Enabled = true;
             }
             else
             {
+                // beatsnap関連のコントロールを無効化
                 txtBeatSnap.BackColor = SystemColors.WindowFrame;
                 txtBeatSnap.Enabled = false;
             }
@@ -592,6 +581,7 @@ namespace osuTaikoSvTool
         {
             if (chkEnableKiai.Checked && rdoAllHitObjects.Checked)
             {
+                // kiaiの始点終点のコントロールを有効化
                 lblKiaiStart.Visible = true;
                 lblKiaiEnd.Visible = true;
                 chkEnableKiaiStart.Visible = true;
@@ -599,6 +589,7 @@ namespace osuTaikoSvTool
             }
             else
             {
+                // kiaiの始点終点のコントロールを無効化
                 lblKiaiStart.Visible = false;
                 lblKiaiEnd.Visible = false;
                 chkEnableKiaiStart.Visible = false;
@@ -724,14 +715,16 @@ namespace osuTaikoSvTool
         }
         private void btnViewHistory_Click(object sender, EventArgs e)
         {
+            // 仮実装
+            // 実行履歴画面を表示する
             Form historyForm = new HistoryForm();
             historyForm.ShowDialog();
-
         }
         private void rdoAllHitObjects_CheckedChanged(object sender, EventArgs e)
         {
             if (rdoAllHitObjects.Checked)
             {
+                // すべてのobject関連のコントロールを有効化
                 if (chkEnableKiai.Checked)
                 {
                     chkEnableKiaiStart.Visible = true;
@@ -739,9 +732,11 @@ namespace osuTaikoSvTool
                     lblKiaiStart.Visible = true;
                     lblKiaiEnd.Visible = true;
                 }
+                objectCode = 0b11111111;
             }
             else
             {
+                // すべてのobject関連のコントロールを無効化
                 chkEnableKiaiStart.Checked = false;
                 chkEnableKiaiEnd.Checked = false;
                 chkEnableKiaiStart.Visible = false;
@@ -750,10 +745,18 @@ namespace osuTaikoSvTool
                 lblKiaiEnd.Visible = false;
             }
         }
+        private void rdoOnlyBarline_CheckedChanged(object sender, EventArgs e)
+        {
+            if (rdoOnlyBarline.Checked)
+            {
+                objectCode = 0b10000000;
+            }
+        }
         private void rdoOnlyBookMark_CheckedChanged(object sender, EventArgs e)
         {
             if (rdoOnlyBookMark.Checked)
             {
+                // Tabコントロール内のコントロールをすべて無効化
                 chkEnableKiaiStart.Checked = false;
                 chkEnableKiaiEnd.Checked = false;
                 chkEnableOffset.Checked = false;
@@ -766,9 +769,11 @@ namespace osuTaikoSvTool
                 lblOffset.Visible = false;
                 txtOffset.Visible = false;
                 lblMiliSecond.Visible = false;
+                objectCode = int.MinValue;
             }
             else
             {
+                // Tabコントロール内のコントロールを有効化
                 chkEnableOffset.Visible = true;
                 lblOffset.Visible = true;
                 txtOffset.Visible = true;
@@ -779,6 +784,7 @@ namespace osuTaikoSvTool
         {
             if (rdoOnlySpecificHitObject.Checked)
             {
+                // 特定のobject関連のコントロールを有効化
                 picSpecificNormalDong.Visible = true;
                 picSpecificFinisherDong.Visible = true;
                 picSpecificNormalKa.Visible = true;
@@ -798,9 +804,11 @@ namespace osuTaikoSvTool
                 picSpecificNormalSlider.MouseDown += picSpecificNormalSlider_MouseDown;
                 picSpecificFinisherSlider.MouseDown += picSpecificFinisherSlider_MouseDown;
                 picSpecificNormalSpinner.MouseDown += picSpecificNormalSpinner_MouseDown;
+                objectCode = 0;
             }
             else
             {
+                // 特定のobject関連のコントロールを無効化
                 picSpecificNormalDong.Visible = false;
                 picSpecificFinisherDong.Visible = false;
                 picSpecificNormalKa.Visible = false;
@@ -830,12 +838,12 @@ namespace osuTaikoSvTool
                 picSpecificNormalSpinner.Image = Properties.Resources.spinner;
                 // 選択肢とコードの初期化
                 isOnlySpecificHitObjectArray = new bool[7] { false, false, false, false, false, false, false };
-                objectCode = 0;
             }
         }
         private void tabExecuteType_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (beforeSelectedTabIndex == 2)
+            // 削除→別の項目になった場合の処理
+            if (beforeSelectedTabIndex == 1)
             {
                 ReturnRemoveControls();
             }
@@ -843,17 +851,19 @@ namespace osuTaikoSvTool
             {
                 case 0:
                     // Add
-                    InitializeModifyControls();
+                    if (beforeSelectedTabIndex == 2)
+                    {
+                        txtOffset.Text = txtStartOffset.Text;
+                    }
                     break;
                 case 1:
-                    // Modify
-                    InitializeAddControls();
-                    break;
-                case 2:
                     // Remove
                     InitializeAddControls();
-                    InitializeModifyControls();
                     InitializeRemoveControls();
+                    if (beforeSelectedTabIndex == 0)
+                    {
+                        txtStartOffset.Text = txtOffset.Text;
+                    }
                     break;
                 default:
                     break;
@@ -866,169 +876,20 @@ namespace osuTaikoSvTool
             {
                 case 0:
                     // HitObjects
+                    isSetMode[0] = true;
+                    isSetMode[1] = false;
                     InitializeBeatSnapControls();
                     break;
                 case 1:
                     // BeatSnap
+                    isSetMode[0] = false;
+                    isSetMode[1] = true;
                     InitializeHitObjectsControls();
                     break;
                 default:
                     break;
             }
         }
-        private void picSpecificNormalDongModify_MouseDown(object? sender, MouseEventArgs e)
-        {
-            if (isOnlySpecificHitObjectArray[0] = !isOnlySpecificHitObjectArray[0])
-            {
-                picSpecificNormalDongModify.Image = Properties.Resources.d_selected;
-                objectCode += 1;
-            }
-            else
-            {
-                picSpecificNormalDongModify.Image = Properties.Resources.d;
-                objectCode -= 1;
-            }
-        }
-        private void picSpecificFinisherDongModify_MouseDown(object? sender, MouseEventArgs e)
-        {
-            if (isOnlySpecificHitObjectArray[1] = !isOnlySpecificHitObjectArray[1])
-            {
-                picSpecificFinisherDongModify.Image = Properties.Resources.d_selected;
-                objectCode += 2;
-            }
-            else
-            {
-                picSpecificFinisherDongModify.Image = Properties.Resources.d;
-                objectCode -= 2;
-            }
-        }
-        private void picSpecificNormalKaModify_MouseDown(object? sender, MouseEventArgs e)
-        {
-            if (isOnlySpecificHitObjectArray[2] = !isOnlySpecificHitObjectArray[2])
-            {
-                picSpecificNormalKaModify.Image = Properties.Resources.k_selected;
-                objectCode += 4;
-            }
-            else
-            {
-                picSpecificNormalKaModify.Image = Properties.Resources.k;
-                objectCode -= 4;
-            }
-        }
-        private void picSpecificFinisherKaModify_MouseDown(object? sender, MouseEventArgs e)
-        {
-            if (isOnlySpecificHitObjectArray[3] = !isOnlySpecificHitObjectArray[3])
-            {
-                picSpecificFinisherKaModify.Image = Properties.Resources.k_selected;
-                objectCode += 8;
-            }
-            else
-            {
-                picSpecificFinisherKaModify.Image = Properties.Resources.k;
-                objectCode -= 8;
-            }
-        }
-        private void picSpecificNormalSliderModify_MouseDown(object? sender, MouseEventArgs e)
-        {
-            if (isOnlySpecificHitObjectArray[4] = !isOnlySpecificHitObjectArray[4])
-            {
-                picSpecificNormalSliderModify.Image = Properties.Resources.slider_selected;
-                objectCode += 16;
-            }
-            else
-            {
-                picSpecificNormalSliderModify.Image = Properties.Resources.slider;
-                objectCode -= 16;
-            }
-        }
-        private void picSpecificFinisherSliderModify_MouseDown(object? sender, MouseEventArgs e)
-        {
-            if (isOnlySpecificHitObjectArray[5] = !isOnlySpecificHitObjectArray[5])
-            {
-                picSpecificFinisherSliderModify.Image = Properties.Resources.slider_selected;
-                objectCode += 32;
-            }
-            else
-            {
-                picSpecificFinisherSliderModify.Image = Properties.Resources.slider;
-                objectCode -= 32;
-            }
-        }
-        private void picSpecificNormalSpinnerModify_MouseDown(object? sender, MouseEventArgs e)
-        {
-            {
-                if (isOnlySpecificHitObjectArray[6] = !isOnlySpecificHitObjectArray[6])
-                {
-                    picSpecificNormalSpinnerModify.Image = Properties.Resources.spinner_selected;
-                    objectCode += 64;
-                }
-                else
-                {
-                    picSpecificNormalSpinnerModify.Image = Properties.Resources.spinner;
-                    objectCode -= 64;
-                }
-            }
-        }
-        private void rdoOnlySpecificHitObjectModify_CheckedChanged(object sender, EventArgs e)
-        {
-            if (rdoOnlySpecificHitObjectModify.Checked)
-            {
-                picSpecificNormalDongModify.Visible = true;
-                picSpecificFinisherDongModify.Visible = true;
-                picSpecificNormalKaModify.Visible = true;
-                picSpecificFinisherKaModify.Visible = true;
-                picSpecificNormalSliderModify.Visible = true;
-                picSpecificFinisherSliderModify.Visible = true;
-                picSpecificNormalSpinnerModify.Visible = true;
-                lblSpecificNormalModify.Visible = true;
-                lblSpecificFinisherModify.Visible = true;
-                lblSpecificGridLineModify.Visible = true;
-                lblSpecificGridLine2Modify.Visible = true;
-                // pictureBoxに設定されているMouseDownイベントを設定する
-                picSpecificNormalDongModify.MouseDown += picSpecificNormalDongModify_MouseDown;
-                picSpecificFinisherDongModify.MouseDown += picSpecificFinisherDongModify_MouseDown;
-                picSpecificNormalKaModify.MouseDown += picSpecificNormalKaModify_MouseDown;
-                picSpecificFinisherKaModify.MouseDown += picSpecificFinisherKaModify_MouseDown;
-                picSpecificNormalSliderModify.MouseDown += picSpecificNormalSliderModify_MouseDown;
-                picSpecificFinisherSliderModify.MouseDown += picSpecificFinisherSliderModify_MouseDown;
-                picSpecificNormalSpinnerModify.MouseDown += picSpecificNormalSpinnerModify_MouseDown;
-            }
-            else
-            {
-                picSpecificNormalDongModify.Visible = false;
-                picSpecificFinisherDongModify.Visible = false;
-                picSpecificNormalKaModify.Visible = false;
-                picSpecificFinisherKaModify.Visible = false;
-                picSpecificNormalSliderModify.Visible = false;
-                picSpecificFinisherSliderModify.Visible = false;
-                picSpecificNormalSpinnerModify.Visible = false;
-                lblSpecificNormalModify.Visible = false;
-                lblSpecificFinisherModify.Visible = false;
-                lblSpecificGridLineModify.Visible = false;
-                lblSpecificGridLine2Modify.Visible = false;
-                // pictureBoxに設定されているMouseDownイベントを外す
-                picSpecificNormalDongModify.MouseDown -= picSpecificNormalDongModify_MouseDown;
-                picSpecificFinisherDongModify.MouseDown -= picSpecificFinisherDongModify_MouseDown;
-                picSpecificNormalKaModify.MouseDown -= picSpecificNormalKaModify_MouseDown;
-                picSpecificFinisherKaModify.MouseDown -= picSpecificFinisherKaModify_MouseDown;
-                picSpecificNormalSliderModify.MouseDown -= picSpecificNormalSliderModify_MouseDown;
-                picSpecificFinisherSliderModify.MouseDown -= picSpecificFinisherSliderModify_MouseDown;
-                picSpecificNormalSpinnerModify.MouseDown -= picSpecificNormalSpinnerModify_MouseDown;
-                // 画像を元に戻す
-                picSpecificNormalDongModify.Image = Properties.Resources.d;
-                picSpecificFinisherDongModify.Image = Properties.Resources.d;
-                picSpecificNormalKaModify.Image = Properties.Resources.k;
-                picSpecificFinisherKaModify.Image = Properties.Resources.k;
-                picSpecificNormalSliderModify.Image = Properties.Resources.slider;
-                picSpecificFinisherSliderModify.Image = Properties.Resources.slider;
-                picSpecificNormalSpinnerModify.Image = Properties.Resources.spinner;
-                // 選択肢とコードの初期化
-                isOnlySpecificHitObjectArray = new bool[7] { false, false, false, false, false, false, false };
-                objectCode = 0;
-            }
-        }
-
         #endregion
-
     }
 }

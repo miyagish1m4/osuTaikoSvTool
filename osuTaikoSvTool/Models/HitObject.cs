@@ -2,6 +2,9 @@
 
 namespace osuTaikoSvTool.Models
 {
+    /// <summary>
+    /// osuから取得したHitObjectsデータをまとめたクラス
+    /// </summary>
     class HitObject
     {
         // BPM
@@ -13,19 +16,20 @@ namespace osuTaikoSvTool.Models
         // ヒットオブジェクトの種類
         public Constants.NoteType noteType;
         // ノーツの種類
-        public NoteHitSound noteHitSound;
-        internal struct NoteHitSound
-        {
-            public bool isNormal { set; get; }
-            public bool isWhistle { set; get; }
-            public bool isFinish { set; get; }
-            public bool isClap { set; get; }
-        }
+        // ビットで判定を行う
+        // 0b00000001 面
+        // 0b00000010 面(大音符)
+        // 0b00000100 縁
+        // 0b00001000 縁(大音符)
+        // 0b00010000 スライダー
+        // 0b00100000 スライダー(大音符)
+        // 0b01000000 スピナー
+        // 0b10000000 小節線
+        public int hitObjectCode { set; get; }
         // NewComboの判定
         public bool isNewCombo { set; get; }
         // 小節線の判定
         public bool isOnBarline { set; get; }
-
         #region 全ヒットオブジェクト共通変数
         // ヒットオブジェクトのx座標
         public int positionX { set; get; }
@@ -56,6 +60,11 @@ namespace osuTaikoSvTool.Models
         // spinnerの終了時間
         public int endTime { set; get; }
         #endregion
+        /// <summary>
+        /// コンストラクタ
+        /// osuファイルから取得した1行のデータをクラス変数に格納する
+        /// </summary>
+        /// <param name="line">osuファイルから取得1行のデータ</param>
         internal HitObject(string line)
         {
             string[] buff = line.Split(",");
@@ -94,11 +103,16 @@ namespace osuTaikoSvTool.Models
             }
             if ((int.Parse(buff[3]) & 0b00000100) != 0)
             {
+                // NewComboが有効の場合
                 isNewCombo = true;
             }
             isOnBarline = false;
-            SetNoteHitSound(buff);
+            SetHitObjectCode(buff);
         }
+        /// <summary>
+        /// 小節線算出処理時に使用されるコンストラクタ
+        /// </summary>
+        /// <param name="time">timing</param>
         internal HitObject(int time)
         {
             // 小節線の場合
@@ -111,31 +125,66 @@ namespace osuTaikoSvTool.Models
             type = "0";      // 未使用
             isNewCombo = false;
             isOnBarline = true;
+            hitObjectCode = 0b10000000;
         }
         /// <summary>
-        /// ヒットサウンドの種類を設定する
+        /// ヒットサウンドの種類をヒットオブジェクトコードに変換
+        /// オブジェクト判定に使用
         /// </summary>
-        /// <param name="buff"></param>
-        private void SetNoteHitSound(string[] buff)
+        /// <param name="buff">osuから取得した1行のデータ</param>
+        private void SetHitObjectCode(string[] buff)
         {
-
-            if ((int.Parse(buff[4]) & 0b0010) != 0)
+            // サークルの場合
+            if ((int.Parse(buff[3]) & 0b00000001) != 0)
             {
-                noteHitSound.isWhistle = true;
+                // 縁の場合
+                if (((int.Parse(buff[4]) & 0b0010) != 0 || (int.Parse(buff[4]) & 0b1000) != 0))
+                {
+                    // フィニッシャーの場合
+                    if((int.Parse(buff[4]) & 0b0100) != 0)
+                    {
+                        hitObjectCode = 0b00001000;
+                    }
+                    // フィニッシャーではない場合
+                    else
+                    {
+                        hitObjectCode = 0b00000100;
+                    }
+                }
+                // 面の場合
+                else
+                {
+                    // フィニッシャーの場合
+                    if ((int.Parse(buff[4]) & 0b0100) != 0)
+                    {
+                        hitObjectCode = 0b00000010;
+                    }
+                    // フィニッシャーではない場合
+                    else
+                    {
+                        hitObjectCode = 0b00000001;
+                    }
+                }
             }
-            if ((int.Parse(buff[4]) & 0b1000) != 0)
+            // スライダーの場合
+            else if ((int.Parse(buff[3]) & 0b00000010) != 0)
             {
-                noteHitSound.isClap = true;
+                // フィニッシャーではない場合
+                if ((int.Parse(buff[4]) & 0b0100) != 0b0100)
+                {
+                    hitObjectCode = 0b00010000;
+                }
+                // フィニッシャーの場合
+                else
+                {
+                    hitObjectCode = 0b00100000;
+                }
             }
-            if ((int.Parse(buff[4]) & 0b0100) != 0)
+            // スピナーの場合
+            else if ((int.Parse(buff[3]) & 0b00001000) != 0)
             {
-                noteHitSound.isFinish = true;
-            }
-            if ((int.Parse(buff[4]) & 0b1011) == 0)
-            {
-                noteHitSound.isNormal = true;
+                hitObjectCode = 0b01000000;
             }
         }
-
     }
 }

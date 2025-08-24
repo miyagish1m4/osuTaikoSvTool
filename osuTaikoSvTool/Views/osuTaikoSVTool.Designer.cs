@@ -63,7 +63,6 @@ namespace osuTaikoSvTool
             chkEnableKiaiStart = new CheckBox();
             lblKiaiEnd = new Label();
             chkEnableKiaiEnd = new CheckBox();
-            btnModify = new Button();
             btnRemove = new Button();
             chkEnableBeatSnap = new CheckBox();
             txtBeatSnap = new TextBox();
@@ -90,26 +89,11 @@ namespace osuTaikoSvTool
             rdoOnlyBarline = new RadioButton();
             rdoOnlySpecificHitObject = new RadioButton();
             tabBeatSnap = new TabPage();
-            tabModifyPage = new TabPage();
-            lblKiaiModify = new Label();
-            pnlSpecificGroupModify = new Panel();
-            rdoAllHitObjectsModify = new RadioButton();
-            rdoOnlyBookMarkModify = new RadioButton();
-            rdoOnlyBarlineModify = new RadioButton();
-            rdoOnlySpecificHitObjectModify = new RadioButton();
-            lblSpecificNormalModify = new Label();
-            picSpecificNormalSpinnerModify = new PictureBox();
-            lblSpecificFinisherModify = new Label();
-            picSpecificNormalSliderModify = new PictureBox();
-            picSpecificFinisherKaModify = new PictureBox();
-            picSpecificFinisherDongModify = new PictureBox();
-            picSpecificFinisherSliderModify = new PictureBox();
-            lblSpecificGridLine2Modify = new Label();
-            picSpecificNormalKaModify = new PictureBox();
-            picSpecificNormalDongModify = new PictureBox();
-            lblSpecificGridLineModify = new Label();
-            chkEnableKiaiModify = new CheckBox();
             tabRemovePage = new TabPage();
+            chkEnableStartOffset = new CheckBox();
+            txtStartOffset = new TextBox();
+            lbllblMiliSecondRemove = new Label();
+            lblEnableStartOffset = new Label();
             lblCalculationType = new Label();
             btnGetTimingFrom = new Button();
             btnGetTimingTo = new Button();
@@ -129,15 +113,6 @@ namespace osuTaikoSvTool
             tabHitObjectsPage.SuspendLayout();
             pnlSpecificGroup.SuspendLayout();
             tabBeatSnap.SuspendLayout();
-            tabModifyPage.SuspendLayout();
-            pnlSpecificGroupModify.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)picSpecificNormalSpinnerModify).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)picSpecificNormalSliderModify).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)picSpecificFinisherKaModify).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)picSpecificFinisherDongModify).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)picSpecificFinisherSliderModify).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)picSpecificNormalKaModify).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)picSpecificNormalDongModify).BeginInit();
             tabRemovePage.SuspendLayout();
             SuspendLayout();
             // 
@@ -346,7 +321,7 @@ namespace osuTaikoSvTool
             chkEnableOffset.AutoSize = true;
             chkEnableOffset.Checked = true;
             chkEnableOffset.CheckState = CheckState.Checked;
-            chkEnableOffset.Location = new Point(218, 17);
+            chkEnableOffset.Location = new Point(184, 17);
             chkEnableOffset.Name = "chkEnableOffset";
             chkEnableOffset.Size = new Size(15, 14);
             chkEnableOffset.TabIndex = 15;
@@ -378,7 +353,7 @@ namespace osuTaikoSvTool
             lblOffset.AutoSize = true;
             lblOffset.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold);
             lblOffset.ForeColor = Color.White;
-            lblOffset.Location = new Point(238, 16);
+            lblOffset.Location = new Point(204, 16);
             lblOffset.Name = "lblOffset";
             lblOffset.Size = new Size(50, 15);
             lblOffset.TabIndex = 37;
@@ -506,22 +481,6 @@ namespace osuTaikoSvTool
             chkEnableKiaiEnd.TabIndex = 21;
             chkEnableKiaiEnd.UseVisualStyleBackColor = true;
             // 
-            // btnModify
-            // 
-            btnModify.BackColor = Color.DarkCyan;
-            btnModify.FlatAppearance.BorderColor = Color.Cyan;
-            btnModify.FlatAppearance.BorderSize = 2;
-            btnModify.FlatStyle = FlatStyle.Flat;
-            btnModify.Font = new Font("Yu Gothic UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 128);
-            btnModify.ForeColor = SystemColors.ControlLightLight;
-            btnModify.Location = new Point(96, 264);
-            btnModify.Name = "btnModify";
-            btnModify.Size = new Size(189, 39);
-            btnModify.TabIndex = 32;
-            btnModify.Text = "変更";
-            btnModify.UseVisualStyleBackColor = false;
-            btnModify.Click += btnModify_Click;
-            // 
             // btnRemove
             // 
             btnRemove.BackColor = Color.DarkCyan;
@@ -530,7 +489,7 @@ namespace osuTaikoSvTool
             btnRemove.FlatStyle = FlatStyle.Flat;
             btnRemove.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
             btnRemove.ForeColor = SystemColors.ControlLightLight;
-            btnRemove.Location = new Point(96, 264);
+            btnRemove.Location = new Point(96, 235);
             btnRemove.Name = "btnRemove";
             btnRemove.Size = new Size(189, 39);
             btnRemove.TabIndex = 33;
@@ -700,10 +659,9 @@ namespace osuTaikoSvTool
             // tabExecuteType
             // 
             tabExecuteType.Controls.Add(tabAddPage);
-            tabExecuteType.Controls.Add(tabModifyPage);
             tabExecuteType.Controls.Add(tabRemovePage);
             tabExecuteType.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
-            tabExecuteType.ItemSize = new Size(130, 40);
+            tabExecuteType.ItemSize = new Size(195, 40);
             tabExecuteType.Location = new Point(8, 475);
             tabExecuteType.Name = "tabExecuteType";
             tabExecuteType.SelectedIndex = 0;
@@ -825,6 +783,7 @@ namespace osuTaikoSvTool
             rdoOnlyBarline.TabIndex = 22;
             rdoOnlyBarline.Text = "小節線のみ";
             rdoOnlyBarline.UseVisualStyleBackColor = true;
+            rdoOnlyBarline.CheckedChanged += rdoOnlyBarline_CheckedChanged;
             // 
             // rdoOnlySpecificHitObject
             // 
@@ -856,227 +815,14 @@ namespace osuTaikoSvTool
             tabBeatSnap.TabIndex = 1;
             tabBeatSnap.Text = "BeatSnap間隔";
             // 
-            // tabModifyPage
-            // 
-            tabModifyPage.BackColor = Color.FromArgb(0, 64, 64);
-            tabModifyPage.BorderStyle = BorderStyle.Fixed3D;
-            tabModifyPage.Controls.Add(lblKiaiModify);
-            tabModifyPage.Controls.Add(pnlSpecificGroupModify);
-            tabModifyPage.Controls.Add(lblSpecificNormalModify);
-            tabModifyPage.Controls.Add(picSpecificNormalSpinnerModify);
-            tabModifyPage.Controls.Add(lblSpecificFinisherModify);
-            tabModifyPage.Controls.Add(picSpecificNormalSliderModify);
-            tabModifyPage.Controls.Add(picSpecificFinisherKaModify);
-            tabModifyPage.Controls.Add(picSpecificFinisherDongModify);
-            tabModifyPage.Controls.Add(picSpecificFinisherSliderModify);
-            tabModifyPage.Controls.Add(lblSpecificGridLine2Modify);
-            tabModifyPage.Controls.Add(picSpecificNormalKaModify);
-            tabModifyPage.Controls.Add(picSpecificNormalDongModify);
-            tabModifyPage.Controls.Add(lblSpecificGridLineModify);
-            tabModifyPage.Controls.Add(btnModify);
-            tabModifyPage.Controls.Add(chkEnableKiaiModify);
-            tabModifyPage.ForeColor = Color.DarkCyan;
-            tabModifyPage.Location = new Point(4, 44);
-            tabModifyPage.Name = "tabModifyPage";
-            tabModifyPage.Padding = new Padding(3);
-            tabModifyPage.RightToLeft = RightToLeft.No;
-            tabModifyPage.Size = new Size(385, 295);
-            tabModifyPage.TabIndex = 1;
-            tabModifyPage.Text = "変更";
-            // 
-            // lblKiaiModify
-            // 
-            lblKiaiModify.AutoSize = true;
-            lblKiaiModify.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold);
-            lblKiaiModify.ForeColor = Color.White;
-            lblKiaiModify.Location = new Point(36, 16);
-            lblKiaiModify.Name = "lblKiaiModify";
-            lblKiaiModify.Size = new Size(25, 15);
-            lblKiaiModify.TabIndex = 67;
-            lblKiaiModify.Text = "kiai";
-            // 
-            // pnlSpecificGroupModify
-            // 
-            pnlSpecificGroupModify.Controls.Add(rdoAllHitObjectsModify);
-            pnlSpecificGroupModify.Controls.Add(rdoOnlyBookMarkModify);
-            pnlSpecificGroupModify.Controls.Add(rdoOnlyBarlineModify);
-            pnlSpecificGroupModify.Controls.Add(rdoOnlySpecificHitObjectModify);
-            pnlSpecificGroupModify.Location = new Point(13, 73);
-            pnlSpecificGroupModify.Name = "pnlSpecificGroupModify";
-            pnlSpecificGroupModify.Size = new Size(136, 103);
-            pnlSpecificGroupModify.TabIndex = 59;
-            // 
-            // rdoAllHitObjectsModify
-            // 
-            rdoAllHitObjectsModify.AutoSize = true;
-            rdoAllHitObjectsModify.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 128);
-            rdoAllHitObjectsModify.ForeColor = Color.White;
-            rdoAllHitObjectsModify.Location = new Point(4, 4);
-            rdoAllHitObjectsModify.Name = "rdoAllHitObjectsModify";
-            rdoAllHitObjectsModify.Size = new Size(115, 19);
-            rdoAllHitObjectsModify.TabIndex = 25;
-            rdoAllHitObjectsModify.Text = "すべてのHitObject";
-            rdoAllHitObjectsModify.UseVisualStyleBackColor = true;
-            // 
-            // rdoOnlyBookMarkModify
-            // 
-            rdoOnlyBookMarkModify.AutoSize = true;
-            rdoOnlyBookMarkModify.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 128);
-            rdoOnlyBookMarkModify.ForeColor = Color.White;
-            rdoOnlyBookMarkModify.Location = new Point(4, 53);
-            rdoOnlyBookMarkModify.Name = "rdoOnlyBookMarkModify";
-            rdoOnlyBookMarkModify.Size = new Size(112, 19);
-            rdoOnlyBookMarkModify.TabIndex = 23;
-            rdoOnlyBookMarkModify.Text = "BookMark上のみ";
-            rdoOnlyBookMarkModify.UseVisualStyleBackColor = true;
-            // 
-            // rdoOnlyBarlineModify
-            // 
-            rdoOnlyBarlineModify.AutoSize = true;
-            rdoOnlyBarlineModify.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 128);
-            rdoOnlyBarlineModify.ForeColor = Color.White;
-            rdoOnlyBarlineModify.Location = new Point(4, 28);
-            rdoOnlyBarlineModify.Name = "rdoOnlyBarlineModify";
-            rdoOnlyBarlineModify.Size = new Size(82, 19);
-            rdoOnlyBarlineModify.TabIndex = 22;
-            rdoOnlyBarlineModify.Text = "小節線のみ";
-            rdoOnlyBarlineModify.UseVisualStyleBackColor = true;
-            // 
-            // rdoOnlySpecificHitObjectModify
-            // 
-            rdoOnlySpecificHitObjectModify.AutoSize = true;
-            rdoOnlySpecificHitObjectModify.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 128);
-            rdoOnlySpecificHitObjectModify.ForeColor = Color.White;
-            rdoOnlySpecificHitObjectModify.Location = new Point(4, 78);
-            rdoOnlySpecificHitObjectModify.Name = "rdoOnlySpecificHitObjectModify";
-            rdoOnlySpecificHitObjectModify.Size = new Size(132, 19);
-            rdoOnlySpecificHitObjectModify.TabIndex = 24;
-            rdoOnlySpecificHitObjectModify.Text = "特定のオブジェクトのみ";
-            rdoOnlySpecificHitObjectModify.UseVisualStyleBackColor = true;
-            rdoOnlySpecificHitObjectModify.CheckedChanged += rdoOnlySpecificHitObjectModify_CheckedChanged;
-            // 
-            // lblSpecificNormalModify
-            // 
-            lblSpecificNormalModify.BackColor = SystemColors.WindowText;
-            lblSpecificNormalModify.Font = new Font("Yu Gothic UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 128);
-            lblSpecificNormalModify.ForeColor = SystemColors.Window;
-            lblSpecificNormalModify.Location = new Point(166, 75);
-            lblSpecificNormalModify.Name = "lblSpecificNormalModify";
-            lblSpecificNormalModify.Size = new Size(26, 42);
-            lblSpecificNormalModify.TabIndex = 56;
-            lblSpecificNormalModify.Text = "通常";
-            lblSpecificNormalModify.TextAlign = ContentAlignment.MiddleCenter;
-            // 
-            // picSpecificNormalSpinnerModify
-            // 
-            picSpecificNormalSpinnerModify.BackgroundImage = Properties.Resources.spinner;
-            picSpecificNormalSpinnerModify.Location = new Point(322, 75);
-            picSpecificNormalSpinnerModify.Name = "picSpecificNormalSpinnerModify";
-            picSpecificNormalSpinnerModify.Size = new Size(42, 42);
-            picSpecificNormalSpinnerModify.TabIndex = 61;
-            picSpecificNormalSpinnerModify.TabStop = false;
-            // 
-            // lblSpecificFinisherModify
-            // 
-            lblSpecificFinisherModify.BackColor = SystemColors.WindowText;
-            lblSpecificFinisherModify.Font = new Font("Yu Gothic UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 128);
-            lblSpecificFinisherModify.ForeColor = SystemColors.Window;
-            lblSpecificFinisherModify.Location = new Point(166, 118);
-            lblSpecificFinisherModify.Name = "lblSpecificFinisherModify";
-            lblSpecificFinisherModify.Size = new Size(26, 42);
-            lblSpecificFinisherModify.TabIndex = 57;
-            lblSpecificFinisherModify.Text = "大音符";
-            lblSpecificFinisherModify.TextAlign = ContentAlignment.MiddleCenter;
-            // 
-            // picSpecificNormalSliderModify
-            // 
-            picSpecificNormalSliderModify.Image = Properties.Resources.slider;
-            picSpecificNormalSliderModify.InitialImage = Properties.Resources.slider;
-            picSpecificNormalSliderModify.Location = new Point(279, 75);
-            picSpecificNormalSliderModify.Name = "picSpecificNormalSliderModify";
-            picSpecificNormalSliderModify.Size = new Size(42, 42);
-            picSpecificNormalSliderModify.TabIndex = 54;
-            picSpecificNormalSliderModify.TabStop = false;
-            // 
-            // picSpecificFinisherKaModify
-            // 
-            picSpecificFinisherKaModify.Image = Properties.Resources.k;
-            picSpecificFinisherKaModify.InitialImage = (Image)resources.GetObject("picSpecificFinisherKaModify.InitialImage");
-            picSpecificFinisherKaModify.Location = new Point(236, 118);
-            picSpecificFinisherKaModify.Name = "picSpecificFinisherKaModify";
-            picSpecificFinisherKaModify.Size = new Size(42, 42);
-            picSpecificFinisherKaModify.TabIndex = 53;
-            picSpecificFinisherKaModify.TabStop = false;
-            // 
-            // picSpecificFinisherDongModify
-            // 
-            picSpecificFinisherDongModify.Image = Properties.Resources.d;
-            picSpecificFinisherDongModify.InitialImage = (Image)resources.GetObject("picSpecificFinisherDongModify.InitialImage");
-            picSpecificFinisherDongModify.Location = new Point(193, 118);
-            picSpecificFinisherDongModify.Name = "picSpecificFinisherDongModify";
-            picSpecificFinisherDongModify.Size = new Size(42, 42);
-            picSpecificFinisherDongModify.TabIndex = 51;
-            picSpecificFinisherDongModify.TabStop = false;
-            // 
-            // picSpecificFinisherSliderModify
-            // 
-            picSpecificFinisherSliderModify.Image = Properties.Resources.slider;
-            picSpecificFinisherSliderModify.InitialImage = Properties.Resources.slider;
-            picSpecificFinisherSliderModify.Location = new Point(279, 118);
-            picSpecificFinisherSliderModify.Name = "picSpecificFinisherSliderModify";
-            picSpecificFinisherSliderModify.Size = new Size(42, 42);
-            picSpecificFinisherSliderModify.TabIndex = 55;
-            picSpecificFinisherSliderModify.TabStop = false;
-            // 
-            // lblSpecificGridLine2Modify
-            // 
-            lblSpecificGridLine2Modify.BackColor = Color.White;
-            lblSpecificGridLine2Modify.Location = new Point(322, 74);
-            lblSpecificGridLine2Modify.Name = "lblSpecificGridLine2Modify";
-            lblSpecificGridLine2Modify.Size = new Size(43, 44);
-            lblSpecificGridLine2Modify.TabIndex = 60;
-            lblSpecificGridLine2Modify.Text = " ";
-            // 
-            // picSpecificNormalKaModify
-            // 
-            picSpecificNormalKaModify.Image = Properties.Resources.k;
-            picSpecificNormalKaModify.InitialImage = (Image)resources.GetObject("picSpecificNormalKaModify.InitialImage");
-            picSpecificNormalKaModify.Location = new Point(236, 75);
-            picSpecificNormalKaModify.Name = "picSpecificNormalKaModify";
-            picSpecificNormalKaModify.Size = new Size(42, 42);
-            picSpecificNormalKaModify.TabIndex = 52;
-            picSpecificNormalKaModify.TabStop = false;
-            // 
-            // picSpecificNormalDongModify
-            // 
-            picSpecificNormalDongModify.Image = Properties.Resources.d;
-            picSpecificNormalDongModify.InitialImage = (Image)resources.GetObject("picSpecificNormalDongModify.InitialImage");
-            picSpecificNormalDongModify.Location = new Point(193, 75);
-            picSpecificNormalDongModify.Name = "picSpecificNormalDongModify";
-            picSpecificNormalDongModify.Size = new Size(42, 42);
-            picSpecificNormalDongModify.TabIndex = 50;
-            picSpecificNormalDongModify.TabStop = false;
-            // 
-            // lblSpecificGridLineModify
-            // 
-            lblSpecificGridLineModify.BackColor = Color.White;
-            lblSpecificGridLineModify.Location = new Point(165, 74);
-            lblSpecificGridLineModify.Name = "lblSpecificGridLineModify";
-            lblSpecificGridLineModify.Size = new Size(157, 87);
-            lblSpecificGridLineModify.TabIndex = 58;
-            lblSpecificGridLineModify.Text = " ";
-            // 
-            // chkEnableKiaiModify
-            // 
-            chkEnableKiaiModify.Location = new Point(16, 12);
-            chkEnableKiaiModify.Name = "chkEnableKiaiModify";
-            chkEnableKiaiModify.Size = new Size(104, 24);
-            chkEnableKiaiModify.TabIndex = 0;
-            // 
             // tabRemovePage
             // 
             tabRemovePage.BackColor = Color.FromArgb(0, 64, 64);
             tabRemovePage.BorderStyle = BorderStyle.Fixed3D;
+            tabRemovePage.Controls.Add(chkEnableStartOffset);
+            tabRemovePage.Controls.Add(txtStartOffset);
+            tabRemovePage.Controls.Add(lbllblMiliSecondRemove);
+            tabRemovePage.Controls.Add(lblEnableStartOffset);
             tabRemovePage.Controls.Add(btnRemove);
             tabRemovePage.ForeColor = Color.DarkCyan;
             tabRemovePage.Location = new Point(4, 44);
@@ -1085,6 +831,48 @@ namespace osuTaikoSvTool
             tabRemovePage.Size = new Size(385, 295);
             tabRemovePage.TabIndex = 2;
             tabRemovePage.Text = "削除";
+            // 
+            // chkEnableStartOffset
+            // 
+            chkEnableStartOffset.AutoSize = true;
+            chkEnableStartOffset.Checked = true;
+            chkEnableStartOffset.CheckState = CheckState.Checked;
+            chkEnableStartOffset.Location = new Point(184, 17);
+            chkEnableStartOffset.Name = "chkEnableStartOffset";
+            chkEnableStartOffset.Size = new Size(15, 14);
+            chkEnableStartOffset.TabIndex = 39;
+            chkEnableStartOffset.UseVisualStyleBackColor = true;
+            // 
+            // txtStartOffset
+            // 
+            txtStartOffset.BackColor = SystemColors.Window;
+            txtStartOffset.BorderStyle = BorderStyle.FixedSingle;
+            txtStartOffset.Location = new Point(295, 12);
+            txtStartOffset.Name = "txtStartOffset";
+            txtStartOffset.Size = new Size(40, 27);
+            txtStartOffset.TabIndex = 40;
+            // 
+            // lbllblMiliSecondRemove
+            // 
+            lbllblMiliSecondRemove.AutoSize = true;
+            lbllblMiliSecondRemove.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold);
+            lbllblMiliSecondRemove.ForeColor = Color.White;
+            lbllblMiliSecondRemove.Location = new Point(340, 17);
+            lbllblMiliSecondRemove.Name = "lbllblMiliSecondRemove";
+            lbllblMiliSecondRemove.Size = new Size(23, 15);
+            lbllblMiliSecondRemove.TabIndex = 42;
+            lbllblMiliSecondRemove.Text = "ms";
+            // 
+            // lblEnableStartOffset
+            // 
+            lblEnableStartOffset.AutoSize = true;
+            lblEnableStartOffset.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold);
+            lblEnableStartOffset.ForeColor = Color.White;
+            lblEnableStartOffset.Location = new Point(204, 16);
+            lblEnableStartOffset.Name = "lblEnableStartOffset";
+            lblEnableStartOffset.Size = new Size(84, 15);
+            lblEnableStartOffset.TabIndex = 41;
+            lblEnableStartOffset.Text = "始点のオフセット";
             // 
             // lblCalculationType
             // 
@@ -1184,18 +972,8 @@ namespace osuTaikoSvTool
             pnlSpecificGroup.PerformLayout();
             tabBeatSnap.ResumeLayout(false);
             tabBeatSnap.PerformLayout();
-            tabModifyPage.ResumeLayout(false);
-            tabModifyPage.PerformLayout();
-            pnlSpecificGroupModify.ResumeLayout(false);
-            pnlSpecificGroupModify.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)picSpecificNormalSpinnerModify).EndInit();
-            ((System.ComponentModel.ISupportInitialize)picSpecificNormalSliderModify).EndInit();
-            ((System.ComponentModel.ISupportInitialize)picSpecificFinisherKaModify).EndInit();
-            ((System.ComponentModel.ISupportInitialize)picSpecificFinisherDongModify).EndInit();
-            ((System.ComponentModel.ISupportInitialize)picSpecificFinisherSliderModify).EndInit();
-            ((System.ComponentModel.ISupportInitialize)picSpecificNormalKaModify).EndInit();
-            ((System.ComponentModel.ISupportInitialize)picSpecificNormalDongModify).EndInit();
             tabRemovePage.ResumeLayout(false);
+            tabRemovePage.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -1232,7 +1010,6 @@ namespace osuTaikoSvTool
         private CheckBox chkEnableKiaiStart;
         private Label lblKiaiEnd;
         private CheckBox chkEnableKiaiEnd;
-        private Button btnModify;
         private Button btnRemove;
         private CheckBox chkEnableBeatSnap;
         private TextBox txtBeatSnap;
@@ -1252,7 +1029,6 @@ namespace osuTaikoSvTool
         private PictureBox picSpecificNormalSpinner;
         private TabControl tabExecuteType;
         private TabPage tabAddPage;
-        private TabPage tabModifyPage;
         private TabPage tabRemovePage;
         private Panel pnlSpecificGroup;
         private RadioButton rdoOnlyBookMark;
@@ -1263,25 +1039,11 @@ namespace osuTaikoSvTool
         private TabPage tabBeatSnap;
         private RadioButton rdoAllHitObjects;
         private Label lblCalculationType;
-        private Label lblKiaiModify;
-        private Panel pnlSpecificGroupModify;
-        private RadioButton rdoAllHitObjectsModify;
-        private RadioButton rdoOnlyBookMarkModify;
-        private RadioButton rdoOnlyBarlineModify;
-        private RadioButton rdoOnlySpecificHitObjectModify;
-        private Label lblSpecificNormalModify;
-        private PictureBox picSpecificNormalSpinnerModify;
-        private Label lblSpecificFinisherModify;
-        private PictureBox picSpecificNormalSliderModify;
-        private PictureBox picSpecificFinisherKaModify;
-        private PictureBox picSpecificFinisherDongModify;
-        private PictureBox picSpecificFinisherSliderModify;
-        private Label lblSpecificGridLine2Modify;
-        private PictureBox picSpecificNormalKaModify;
-        private PictureBox picSpecificNormalDongModify;
-        private Label lblSpecificGridLineModify;
         private Button btnGetTimingFrom;
         private Button btnGetTimingTo;
-        private CheckBox chkEnableKiaiModify;
+        private CheckBox chkEnableStartOffset;
+        private TextBox txtStartOffset;
+        private Label lbllblMiliSecondRemove;
+        private Label lblEnableStartOffset;
     }
 }

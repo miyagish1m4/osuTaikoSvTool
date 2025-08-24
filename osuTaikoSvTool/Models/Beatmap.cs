@@ -1,37 +1,54 @@
 ﻿namespace osuTaikoSvTool.Models
 {
+    /// <summary>
+    /// osuファイルから取得したビートマップ情報
+    /// </summary>
     class Beatmap
     {
         // バージョン
-        public string version { set; get; }
+        internal string version { set; get; }
         // General
-        public List<string> general { set; get; }
+        internal List<string> general { set; get; }
         // Editor
-        public List<string> editor { set; get; }
+        internal List<string> editor { set; get; }
         // Metadata
-        public List<string> metadata { set; get; }
+        internal List<string> metadata { set; get; }
         // Difficulty
-        public List<string> difficulty { set; get; }
+        internal List<string> difficulty { set; get; }
         // イベント
-        public List<string> events { set; get; }
+        internal List<string> events { set; get; }
         // Colours
-        public List<string> colours { set; get; }
+        internal List<string> colours { set; get; }
         // タイミングポイント
-        public List<TimingPoint> timingPoints { set; get; }
+        internal List<TimingPoint> timingPoints { set; get; }
         // ヒットオブジェクト
-        public List<HitObject> hitObjects { set; get; }
+        internal List<HitObject> hitObjects { set; get; }
         // ブックマーク
-        public List<Bookmarks> bookmarks { set; get; }
-        public Beatmap(string version,
-                       List<string> general,
-                       List<string> editor,
-                       List<string> metadata,
-                       List<string> difficulty,
-                       List<string> events,
-                       List<TimingPoint> timingPoints,
-                       List<string> colours,
-                       List<HitObject> hitObject,
-                       List<Bookmarks> bookmarks)
+        internal List<Bookmark> bookmarks { set; get; }
+        /// <summary>
+        /// コンストラクタ
+        /// 取得した値をクラスの変数に格納する
+        /// </summary>
+        /// <param name="version">バージョン</param>
+        /// <param name="general">Generalセクション</param>
+        /// <param name="editor">Editorセクション</param>
+        /// <param name="metadata">Metadataセクション</param>
+        /// <param name="difficulty">Difficultyセクション</param>
+        /// <param name="events">Eventsセクション</param>
+        /// <param name="timingPoints">TimingPointsセクション</param>
+        /// <param name="colours">Coloursセクション</param>
+        /// <param name="hitObject">HitObjectsセクション</param>
+        /// <param name="bookmarks">bookmarkのリスト</param>
+        internal Beatmap(string version,
+                         List<string> general,
+                         List<string> editor,
+                         List<string> metadata,
+                         List<string> difficulty,
+                         List<string> events,
+                         List<TimingPoint> timingPoints,
+                         List<string> colours,
+                         List<HitObject> hitObject,
+                         List<Bookmark> bookmarks)
         {
             this.version = version;
             this.general = general;
@@ -44,6 +61,5 @@
             this.hitObjects = hitObject;
             this.bookmarks = bookmarks;
         }
-
     }
 }

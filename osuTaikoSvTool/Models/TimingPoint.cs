@@ -1,27 +1,43 @@
 ﻿namespace osuTaikoSvTool.Models
 {
+    /// <summary>
+    /// osuファイルから取得したTimingPointsデータをまとめたクラス
+    /// </summary>
     class TimingPoint
     {
         // タイミングポイント
-        public int time { set; get; }
+        internal int time { set; get; }
         // BPM
-        public decimal bpm { set; get; }
+        internal decimal bpm { set; get; }
         // SV
-        public decimal sv { set; get; }
+        internal decimal sv { set; get; }
         // 1小節の長さ(ms)
-        public decimal barLength { set; get; }
+        internal decimal barLength { set; get; }
         // 拍子
-        public int meter { set; get; }
+        internal int meter { set; get; }
         // サンプルセット(Normal,Soft,Drum 等)
-        public int sampleSet { set; get; }
+        internal int sampleSet { set; get; }
         // サンプルインデックス
-        public int sampleIndex { set; get; }
+        internal int sampleIndex { set; get; }
         // 音量
-        public int volume { set; get; }
+        internal int volume { set; get; }
         // タイミングポイントの種類
-        public bool isRedLine { set; get; }
+        internal bool isRedLine { set; get; }
         // エフェクト(kiai有無,小節線有無 等)
-        public int effect { set; get; }
+        internal int effect { set; get; }
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="time">timing</param>
+        /// <param name="bpm">BPM</param>
+        /// <param name="sv">SV</param>
+        /// <param name="barLength">1小節あたりの時間(ms)</param>
+        /// <param name="meter">拍子(meter/4)</param>
+        /// <param name="sampleSet">ヒットサウンド</param>
+        /// <param name="sampleIndex">ヒットサウンドカスタム時のインデックス</param>
+        /// <param name="volume">音量</param>
+        /// <param name="isRedLine">赤線判定フラグ</param>
+        /// <param name="effect">エフェクト(kiai有無,omit有無など)</param>
         internal TimingPoint(int time,
                              decimal bpm,
                              decimal sv,
@@ -44,7 +60,11 @@
             this.isRedLine = isRedLine;
             this.effect = effect;
         }
-
+        /// <summary>
+        /// コンストラクタ
+        /// osuファイルから取得した1行のデータをクラス変数に格納する
+        /// </summary>
+        /// <param name="line">osuファイルから取得した1行のデータ</param>
         internal TimingPoint(string line)
         {
             string[] buff = line.Split(",");
