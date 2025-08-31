@@ -1,5 +1,6 @@
 using System.Xml.Serialization;
 using osuTaikoSvTool.Models;
+using osuTaikoSvTool.Properties;
 
 namespace osuTaikoSvTool.Utils.Helper
 {
@@ -114,6 +115,8 @@ namespace osuTaikoSvTool.Utils.Helper
                                               string volumeTo,
                                               int calculationCode,
                                               bool isKiai,
+                                              int relativeCode,
+                                              string relativeBaseSv,
                                               bool isOffset,
                                               string offset,
                                               bool isSetObject,
@@ -121,6 +124,8 @@ namespace osuTaikoSvTool.Utils.Helper
                                               int setObjectCode,
                                               bool isKiaiStart,
                                               bool isKiaiEnd,
+                                              bool isTimingStart,
+                                              bool isTimingEnd,
                                               bool isBeatSnap,
                                               string beatSnap,
                                               int excecuteCode,
@@ -134,6 +139,7 @@ namespace osuTaikoSvTool.Utils.Helper
             int retVolumeTo = -1;
             int retOffset = 0;
             int retBeatSnap = -1;
+            decimal retRlativeBaseSv = -1m;
             DateTime date = DateTime.Now;
             try
             {
@@ -145,13 +151,14 @@ namespace osuTaikoSvTool.Utils.Helper
                 {
                     throw new Exception();
                 }
-                // 実行コードが追加、または変更の場合は
+                // 実行コードが適応の場合は
                 // SV.Volume,Beatsnap間隔のバリデーションチェックを行う
-                if (excecuteCode == Properties.Constants.EXECUTE_ADD)
+                if (excecuteCode == Properties.Constants.EXECUTE_APPLY)
                 {
                     if (!ValidateSv(svFrom,
                                     svTo,
                                     isSv,
+                                    relativeCode,
                                     ref retSvFrom,
                                     ref retSvTo) ||
                         !ValidateVolume(volumeFrom,
@@ -161,7 +168,10 @@ namespace osuTaikoSvTool.Utils.Helper
                                         ref retVolumeTo) ||
                         !ValidateBeatSnap(beatSnap,
                                           isBeatSnap,
-                                          ref retBeatSnap))
+                                          ref retBeatSnap) ||
+                        !ValidateRelativeBaseSv(relativeBaseSv,
+                                                relativeCode,
+                                                ref retRlativeBaseSv))
                     {
                         throw new Exception();
                     }
@@ -179,7 +189,7 @@ namespace osuTaikoSvTool.Utils.Helper
                     // すべてのHitObjectを対象とする
                     if (setObjectCode == 0)
                     {
-                        setObjectCode = 0b11111111;
+                        setObjectCode = 0x0000017f;
                     }
                 }
                 // offsetのバリデーションチェックを行う
@@ -189,6 +199,7 @@ namespace osuTaikoSvTool.Utils.Helper
                 {
                     throw new Exception();
                 }
+
                 // 入力値クラスのインスタンスを作成する
                 userInputData = new UserInputData(retTimingFrom,
                                                   retTimingTo,
@@ -200,6 +211,8 @@ namespace osuTaikoSvTool.Utils.Helper
                                                   retVolumeTo,
                                                   calculationCode,
                                                   isKiai,
+                                                  relativeCode,
+                                                  retRlativeBaseSv,
                                                   isOffset,
                                                   retOffset,
                                                   isSetObject,
@@ -207,6 +220,8 @@ namespace osuTaikoSvTool.Utils.Helper
                                                   setObjectCode,
                                                   isKiaiStart,
                                                   isKiaiEnd,
+                                                  isTimingStart,
+                                                  isTimingEnd,
                                                   isBeatSnap,
                                                   retBeatSnap,
                                                   date);
@@ -242,7 +257,7 @@ namespace osuTaikoSvTool.Utils.Helper
                     Common.ShowMessageDialog("E_V-EM-001");
                     return false;
                 }
-                if (!Common.ConvertTiming(timingFrom, ref retTimingFrom) || !Common.ConvertTiming(timingTo, ref retTimingTo))
+                if (!Common.ConvertMsTiming(timingFrom, ref retTimingFrom) || !Common.ConvertMsTiming(timingTo, ref retTimingTo))
                 {
                     //タイミングのフォーマットが間違えている
                     Common.ShowMessageDialog("E_V-C-001");
@@ -275,6 +290,7 @@ namespace osuTaikoSvTool.Utils.Helper
         private static bool ValidateSv(string svFrom,
                                        string svTo,
                                        bool isSv,
+                                       int relativeCode,
                                        ref decimal retSvFrom,
                                        ref decimal retSvTo)
         {
@@ -299,12 +315,22 @@ namespace osuTaikoSvTool.Utils.Helper
                     Common.ShowMessageDialog("E_V-T-001");
                     return false;
                 }
-                if ((retSvFrom < 0.01m) || (retSvFrom > 10m) || (retSvTo < 0.01m) || (retSvTo > 10m))
+                if (((retSvFrom <= 0m) || (retSvTo <= 0m)) &&
+                    (relativeCode == 0))
+                {
+                    retSvFrom = -1m;
+                    retSvTo = -1m;
+                    // SVが負の値になる
+                    Common.ShowMessageDialog("E_V-C-003");
+                    return false;
+                }
+                if (((retSvFrom < 0.01m) || (retSvFrom > 10m) || (retSvTo < 0.01m) || (retSvTo > 10m)) &&
+                (relativeCode == -1))
                 {
                     retSvFrom = -1m;
                     retSvTo = -1m;
                     //SVがosu側で指定できる範囲外の値
-                    Common.ShowMessageDialog("E_V-C-003");
+                    Common.ShowMessageDialog("E_V-C-004");
                     return false;
                 }
                 return true;
@@ -359,7 +385,7 @@ namespace osuTaikoSvTool.Utils.Helper
                     retVolumeFrom = -1;
                     retVolumeTo = -1;
                     //Volumeがosu側で指定できる範囲外の値
-                    Common.ShowMessageDialog("E_V-C-004");
+                    Common.ShowMessageDialog("E_V-C-005");
                     return false;
                 }
                 // osu側で指定できるVolumeの範囲内の場合はバリデーションチェックを完了する
@@ -402,6 +428,38 @@ namespace osuTaikoSvTool.Utils.Helper
                     //Offsetのフォーマットが間違えている
                     Common.ShowMessageDialog("E_V-T-003");
                     return false;
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Common.WriteErrorMessage("LOG_E-EXCEPTION");
+                Common.WriteExceptionMessage(ex);
+                return false;
+            }
+
+        }
+        /// <summary>
+        /// 基礎SVのバリデーションチェックをする関数
+        /// </summary>
+        /// <param name="relativeBaseSv">基礎SV</param>
+        /// <param name="relativeCode">相対速度オプションコード</param>
+        /// <param name="retRelativeBaseSv">チェック後の基礎SV</param>
+        /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
+        private static bool ValidateRelativeBaseSv(string relativeBaseSv,
+                                                   int relativeCode,
+                                                   ref decimal retRelativeBaseSv)
+        {
+            try
+            {
+                if (relativeCode == Constants.RELATIVE_MULTIPLY)
+                {
+                    if (!decimal.TryParse(relativeBaseSv, out retRelativeBaseSv))
+                    {
+                        //基礎SVのフォーマットが間違えている
+                        Common.ShowMessageDialog("E_V-T-003");
+                        return false;
+                    }
                 }
                 return true;
             }

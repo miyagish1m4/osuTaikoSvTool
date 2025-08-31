@@ -8,13 +8,13 @@ namespace osuTaikoSvTool.Services
     internal class SVCalculatorService
     {
         /// <summary>
-        /// 追加ボタン押下時の処理
+        /// 適応ボタン押下時の処理
         /// </summary>
         /// <param name="userInputData">ユーザー入力データ</param>
         /// <param name="beatmap">譜面情報</param>
         /// <param name="outTimingPoints">追加する緑線の格納先</param>
         /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
-        internal static bool Add(UserInputData userInputData, Beatmap beatmap, ref List<TimingPoint> outTimingPoints)
+        internal static bool Apply(UserInputData userInputData, Beatmap beatmap, ref List<TimingPoint> outTimingPoints)
         {
             List<TimingPoint> timingPointsBuff = [];
             try
@@ -22,7 +22,7 @@ namespace osuTaikoSvTool.Services
                 if (userInputData.setOption.isSetObjects)
                 {
                     // objectに緑線を置く場合
-                    if (!AddOnObjects(userInputData, beatmap, ref timingPointsBuff))
+                    if (!ApplyOnObjects(userInputData, beatmap, ref timingPointsBuff))
                     {
                         throw new Exception();
                     }
@@ -30,7 +30,7 @@ namespace osuTaikoSvTool.Services
                 else if (userInputData.setOption.isSetBeatSnap)
                 {
                     // beatSnap間隔で緑線を置く場合
-                    if (!AddOnBeatSnaps(userInputData, beatmap, ref timingPointsBuff))
+                    if (!ApplyOnBeatSnaps(userInputData, beatmap, ref timingPointsBuff))
                     {
                         throw new Exception();
                     }
@@ -75,7 +75,7 @@ namespace osuTaikoSvTool.Services
 
         }
         /// <summary>
-        /// 削除ボタン押下時の処理
+        /// 緑線を削除する処理
         /// </summary>
         /// <param name="userInputData">ユーザー入力データ</param>
         /// <param name="beatmap">譜面情報</param>
@@ -149,61 +149,33 @@ namespace osuTaikoSvTool.Services
             }
         }
         /// <summary>
-        /// 緑線追加対象に応じて処理を分ける
+        /// Objectに緑線を適応する
         /// </summary>
         /// <param name="userInputData">ユーザー入力値</param>
         /// <param name="beatmap">譜面情報</param>
-        /// <param name="outTimingPoints">追加する緑線の格納先</param>
-        /// <returns></returns>
-        private static bool AddOnObjects(UserInputData userInputData, Beatmap beatmap, ref List<TimingPoint> outTimingPoints)
-        {
-            try
-            {
-                if (userInputData.setObjectOption.setObjectsCode == Int32.MinValue)
-                {
-                    //ブックマークの場合
-                    AddOnBookmarks(userInputData, beatmap, ref outTimingPoints);
-                }
-                else
-                {
-                    //ブックマーク以外の場合
-                    AddOnHitObjects(userInputData, beatmap, ref outTimingPoints);
-                }
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Common.WriteErrorMessage("LOG_E-EXCEPTION");
-                Common.WriteExceptionMessage(ex);
-                return false;
-            }
-        }
-        /// <summary>
-        /// HitObjectsと赤線や始点・終点に緑線を追加する
-        /// </summary>
-        /// <param name="userInputData">ユーザー入力値</param>
-        /// <param name="beatmap">譜面情報</param>
-        /// <param name="outTimingPoints">追加する緑線の格納先</param>
+        /// <param name="outTimingPoints">適応する緑線の格納先</param>
         /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
-        private static bool AddOnHitObjects(UserInputData userInputData, Beatmap beatmap, ref List<TimingPoint> outTimingPoints)
+        private static bool ApplyOnObjects(UserInputData userInputData, Beatmap beatmap, ref List<TimingPoint> outTimingPoints)
         {
             try
             {
 
-                // HitObjectsに緑線追加処理
-                if (!AddOnSelectedHitObjects(userInputData, beatmap, ref outTimingPoints))
+                // HitObjectsに緑線適応処理
+                if (!ApplyOnHitObjects(userInputData, beatmap, ref outTimingPoints))
                 {
                     throw new Exception();
                 }
-                // TimingPointsに緑線追加処理
-                if (!AddOnTimingPoints(userInputData, beatmap, ref outTimingPoints))
+                // TimingPointsに緑線適応処理
+                if (!ApplyOnTimingPoints(userInputData, beatmap, ref outTimingPoints))
                 {
                     throw new Exception();
                 }
-                if (userInputData.setObjectOption.isKiaiStart || userInputData.setObjectOption.isKiaiEnd)
+                if ((userInputData.setObjectOption.isKiaiStart || userInputData.setObjectOption.isKiaiEnd) && 
+                    ((userInputData.setObjectOption.setObjectsCode != 0x00000100) && 
+                     (userInputData.setObjectOption.setObjectsCode != 0x00000400)))
                 {
-                    // 始点・終点に緑線追加処理
-                    if (!AddOnStartAndEndPoints(userInputData, beatmap, ref outTimingPoints))
+                    // 始点・終点に緑線適応処理
+                    if (!ApplyOnStartAndEndPoints(userInputData, beatmap, ref outTimingPoints))
                     {
                         throw new Exception();
                     }
@@ -223,13 +195,13 @@ namespace osuTaikoSvTool.Services
             }
         }
         /// <summary>
-        /// HitObjectsに緑線を追加する
+        /// HitObjectsに緑線を適応する
         /// </summary>
         /// <param name="userInputData">ユーザー入力値</param>
         /// <param name="beatmap">譜面情報</param>
-        /// <param name="outTimingPoints">追加する緑線の格納先</param>
+        /// <param name="outTimingPoints">適応する緑線の格納先</param>
         /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
-        private static bool AddOnSelectedHitObjects(UserInputData userInputData, Beatmap beatmap, ref List<TimingPoint> outTimingPoints)
+        private static bool ApplyOnHitObjects(UserInputData userInputData, Beatmap beatmap, ref List<TimingPoint> outTimingPoints)
         {
             decimal baseBpm = 120;
             decimal svPerMs = 0;
@@ -274,6 +246,18 @@ namespace osuTaikoSvTool.Services
                     }
                     decimal sv;
                     int volume;
+                    if ((userInputData.setObjectOption.setObjectsCode == 0x0000017f) && 
+                        !userInputData.setObjectOption.isTimingStart && 
+                        (beatmap.hitObjects[i].time == userInputData.timingFrom))
+                    {
+                        continue;
+                    }
+                    if ((userInputData.setObjectOption.setObjectsCode == 0x0000017f) && 
+                        !userInputData.setObjectOption.isTimingEnd && 
+                        (beatmap.hitObjects[i].time == userInputData.timingTo))
+                    {
+                        continue;
+                    }
                     // オブジェクトコードを比較し、一致するものがある場合に緑線の追加を行う
                     if ((beatmap.hitObjects[i].hitObjectCode & userInputData.setObjectOption.setObjectsCode) != 0)
                     {
@@ -285,21 +269,29 @@ namespace osuTaikoSvTool.Services
                         var applyTimingPoint = beatmap.timingPoints.LastOrDefault(tp => (tp.time <= beatmap.hitObjects[i].svApplyTime) && tp.isRedLine);
                         if (i != 0)
                         {
-                            // 直前のTimingPointが前のノーツより後にある場合は削除対象にする
-                            if ((beatmap.hitObjects[i - 1].time < applyInheritedPoint?.time) && !applyInheritedPoint.isRedLine)
+                            // 直前のTimingPointが前のノーツより後にあるかつ、
+                            // ユーザーの指定範囲内の場合は削除対象にする
+                            if ((beatmap.hitObjects[i - 1].time < applyInheritedPoint?.time) &&
+                                (userInputData.timingFrom - userInputData.offset <= applyInheritedPoint?.time) &&
+                                !applyInheritedPoint.isRedLine)
                             {
                                 removeList.Add(applyInheritedPointIndex);
                             }
                         }
                         if (userInputData.isSv)
                         {
+                            // 直前のSVを取得する
+                            decimal baseSv = applyInheritedPoint != null ? applyInheritedPoint.sv : 1m;
                             // SVを求める
                             sv = applyTimingPoint != null ? CalculateSv(userInputData.svFrom,
                                                                         svPerMs,
                                                                         userInputData.timingFrom,
                                                                         beatmap.hitObjects[i].time,
-                                                                        userInputData.calculationCode) *
-                                                            (baseBpm / applyTimingPoint.bpm) : 120;
+                                                                        baseSv,
+                                                                        userInputData.calculationCode,
+                                                                        userInputData.relativeCode,
+                                                                        userInputData.relativeBaseSv) *
+                                                                        (baseBpm / applyTimingPoint.bpm) : 120;
                         }
                         else
                         {
@@ -423,13 +415,13 @@ namespace osuTaikoSvTool.Services
             }
         }
         /// <summary>
-        /// 赤線に緑線を追加する
+        /// 赤線に緑線を適応する
         /// </summary>
         /// <param name="userInputData">ユーザー入力値</param>
         /// <param name="beatmap">譜面情報</param>
-        /// <param name="outTimingPoints">追加する緑線の格納先</param>
+        /// <param name="outTimingPoints">適応する緑線の格納先</param>
         /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
-        private static bool AddOnTimingPoints(UserInputData userInputData, Beatmap beatmap, ref List<TimingPoint> outTimingPoints)
+        private static bool ApplyOnTimingPoints(UserInputData userInputData, Beatmap beatmap, ref List<TimingPoint> outTimingPoints)
         {
             decimal baseBpm = 120;
             decimal svPerMs = 0;
@@ -469,6 +461,18 @@ namespace osuTaikoSvTool.Services
                     if (beatmap.hitObjects[i].time > userInputData.timingTo)
                     {
                         break;
+                    }
+                    if ((userInputData.setObjectOption.setObjectsCode == 0x0000017f) &&
+                        !userInputData.setObjectOption.isTimingStart &&
+                        (beatmap.hitObjects[i].time == userInputData.timingFrom))
+                    {
+                        continue;
+                    }
+                    if ((userInputData.setObjectOption.setObjectsCode == 0x0000017f) &&
+                        !userInputData.setObjectOption.isTimingEnd &&
+                        (beatmap.hitObjects[i].time == userInputData.timingTo))
+                    {
+                        continue;
                     }
                     var applyTimingPoint = beatmap.timingPoints.LastOrDefault(tp => (tp.time == beatmap.hitObjects[i].time) && tp.isRedLine);
                     decimal sv = 1;
@@ -514,13 +518,18 @@ namespace osuTaikoSvTool.Services
                         {
                             if (userInputData.isSv)
                             {
+                                // 直前のSVを取得する
+                                decimal baseSv = applyInheritedPoint != null ? applyInheritedPoint.sv : 1m;
                                 // SVを求める
                                 sv = applyTimingPoint != null ? CalculateSv(userInputData.svFrom,
                                                                             svPerMs,
                                                                             userInputData.timingFrom,
                                                                             beatmap.hitObjects[i].time,
-                                                                            userInputData.calculationCode) *
-                                                                (baseBpm / applyTimingPoint.bpm) : 120;
+                                                                            baseSv,
+                                                                            userInputData.calculationCode,
+                                                                            userInputData.relativeCode,
+                                                                            userInputData.relativeBaseSv) *
+                                                                            (baseBpm / applyTimingPoint.bpm) : 120;
                             }
                             else
                             {
@@ -592,13 +601,13 @@ namespace osuTaikoSvTool.Services
             }
         }
         /// <summary>
-        /// 始点と終点に緑線を追加する
+        /// 始点と終点に緑線を適応する
         /// </summary>
         /// <param name="userInputData">ユーザー入力値</param>
         /// <param name="beatmap">譜面情報</param>
-        /// <param name="outTimingPoints">追加する緑線の格納先</param>
+        /// <param name="outTimingPoints">適応する緑線の格納先</param>
         /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
-        private static bool AddOnStartAndEndPoints(UserInputData userInputData, Beatmap beatmap, ref List<TimingPoint> outTimingPoints)
+        private static bool ApplyOnStartAndEndPoints(UserInputData userInputData, Beatmap beatmap, ref List<TimingPoint> outTimingPoints)
         {
             int offset = userInputData.isOffset ? userInputData.offset : 0;
             //実行コード
@@ -624,20 +633,23 @@ namespace osuTaikoSvTool.Services
                     {
                         case 0b0000:
                         case 0b0001:
-                            // 直前の緑線と入力値を基に緑線を作成する
-                            var applyTimingPoint = beatmap.timingPoints.LastOrDefault(tp => tp.time <= userInputData.timingFrom);
-                            if (applyTimingPoint != null)
+                            if (userInputData.setObjectOption.isTimingStart)
                             {
-                                outTimingPoints.Add(new TimingPoint(userInputData.timingFrom,
-                                                                    applyTimingPoint.bpm,
-                                                                    userInputData.isSv ? userInputData.svFrom : applyTimingPoint.sv,
-                                                                    applyTimingPoint.barLength,
-                                                                    applyTimingPoint.meter,
-                                                                    applyTimingPoint.sampleSet,
-                                                                    applyTimingPoint.sampleIndex,
-                                                                    userInputData.isVolume ? userInputData.volumeFrom : applyTimingPoint.volume,
-                                                                    false,
-                                                                    1));
+                                // 直前の緑線と入力値を基に緑線を作成する
+                                var applyTimingPoint = beatmap.timingPoints.LastOrDefault(tp => tp.time <= userInputData.timingFrom);
+                                if (applyTimingPoint != null)
+                                {
+                                    outTimingPoints.Add(new TimingPoint(userInputData.timingFrom,
+                                                                        applyTimingPoint.bpm,
+                                                                        userInputData.isSv ? userInputData.svFrom : applyTimingPoint.sv,
+                                                                        applyTimingPoint.barLength,
+                                                                        applyTimingPoint.meter,
+                                                                        applyTimingPoint.sampleSet,
+                                                                        applyTimingPoint.sampleIndex,
+                                                                        userInputData.isVolume ? userInputData.volumeFrom : applyTimingPoint.volume,
+                                                                        false,
+                                                                        1));
+                                }
                             }
                             break;
                         case 0b0010:
@@ -678,19 +690,22 @@ namespace osuTaikoSvTool.Services
                     {
                         case 0b0000:
                         case 0b0001:
-                            var applyTimingPoint = beatmap.timingPoints.LastOrDefault(tp => tp.time <= userInputData.timingTo);
-                            if (applyTimingPoint != null)
+                            if (userInputData.setObjectOption.isTimingEnd)
                             {
-                                outTimingPoints.Add(new TimingPoint(userInputData.timingTo,
-                                                                    applyTimingPoint.bpm,
-                                                                    userInputData.isSv ? userInputData.svTo : applyTimingPoint.sv,
-                                                                    applyTimingPoint.barLength,
-                                                                    applyTimingPoint.meter,
-                                                                    applyTimingPoint.sampleSet,
-                                                                    applyTimingPoint.sampleIndex,
-                                                                    userInputData.isVolume ? userInputData.volumeTo : applyTimingPoint.volume,
-                                                                    false,
-                                                                    0));
+                                var applyTimingPoint = beatmap.timingPoints.LastOrDefault(tp => tp.time <= userInputData.timingTo);
+                                if (applyTimingPoint != null)
+                                {
+                                    outTimingPoints.Add(new TimingPoint(userInputData.timingTo,
+                                                                        applyTimingPoint.bpm,
+                                                                        userInputData.isSv ? userInputData.svTo : applyTimingPoint.sv,
+                                                                        applyTimingPoint.barLength,
+                                                                        applyTimingPoint.meter,
+                                                                        applyTimingPoint.sampleSet,
+                                                                        applyTimingPoint.sampleIndex,
+                                                                        userInputData.isVolume ? userInputData.volumeTo : applyTimingPoint.volume,
+                                                                        false,
+                                                                        0));
+                                }
                             }
                             break;
                         case 0b0010:
@@ -725,7 +740,7 @@ namespace osuTaikoSvTool.Services
         /// </summary>
         /// <param name="userInputData">ユーザー入力値</param>
         /// <param name="beatmap">譜面情報</param>
-        /// <param name="outTimingPoints">追加する緑線の格納先</param>
+        /// <param name="outTimingPoints">適応された緑線</param>
         /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
         private static bool AdjustSliderLengthAfterTimingTo(UserInputData userInputData, Beatmap beatmap, ref List<TimingPoint> outTimingPoints)
         {
@@ -786,117 +801,13 @@ namespace osuTaikoSvTool.Services
             }
         }
         /// <summary>
-        /// Bookmarkに緑線を追加する
+        /// beatSnap間隔に緑線を適応する
         /// </summary>
         /// <param name="userInputData">ユーザー入力値</param>
         /// <param name="beatmap">譜面情報</param>
-        /// <param name="outTimingPoints">追加する緑線の格納先</param>
+        /// <param name="outTimingPoints">適応する緑線の格納先</param>
         /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
-        private static bool AddOnBookmarks(UserInputData userInputData, Beatmap beatmap, ref List<TimingPoint> outTimingPoints)
-        {
-            int kiaiEffect = userInputData.isKiai ? 1 : 0;
-            decimal baseBpm = 120;
-            decimal svPerMs = 0;
-            decimal volumePerMs = 0;
-            try
-            {
-                // 始点のBPMを求める
-                var baseTimingPoint = beatmap.timingPoints.LastOrDefault(tp => (tp.time <= userInputData.timingFrom) && tp.isRedLine);
-                baseBpm = baseTimingPoint != null ? baseTimingPoint.bpm : 120;
-                if (userInputData.isSv)
-                {
-                    // 1msあたりのSVの変化量を求める
-                    svPerMs = GetSvPerMs(userInputData.svFrom,
-                                         userInputData.svTo,
-                                         userInputData.timingFrom,
-                                         userInputData.timingTo,
-                                         userInputData.calculationCode);
-                }
-                if (userInputData.isVolume)
-                {
-                    // 1msあたりのVolumeの変化量を求める
-                    volumePerMs = (decimal)(userInputData.volumeTo - userInputData.volumeFrom) /
-                                  (decimal)(userInputData.timingTo - userInputData.timingFrom);
-                }
-                foreach (var bookmark in beatmap.bookmarks)
-                {
-                    decimal sv = 1;
-                    int volume = 100;
-                    if (bookmark.time < userInputData.timingFrom)
-                    {
-                        continue;
-                    }
-                    if (bookmark.time > userInputData.timingTo)
-                    {
-                        break;
-                    }
-                    // 直前のTimingPointを探す
-                    var applyInheritedPoint = beatmap.timingPoints.LastOrDefault(tp => tp.time <= bookmark.time);
-                    // 直前の赤線を探す
-                    var applyTimingPoint = beatmap.timingPoints.LastOrDefault(tp => (tp.time <= bookmark.time) && tp.isRedLine);
-                    if (userInputData.isSv)
-                    {
-                        // SVを求める
-                        sv = applyTimingPoint != null ? CalculateSv(userInputData.svFrom,
-                                                                    svPerMs,
-                                                                    userInputData.timingFrom,
-                                                                    bookmark.time,
-                                                                    userInputData.calculationCode) *
-                                                        (baseBpm / applyTimingPoint.bpm) : 120;
-                    }
-                    else
-                    {
-                        // 直前のSVを参照する
-                        sv = applyInheritedPoint != null ? applyInheritedPoint.sv : 1m;
-                    }
-                    if (userInputData.isVolume)
-                    {
-                        // 音量を求める
-                        volume = applyTimingPoint != null ? (int)Math.Floor(CalculateVolume(userInputData.volumeFrom,
-                                                                                            volumePerMs,
-                                                                                            userInputData.timingFrom,
-                                                                                            bookmark.time) *
-                                                                                            (baseBpm / applyTimingPoint.bpm)) : 100;
-                    }
-                    else
-                    {
-                        // 直前の音量を参照する
-                        volume = applyInheritedPoint != null ? applyInheritedPoint.volume : 100;
-                    }
-                    // 緑線を追加する
-                    outTimingPoints.Add(new TimingPoint(bookmark.time,
-                                                        0,//bpmは緑線には不要な情報の為、0を設定する
-                                                        sv,
-                                                        0,//barLengthは緑線には不要な情報の為、0を設定する
-                                                        applyInheritedPoint != null ? applyInheritedPoint.meter : 4,
-                                                        applyInheritedPoint != null ? applyInheritedPoint.sampleSet : 1,
-                                                        applyInheritedPoint != null ? applyInheritedPoint.sampleIndex : 0,
-                                                        volume,
-                                                        false,
-                                                        kiaiEffect));
-                }
-                // ユーザーが指定した範囲外のスライダーの長さの調整
-                if (!AdjustSliderLengthAfterTimingTo(userInputData, beatmap, ref outTimingPoints))
-                {
-                    throw new Exception("");
-                }
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Common.WriteErrorMessage("LOG_E-EXCEPTION");
-                Common.WriteExceptionMessage(ex);
-                return false;
-            }
-        }
-        /// <summary>
-        /// beatSnap間隔に緑線を追加する
-        /// </summary>
-        /// <param name="userInputData">ユーザー入力値</param>
-        /// <param name="beatmap">譜面情報</param>
-        /// <param name="outTimingPoints">追加する緑線の格納先</param>
-        /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
-        private static bool AddOnBeatSnaps(UserInputData userInputData, Beatmap beatmap, ref List<TimingPoint> outTimingPoints)
+        private static bool ApplyOnBeatSnaps(UserInputData userInputData, Beatmap beatmap, ref List<TimingPoint> outTimingPoints)
         {
             int kiaiEffect = userInputData.isKiai ? 1 : 0;
             decimal svPerMs = 0;
@@ -966,13 +877,18 @@ namespace osuTaikoSvTool.Services
                         var applyInheritedPoint = beatmap.timingPoints.LastOrDefault(tp => tp.time <= (int)currentTiming) ?? throw new Exception();
                         if (userInputData.isSv)
                         {
+                            // 直前のSVを取得する
+                            decimal baseSv = applyInheritedPoint != null ? applyInheritedPoint.sv : 1m;
                             // SVを求める
                             sv = applyTimingPoint != null ? CalculateSv(userInputData.svFrom,
                                                                         svPerMs,
                                                                         userInputData.timingFrom,
                                                                         (int)currentTiming,
-                                                                        userInputData.calculationCode) *
-                                                            (applyTimingPoint.bpm / applyTimingPoint.bpm) : 120;
+                                                                        baseSv,
+                                                                        userInputData.calculationCode,
+                                                                        userInputData.relativeCode,
+                                                                        userInputData.relativeBaseSv) *
+                                                                        (applyTimingPoint.bpm / applyTimingPoint.bpm) : 120;
                         }
                         else
                         {
@@ -992,6 +908,10 @@ namespace osuTaikoSvTool.Services
                         {
                             // 直前の音量を参照する
                             volume = applyTimingPoint != null ? applyTimingPoint.volume : 100;
+                        }
+                        if(applyInheritedPoint == null)
+                        {
+                            return false;
                         }
                         outTimingPoints.Add(new TimingPoint((int)currentTiming - offset,
                                                             applyInheritedPoint.bpm,
@@ -1085,16 +1005,33 @@ namespace osuTaikoSvTool.Services
                                            decimal svPerMs,
                                            int timingFrom,
                                            int currentTiming,
-                                           int calculationCode)
+                                           decimal baseSv,
+                                           int calculationCode,
+                                           int relativeCode,
+                                           decimal relativeBaseSv)
         {
+            decimal currentSv = 0m;
             switch (calculationCode)
             {
                 case Constants.CALCULATION_ARITHMETIC:
-                    return svFrom + (svPerMs * (currentTiming - timingFrom));
+                    currentSv = svFrom + (svPerMs * (currentTiming - timingFrom));
+                    break;
                 case Constants.CALCULATION_GEOMETRIC:
-                    return svFrom * (decimal)Math.Pow((double)svPerMs, (double)(currentTiming - timingFrom));
+                    currentSv = svFrom * (decimal)Math.Pow((double)svPerMs, (double)(currentTiming - timingFrom));
+                    break;
                 default:
                     throw new ArgumentException("Invalid calculation code");
+            }
+            switch (relativeCode)
+            {
+                case Constants.RELATIVE_DISABLE:
+                    return currentSv;
+                case Constants.RELATIVE_MULTIPLY:
+                    return (baseSv - relativeBaseSv) * currentSv + relativeBaseSv;
+                case Constants.RELATIVE_SUM:
+                    return baseSv + currentSv;
+                default:
+                    throw new ArgumentException("Invalid relative code");
             }
         }
         /// <summary>

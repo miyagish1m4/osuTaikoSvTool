@@ -256,12 +256,12 @@ namespace osuTaikoSvTool.Utils
             }
         }
         /// <summary>
-        /// ユーザが入力したタイミングを変換する処理
+        /// ユーザが入力したタイミングをミリ秒表記に変換する処理
         /// </summary>
         /// <param name="baseTiming">入力したタイミング (mm:ss:fff (notes))</param>
         /// <param name="returnTiming">変換後のタイミング (mmssfff)</param>
         /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
-        internal static bool ConvertTiming(string baseTiming, ref int returnTiming)
+        internal static bool ConvertMsTiming(string baseTiming, ref int returnTiming)
         {
             try
             {
@@ -291,5 +291,20 @@ namespace osuTaikoSvTool.Utils
                 return false;
             }
         }
+        /// <summary>
+        /// 取得したタイミングをmm:ss:fff表記に変換する処理
+        /// </summary>
+        /// <param name="currentTime">現タイミング</param>
+        /// <returns>変換後のタイミング</returns>
+        internal static string ConvertFormatTiming(int currentTime) 
+        {
+            int minute = currentTime / 60000;
+            int second = (currentTime % 60000) / 1000;
+            int milliSecond = currentTime % 1000;
+            return minute.ToString("00") + ":" +
+                   second.ToString("00") + ":" +
+                   milliSecond.ToString("000");
+        }
+
     }
 }

@@ -17,14 +17,17 @@ namespace osuTaikoSvTool.Models
         public Constants.NoteType noteType;
         // ノーツの種類
         // ビットで判定を行う
-        // 0b00000001 面
-        // 0b00000010 面(大音符)
-        // 0b00000100 縁
-        // 0b00001000 縁(大音符)
-        // 0b00010000 スライダー
-        // 0b00100000 スライダー(大音符)
-        // 0b01000000 スピナー
-        // 0b10000000 小節線
+        // 0b00000000 00000000 00000000 00000001 面
+        // 0b00000000 00000000 00000000 00000010 面(大音符)
+        // 0b00000000 00000000 00000000 00000100 縁
+        // 0b00000000 00000000 00000000 00001000 縁(大音符)
+        // 0b00000000 00000000 00000000 00010000 スライダー
+        // 0b00000000 00000000 00000000 00100000 スライダー(大音符)
+        // 0b00000000 00000000 00000000 01000000 スピナー
+        // 0b00000000 00000000 00000000 10000000 小節線以外
+        // 0b00000000 00000000 00000001 00000000 小節線
+        // 0b00000000 00000000 00000010 00000000 Bookmark以外
+        // 0b00000000 00000000 00000100 00000000 Bookmark
         public int hitObjectCode { set; get; }
         // NewComboの判定
         public bool isNewCombo { set; get; }
@@ -110,22 +113,34 @@ namespace osuTaikoSvTool.Models
             SetHitObjectCode(buff);
         }
         /// <summary>
-        /// 小節線算出処理時に使用されるコンストラクタ
+        /// 小節線,Bookmark算出処理時に使用されるコンストラクタ
         /// </summary>
         /// <param name="time">timing</param>
-        internal HitObject(int time)
+        /// <param name="code">ノーツ種別
+        /// 　　　　　　　　　 0:小節線
+        /// 　　　　　　　　　 1:Bookmark</param>
+        internal HitObject(int time, int code)
         {
             // 小節線の場合
             this.time = time;
             this.svApplyTime = time;
-            noteType = Constants.NoteType.BARLINE;
             positionX = 0;   // 未使用
             positionY = 0;   // 未使用
             hitSound = "0";  // 未使用
             type = "0";      // 未使用
             isNewCombo = false;
             isOnBarline = true;
-            hitObjectCode = 0b10000000;
+            switch(code)
+            {
+                case 0:
+                    noteType = Constants.NoteType.BARLINE;
+                    hitObjectCode = 0x00000100;
+                    break;
+                case 1:
+                    noteType = Constants.NoteType.BOOKMARK;
+                    hitObjectCode = 0x00000400;
+                    break;
+            }
         }
         /// <summary>
         /// ヒットサウンドの種類をヒットオブジェクトコードに変換

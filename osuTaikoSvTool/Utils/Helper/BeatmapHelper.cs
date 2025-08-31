@@ -337,12 +337,12 @@ namespace osuTaikoSvTool.Utils.Helper
                         if (hitObjectOnBarLine == null)
                         {
                             // 赤線を HitObject として追加
-                            hitObjectList.Add(new HitObject(timeBarline));
+                            hitObjectList.Add(new HitObject(timeBarline, 0));
                         }
                         else
                         {
                             // オブジェクトコードに小節線を追加
-                            hitObjectOnBarLine.hitObjectCode += 0b10000000;
+                            hitObjectOnBarLine.hitObjectCode += unchecked((int)0x00000100);
                         }
                     }
                 }
@@ -350,31 +350,59 @@ namespace osuTaikoSvTool.Utils.Helper
                 timingPointList = [.. timingPointList.OrderBy(a => a.time).ThenByDescending(b => b.isRedLine ? 1 : 0)];
                 hitObjectList = [.. hitObjectList.OrderBy(a => a.time)];
 
-                // bookmarksリストを加工する
+                // bookmarksをhitObjectに含める
                 for (int i = 0; i < bookmarkList.Count; i++)
                 {
-                    for (global::System.Int32 j = (timingPointList.Count) - (1); j >= 0; j--)
+                    //for (global::System.Int32 j = (timingPointList.Count) - (1); j >= 0; j--)
+                    //{
+                    //    // 対象となるbookmarkにtime以外設定されていない場合は
+                    //    // bookmarkの直前の赤線、または緑線からTimingPointsとしての情報を受け取る
+                    //    if ((timingPointList[j].time <= bookmarkList[i].time) && bookmarkList[i].sv == -1)
+                    //    {
+                    //        bookmarkList[i].sv = timingPointList[j].isRedLine ? 1 : timingPointList[j].sv;
+                    //        bookmarkList[i].meter = timingPointList[j].meter;
+                    //        bookmarkList[i].sampleSet = timingPointList[j].sampleSet;
+                    //        bookmarkList[i].sampleIndex = timingPointList[j].sampleIndex;
+                    //        bookmarkList[i].volume = timingPointList[j].volume;
+                    //        bookmarkList[i].isRedLine = false;
+                    //        bookmarkList[i].effect = timingPointList[j].effect;
+                    //    }
+                    //    // 対象となるbookmarkにBPM情報などが設定されていない場合は
+                    //    // bookmarkの直前の赤線からBPM情報などを受け取る
+                    //    if (timingPointList[j].time <= bookmarkList[i].time && timingPointList[j].isRedLine)
+                    //    {
+                    //        bookmarkList[i].bpm = timingPointList[j].bpm;
+                    //        bookmarkList[i].barLength = timingPointList[j].barLength;
+                    //        break;
+                    //    }
+                    //}
+                    int currentTime = bookmarkList[i].time;
+                    // すでに同じ time の HitObject が存在するかをチェック
+                    var hitObjectOnBookmark = hitObjectList.FirstOrDefault(h => h.time == currentTime);
+                    if (hitObjectOnBookmark == null)
                     {
-                        // 対象となるbookmarkにtime以外設定されていない場合は
-                        // bookmarkの直前の赤線、または緑線からTimingPointsとしての情報を受け取る
-                        if ((timingPointList[j].time <= bookmarkList[i].time) && bookmarkList[i].sv == -1)
-                        {
-                            bookmarkList[i].sv = timingPointList[j].isRedLine ? 1 : timingPointList[j].sv;
-                            bookmarkList[i].meter = timingPointList[j].meter;
-                            bookmarkList[i].sampleSet = timingPointList[j].sampleSet;
-                            bookmarkList[i].sampleIndex = timingPointList[j].sampleIndex;
-                            bookmarkList[i].volume = timingPointList[j].volume;
-                            bookmarkList[i].isRedLine = false;
-                            bookmarkList[i].effect = timingPointList[j].effect;
-                        }
-                        // 対象となるbookmarkにBPM情報などが設定されていない場合は
-                        // bookmarkの直前の赤線からBPM情報などを受け取る
-                        if (timingPointList[j].time <= bookmarkList[i].time && timingPointList[j].isRedLine)
-                        {
-                            bookmarkList[i].bpm = timingPointList[j].bpm;
-                            bookmarkList[i].barLength = timingPointList[j].barLength;
-                            break;
-                        }
+                        // ない場合はBookmarkをHitObjectとして追加
+                        hitObjectList.Add(new HitObject(currentTime, 1));
+                    }
+                    else
+                    {
+                        // ある場合はオブジェクトコードにBookmarkを追加
+                        hitObjectOnBookmark.hitObjectCode += 0x00000400;
+                    }
+                }
+                foreach (var hitObject in hitObjectList)
+                {
+                    if ((hitObject.hitObjectCode & 0x00000400) == 0)
+                    {
+                        // オブジェクトコードにbookmarkがない場合は
+                        // オブジェクトコードにbookmark以外を追加
+                        hitObject.hitObjectCode += unchecked((int)0x00000200);
+                    }
+                    if ((hitObject.hitObjectCode & 0x00000100) == 0)
+                    {
+                        // オブジェクトコードに小節線がない場合は
+                        // オブジェクトコードに小節線以外を追加
+                        hitObject.hitObjectCode += 0b10000000;
                     }
                 }
                 return true;
@@ -463,7 +491,7 @@ namespace osuTaikoSvTool.Utils.Helper
                 DateTime now = DateTime.Now;
                 string backupFileName = $"{now:yyyy_MM_dd_HH_mm_ss_fff}.osu";
                 // バックアップフォルダがない場合は作成する
-                if(!Directory.Exists(backupPath))
+                if (!Directory.Exists(backupPath))
                 {
                     Directory.CreateDirectory(backupPath);
                 }

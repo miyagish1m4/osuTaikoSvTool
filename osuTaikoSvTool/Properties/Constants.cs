@@ -9,6 +9,7 @@ namespace osuTaikoSvTool.Properties
         internal enum NoteType
         {
             BARLINE,
+            BOOKMARK,
             CIRCLE,
             SLIDER,
             SPINNER
@@ -57,12 +58,17 @@ namespace osuTaikoSvTool.Properties
         internal const int HIT_OBJECTS_CODE = 8;
         #endregion
         #region 実行コード
-        internal const int EXECUTE_ADD = 0;
+        internal const int EXECUTE_APPLY = 0;
         internal const int EXECUTE_REMOVE = 1;
         #endregion
         #region 計算コード
-        internal const int CALCULATION_ARITHMETIC = 1; // 等差
-        internal const int CALCULATION_GEOMETRIC = 2; // 等比
+        internal const int CALCULATION_ARITHMETIC = 1;  // 等差
+        internal const int CALCULATION_GEOMETRIC = 2;   // 等比
+        #endregion
+        #region 相対速度オプション
+        internal const int RELATIVE_DISABLE = -1;   // 無効
+        internal const int RELATIVE_SUM = 1;        // 加算
+        internal const int RELATIVE_MULTIPLY = 2;   // 乗算
         #endregion
         #region ログレベル
         internal const string LOG_LEVEL_INFO = "INFO";

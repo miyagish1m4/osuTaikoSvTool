@@ -36,6 +36,13 @@ namespace osuTaikoSvTool.Models
         internal int offset { set; get; }
         // kiai有効化設定
         internal bool isKiai { set; get; }
+        // 相対速度オプション
+        // -1 : 無効
+        // 0  : 乗算
+        // 1  : 加算
+        internal int relativeCode { set; get; }
+        // 相対速度オプションで"乗算"選択時の基礎SV
+        internal decimal relativeBaseSv { set; get; }
         internal SetOption setOption = new();
         internal SetObjectOption setObjectOption = new();
         internal SetBeatSnapOption setBeatSnapOption = new();
@@ -61,13 +68,20 @@ namespace osuTaikoSvTool.Models
             // 0b00000000 00000000 00000000 00010000 スライダー
             // 0b00000000 00000000 00000000 00100000 スライダー(大音符)
             // 0b00000000 00000000 00000000 01000000 スピナー
-            // 0b00000000 00000000 00000000 10000000 小節線
-            // 0b10000000 00000000 00000000 00000000(int最小値) ブックマーク                 
+            // 0b00000000 00000000 00000000 10000000 小節線以外
+            // 0b00000000 00000000 00000001 00000000 小節線
+            // 0b00000000 00000000 00000010 00000000 Bookmark以外
+            // 0b00000000 00000000 00000100 00000000 Bookmark
             internal int setObjectsCode { set; get; }
             // kiai開始有効化設定
             internal bool isKiaiStart { set; get; }
             // kiai終了有効化設定
             internal bool isKiaiEnd { set; get; }
+            // 始点緑線有効化設定
+            internal bool isTimingStart { set; get; }
+            // 終点緑線有効化設定
+            internal bool isTimingEnd { set; get; }
+
         }
         internal struct SetBeatSnapOption
         {
@@ -117,6 +131,8 @@ namespace osuTaikoSvTool.Models
                                int volumeTo,
                                int calculationCode,
                                bool isKiai,
+                               int relativeCode,
+                               decimal relativeBaseSv,
                                bool isOffset,
                                int offset,
                                bool isSetObject,
@@ -124,6 +140,8 @@ namespace osuTaikoSvTool.Models
                                int setObjectCode,
                                bool isKiaiStart,
                                bool isKiaiEnd,
+                               bool isTimingStart,
+                               bool isTimingEnd,
                                bool isBeatSnap,
                                int beatSnap,
                                DateTime date)
@@ -138,6 +156,8 @@ namespace osuTaikoSvTool.Models
             this.volumeTo = volumeTo;
             this.calculationCode = calculationCode;
             this.isKiai = isKiai;
+            this.relativeCode = relativeCode;
+            this.relativeBaseSv = relativeBaseSv;
             this.isOffset = isOffset;
             this.offset = offset;
             this.setOption.isSetObjects = isSetObject;
@@ -145,6 +165,8 @@ namespace osuTaikoSvTool.Models
             this.setObjectOption.setObjectsCode = setObjectCode;
             this.setObjectOption.isKiaiStart = isKiaiStart;
             this.setObjectOption.isKiaiEnd = isKiaiEnd;
+            this.setObjectOption.isTimingStart = isTimingStart;
+            this.setObjectOption.isTimingEnd = isTimingEnd;
             this.setBeatSnapOption.beatSnap = beatSnap;
             this.setBeatSnapOption.isBeatSnap = isBeatSnap;
             this.createDate = date;
