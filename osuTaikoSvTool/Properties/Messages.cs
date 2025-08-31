@@ -10,6 +10,7 @@ namespace osuTaikoSvTool.Properties
         public static Dictionary<string, string> DialogMessages = new()
         {
             { "I_A-P-001", "処理に成功しました。\nCtrl+Lを押して譜面を更新してください。" },
+            { "I_A-P-002", "譜面を実行前の状態に戻しました。\nCtrl+Lを押して譜面を更新してください。" },
             { "W_A_EM-001", "履歴が存在しません。" },
             { "E_A-P-001", "処理に失敗しました。" },
             { "E_A-D-001", "譜面情報の取得に失敗しました。" },

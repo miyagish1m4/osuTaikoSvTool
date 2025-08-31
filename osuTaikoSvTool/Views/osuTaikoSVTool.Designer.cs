@@ -1051,10 +1051,12 @@ namespace osuTaikoSvTool
             Controls.Add(txtTimingTo);
             Controls.Add(pnlBeatmapInfoGroup);
             ForeColor = Color.Black;
+            KeyPreview = true;
             Name = "osuTaikoSVTool";
             Text = "osuTaikoSVTool";
             Load += osuTaikoSVTool_Load;
             Shown += osuTaikoSVTool_Shown;
+            KeyDown += osuTaikoSVTool_KeyDown;
             pnlBeatmapInfoGroup.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)picDisplayBg).EndInit();
             pnlCalcurationTypeGroup.ResumeLayout(false);

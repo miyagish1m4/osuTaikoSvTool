@@ -24,7 +24,7 @@ namespace osuTaikoSvTool.Utils.Helper
                 using (var sw = new StreamWriter(Directory.GetCurrentDirectory() + "\\" +
                                                  Properties.Constants.HISTORY_DIRECTORY + "\\" +
                                                  "\\history_" +
-                                                 userInputData.createDate.ToString("yyyyMMddhhmmssfff") +
+                                                 userInputData.createDate.ToString("yyyyMMddHHmmssfff") +
                                                  Properties.Constants.XML_EXTENSION,
                                                  false,
                                                  new System.Text.UTF8Encoding(false))) // BOMなしUTF-8

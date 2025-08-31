@@ -31,6 +31,7 @@ namespace osuTaikoSvTool
         private int objectCode = 0;
         private int calculationCode = 0;
         private int relativeCode = -1;
+        private bool isExecute = false;
         private int beforeSelectedTabIndex = 0;
         private string backupDirectoryName = string.Empty;
         #endregion
@@ -301,6 +302,7 @@ namespace osuTaikoSvTool
             }
             // 成功した場合はメッセージダイアログを表示する
             Common.ShowMessageDialog("I_A-P-001");
+            isExecute = true;
             return;
         }
         /// <summary>
@@ -351,6 +353,44 @@ namespace osuTaikoSvTool
                 this.Top = (rect.Top + rect.Height > this.Top + this.Height) ? this.Top : rect.Top + rect.Height - this.Height;
                 this.Top = (rect.Top < this.Top) ? this.Top : rect.Top;
             }
+        }
+        private void osuTaikoSVTool_KeyDown(object sender, KeyEventArgs e)
+        {
+            switch (e.KeyData)
+            {
+                //［Ctrl］+［S］が押されたらSV適応/削除を実行する
+                case (Keys.S | Keys.Control):
+                    switch (tabExecuteType.SelectedIndex)
+                    {
+                        case 0:
+                            btnApply_Click(sender, e);
+                            break;
+                        case 1:
+                            btnRemove_Click(sender, e);
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+                //［Ctrl］+［Z］が押されたら実行前の譜面にする
+                case (Keys.Z | Keys.Control):
+                    if(!isExecute)
+                    {
+                        break;
+                    }
+                    if (BeatmapHelper.ExportToPreviousOsuFile(this.beatmapInfo.beatmapPath, this.backupDirectoryName))
+                    {
+                        // 成功した場合は完了メッセージを表示する
+                        Common.ShowMessageDialog("I_A-P-002");
+                    }
+                    else
+                    {
+                        // 失敗した場合はエラーダイアログを表示する
+                        Common.ShowMessageDialog("E_A-P-001");
+                    }
+                    break;
+            }
+
         }
         private void Application_ApplicationExit(object? sender, EventArgs e)
         {
@@ -964,7 +1004,7 @@ namespace osuTaikoSvTool
             {
                 case 0:
                     // Add
-                    if (beforeSelectedTabIndex == 2)
+                    if (beforeSelectedTabIndex == 1)
                     {
                         txtOffset.Text = txtStartOffset.Text;
                     }

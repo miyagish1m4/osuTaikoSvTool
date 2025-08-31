@@ -405,6 +405,7 @@ namespace osuTaikoSvTool.Utils.Helper
                         hitObject.hitObjectCode += 0b10000000;
                     }
                 }
+                hitObjectList = [.. hitObjectList.OrderBy(a => a.time)];
                 return true;
             }
             catch (Exception ex)
@@ -586,6 +587,61 @@ namespace osuTaikoSvTool.Utils.Helper
                 file.Close();
             }
             return true;
+        }
+        /// <summary>
+        /// 前に実行したファイルをコピーする処理
+        /// </summary>
+        /// <param name="path">osuファイルが格納されているフォルダ</param>
+        /// <param name="backupDirectory">バックアップディレクトリ</param>
+        /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
+        internal static bool ExportToPreviousOsuFile(string path, string backupDirectory)
+        {
+            try
+            {
+                string backupPath = Directory.GetCurrentDirectory() + Constants.BACKUP_DIRECTORY + "\\" + backupDirectory;
+                // バックアップディレクトリが見つからない場合はfalseで返す
+                if (!Directory.Exists(backupPath))
+                {
+                    return false;
+                }
+                // バックアップファイルを探す
+                string[] files = Directory.GetFiles(backupPath, "*.osu");
+                // バックアップファイルが見つからない場合はfalseで返す
+                if (files.Length == 0)
+                {
+                    return false;
+                }
+                List<long> fileDate = [];
+                // ファイル名の_を消し、数値にする
+                foreach (var file in files)
+                {
+                    string deletedPath = file.Replace(backupPath + "\\", "");
+                    string deletedExtension = deletedPath.Replace(".osu", "");
+                    string deletedUnderScore = deletedExtension.Replace("_", "");
+                    fileDate.Add(Convert.ToInt64(deletedUnderScore));
+                }
+                // 数値を降順にソートする
+                fileDate.Sort();
+                fileDate.Reverse();
+                // 最後の実行で作成されたバックアップファイルを探す
+                long currentDate = Convert.ToInt64(DateTime.Now.ToString("yyyyMMddHHmmssfff"));
+                var targetFile = fileDate.FirstOrDefault(f => f <= currentDate);
+                if (targetFile == 0)
+                {
+                    return false;
+                }
+                string targetFileString = targetFile.ToString("0000_00_00_00_00_00_000");
+                targetFileString = Path.Combine(backupPath, targetFileString + ".osu");
+                // Songsフォルダにコピーの作成
+                File.Copy(targetFileString, path, true);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Common.WriteErrorMessage("LOG_E-EXPORT-OSU");
+                Common.WriteExceptionMessage(ex);
+                return false;
+            }
         }
         /// <summary>
         /// osuファイルのヒットオブジェクトの行を作成する
