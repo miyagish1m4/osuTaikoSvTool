@@ -1,5 +1,4 @@
 using System.Text;
-using OsuParsers.Beatmaps.Objects;
 using osuTaikoSvTool.Properties;
 
 namespace osuTaikoSvTool.Utils
@@ -109,7 +108,7 @@ namespace osuTaikoSvTool.Utils
         /// <param name="messageCode">メッセージコード、またはメッセージ</param>
         internal static void ShowMessageDialog(string messageCode)
         {
-            string messageLevel = messageCode.Substring(0, 1);
+            string messageLevel = messageCode[..1];
             switch (messageLevel)
             {
                 // Informationメッセージの場合

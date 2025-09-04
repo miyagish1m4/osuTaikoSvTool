@@ -95,11 +95,14 @@ namespace osuTaikoSvTool.Utils.Helper
         /// <param name="volumeFrom">Volume(始点)</param>
         /// <param name="volumeTo">Volume(終点)</param>
         /// <param name="calculationCode">計算コード</param>
+        /// <param name="isKiai">Kiai判定フラグ</param>
+        /// <param name="relativeCode">相対速度変化コード</param>
+        /// <param name="relativeBaseSv">相対速度変化基準SV</param>
+        /// <param name="isSvTo">SV終点有効化フラグ</param>
         /// <param name="isOffset">Offset有効化フラグ</param>
         /// <param name="offset">Offset</param>
         /// <param name="isBeatSnap">BeatSnap間隔配置有効化フラグ</param>
         /// <param name="beatSnap">BeatSnap間隔</param>
-        /// <param name="isKiai">Kiai判定フラグ</param>
         /// <param name="isKiaiStart">Kiai始点判定フラグ</param>
         /// <param name="isKiaiEnd">Kiai終点判定フラグ</param>
         /// <param name="excecuteCode">実行コード</param>
@@ -117,6 +120,7 @@ namespace osuTaikoSvTool.Utils.Helper
                                               bool isKiai,
                                               int relativeCode,
                                               string relativeBaseSv,
+                                              bool isSvTo,
                                               bool isOffset,
                                               string offset,
                                               bool isSetObject,
@@ -158,7 +162,9 @@ namespace osuTaikoSvTool.Utils.Helper
                     if (!ValidateSv(svFrom,
                                     svTo,
                                     isSv,
+                                    calculationCode,
                                     relativeCode,
+                                    isSvTo,
                                     ref retSvFrom,
                                     ref retSvTo) ||
                         !ValidateVolume(volumeFrom,
@@ -284,13 +290,18 @@ namespace osuTaikoSvTool.Utils.Helper
         /// <param name="svFrom">SV(始点)</param>
         /// <param name="svTo">SV(終点)</param>
         /// <param name="isSv">SV有効化フラグ</param>
+        /// <param name="calculationCode">計算コード</param>
+        /// <param name="relativeCode">相対速度変化コード</param>
+        /// <param name="isSvTo">SV終点有効化フラグ</param>
         /// <param name="retSvFrom">チェック後のSV(始点)</param>
         /// <param name="retSvTo">チェック後のSV(終点)</param>
         /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
         private static bool ValidateSv(string svFrom,
                                        string svTo,
                                        bool isSv,
+                                       int calculationCode,
                                        int relativeCode,
+                                       bool isSvTo,
                                        ref decimal retSvFrom,
                                        ref decimal retSvTo)
         {
@@ -303,7 +314,11 @@ namespace osuTaikoSvTool.Utils.Helper
                     retSvTo = -1;
                     return true;
                 }
-                if ((svFrom == string.Empty) || (svTo == string.Empty))
+                if (!isSvTo)
+                {
+                    svTo = svFrom;
+                }
+                if (((svFrom == string.Empty) || (svTo == string.Empty)))
                 {
                     //SVの入力がない
                     Common.ShowMessageDialog("E_V-EM-002");
@@ -315,23 +330,55 @@ namespace osuTaikoSvTool.Utils.Helper
                     Common.ShowMessageDialog("E_V-T-001");
                     return false;
                 }
-                if (((retSvFrom <= 0m) || (retSvTo <= 0m)) &&
-                    (relativeCode == 0))
+                switch (relativeCode)
                 {
-                    retSvFrom = -1m;
-                    retSvTo = -1m;
-                    // SVが負の値になる
-                    Common.ShowMessageDialog("E_V-C-003");
-                    return false;
-                }
-                if (((retSvFrom < 0.01m) || (retSvFrom > 10m) || (retSvTo < 0.01m) || (retSvTo > 10m)) &&
-                (relativeCode == -1))
-                {
-                    retSvFrom = -1m;
-                    retSvTo = -1m;
-                    //SVがosu側で指定できる範囲外の値
-                    Common.ShowMessageDialog("E_V-C-004");
-                    return false;
+                    case Constants.RELATIVE_DISABLE:
+                        // 相対速度変化オプションが無効の場合は
+                        // SVがosu側で指定できる範囲内かチェックする
+                        if (((retSvFrom < 0.01m) || (retSvFrom > 10m) || (retSvTo < 0.01m) || (retSvTo > 10m)))
+                        {
+                            retSvFrom = -1m;
+                            retSvTo = -1m;
+                            // SVがosu側で指定できる範囲外の値
+                            Common.ShowMessageDialog("E_V-C-003");
+                            return false;
+                        }
+                        break;
+                    case Constants.RELATIVE_MULTIPLY:
+                        // 相対速度変化オプションが乗算の場合は
+                        // 等比数列で計算する場合、末項が0以下ではないかチェックする
+                        if (calculationCode == Constants.CALCULATION_GEOMETRIC &&
+                            retSvTo <= 0m && isSvTo)
+                        {
+                            retSvFrom = -1m;
+                            retSvTo = -1m;
+                            // 末項が0になる
+                            Common.ShowMessageDialog("E_V-C-004");
+                            return false;
+                        }
+                        break;
+                    case Constants.RELATIVE_SUM:
+                        // 相対速度変化オプションが加算の場合は
+                        // SVがosu側で指定できる範囲内かチェックする
+                        if (((retSvFrom <= -10m) || (retSvFrom >= 10m) || (retSvTo <= -10m) || (retSvTo >= 10m)))
+                        {
+                            retSvFrom = -1m;
+                            retSvTo = -1m;
+                            // SVがosu側で指定できる範囲外の値
+                            Common.ShowMessageDialog("E_V-C-003");
+                            return false;
+                        }
+                        // 等比数列で計算する場合、始点と終点の積が0以下ではないかチェックする
+                        if ((calculationCode == Constants.CALCULATION_GEOMETRIC) &&
+                            (retSvFrom * retSvTo <= 0))
+                        {
+                            retSvFrom = -1m;
+                            retSvTo = -1m;
+                            // SV(始点)とSV(終点)の正負が一致していない
+                            Common.ShowMessageDialog("E_V-C-005");
+                            return false;
+                        }
+                        break;
                 }
                 return true;
             }
@@ -385,7 +432,7 @@ namespace osuTaikoSvTool.Utils.Helper
                     retVolumeFrom = -1;
                     retVolumeTo = -1;
                     //Volumeがosu側で指定できる範囲外の値
-                    Common.ShowMessageDialog("E_V-C-005");
+                    Common.ShowMessageDialog("E_V-C-006");
                     return false;
                 }
                 // osu側で指定できるVolumeの範囲内の場合はバリデーションチェックを完了する
@@ -455,6 +502,12 @@ namespace osuTaikoSvTool.Utils.Helper
                 if (relativeCode == Constants.RELATIVE_MULTIPLY)
                 {
                     if (!decimal.TryParse(relativeBaseSv, out retRelativeBaseSv))
+                    {
+                        //基礎SVのフォーマットが間違えている
+                        Common.ShowMessageDialog("E_V-T-003");
+                        return false;
+                    }
+                    if (retRelativeBaseSv < 0 || retRelativeBaseSv > 10)
                     {
                         //基礎SVのフォーマットが間違えている
                         Common.ShowMessageDialog("E_V-T-003");

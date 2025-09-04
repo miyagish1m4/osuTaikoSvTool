@@ -20,6 +20,7 @@ namespace osuTaikoSvTool
         private BeatmapMetadata preBeatmapInfo = new();
         private Beatmap? beatmapData;
         private UserInputData? userInputData;
+        private Config config = new();
         private List<TimingPoint> timingPoints = [];
         private string osuDirectory = string.Empty;
         private string songsPath = string.Empty;
@@ -62,6 +63,11 @@ namespace osuTaikoSvTool
                     var processes = Process.GetProcessesByName("osu!");
                     if (processes.Length == 0)
                     {
+                        if(isDirectoryLoaded)
+                        {
+                            beatmapInfo = new();
+                        }
+                        isDirectoryLoaded = false;
                         throw new Exception("osu!が起動されていません。");
                     }
                     // osuフォルダ取得処理
@@ -146,14 +152,17 @@ namespace osuTaikoSvTool
                     preBeatmapInfo.version = beatmapInfo.version;
                     preBeatmapInfo.creator = beatmapInfo.creator;
                     // テキストラベルに譜面の情報を書き込む
-                    lblFileName.Text = beatmapInfo.artist.Replace("&", "&&") + " - " +
-                                       beatmapInfo.title.Replace("&", "&&") + " [" +
-                                       beatmapInfo.version.Replace("&", "&&") + "]";
+                    lblFileName.Text = beatmapInfo.artist.Replace("&", "&&") +
+                                       (beatmapInfo.artist == string.Empty ? "" : " - ") +
+                                       beatmapInfo.title.Replace("&", "&&") +
+                                       (beatmapInfo.title == string.Empty ? "" : " [") +
+                                       beatmapInfo.version.Replace("&", "&&") +
+                                       (beatmapInfo.version == string.Empty ? "" : "]");
                     // バックアップフォルダ名を設定する
                     backupDirectoryName = beatmapInfo.artist + " - " +
-                                          beatmapInfo.title + " (" +
-                                          beatmapInfo.creator + ") [" +
-                                          beatmapInfo.version + "]";
+                                                             beatmapInfo.title + " (" +
+                                                             beatmapInfo.creator + ") [" +
+                                                             beatmapInfo.version + "]";
                     preBeatmapInfo.beatmapPath = beatmapInfo.beatmapPath;
                     // BGのパスが取得できている場合はBGをフォームに表示する
                     if (beatmapInfo.backgroundPath == null || beatmapInfo.backgroundPath == string.Empty)
@@ -179,6 +188,8 @@ namespace osuTaikoSvTool
         /// </summary>
         private void InitializeApplyControls()
         {
+            chkEnableSvTo.Visible = false;
+            chkEnableSvTo.Checked = true;
             isSetMode[0] = true;
             isSetMode[1] = false;
             tabSetType.SelectedIndex = 0;
@@ -277,11 +288,15 @@ namespace osuTaikoSvTool
                 return;
             }
             // バックアップを作成する
-            if (!BeatmapHelper.CreateBackup(this.beatmapInfo.beatmapPath, this.backupDirectoryName))
+            if (BeatmapHelper.CreateBackup(this.beatmapInfo.beatmapPath, this.backupDirectoryName))
             {
-                // 失敗した場合はエラーダイアログを表示する
-                Common.ShowMessageDialog("E_A-P-001");
-                return;
+                if (!SettingHelper.ResetBackupFile(config) ||
+                    !SettingHelper.ResetHistoryFile(config))
+                {
+                    // 失敗した場合はエラーダイアログを表示する
+                    Common.ShowMessageDialog("E_A-P-001");
+                    return;
+                }
             }
             // デバッグ用CSV出力
             // 内容確認などに使ってね
@@ -327,6 +342,11 @@ namespace osuTaikoSvTool
             }
             return true;
         }
+        private void InitializeConfig()
+        {
+            config.ConfigLoad();
+            this.Text = Constants.APP_NAME + " ver" + Constants.APP_VERSION;
+        }
         #endregion
         #region イベントハンドラ
         private void osuTaikoSVTool_Load(object sender, EventArgs e)
@@ -335,6 +355,8 @@ namespace osuTaikoSvTool
             Common.WriteInfoMessage("LOG_I-START");
             // ApplicationExitイベントハンドラを追加
             Application.ApplicationExit += new EventHandler(Application_ApplicationExit);
+            // Configファイル設定読み込み
+            InitializeConfig();
             // それぞれのコントロールの初期化処理
             InitializeApplyControls();
             picDisplayBg.Controls.Add(lblFileName);
@@ -356,6 +378,7 @@ namespace osuTaikoSvTool
         }
         private void osuTaikoSVTool_KeyDown(object sender, KeyEventArgs e)
         {
+            string backupPath = Directory.GetCurrentDirectory() + Constants.BACKUP_DIRECTORY + "\\" + this.backupDirectoryName;
             switch (e.KeyData)
             {
                 //［Ctrl］+［S］が押されたらSV適応/削除を実行する
@@ -374,7 +397,14 @@ namespace osuTaikoSvTool
                     break;
                 //［Ctrl］+［Z］が押されたら実行前の譜面にする
                 case (Keys.Z | Keys.Control):
-                    if(!isExecute)
+                    // 譜面情報がリアルタイムで取得できていない場合はエラーダイアログを表示する
+                    if (this.beatmapInfo.beatmapPath == null || this.beatmapInfo.beatmapPath == string.Empty)
+                    {
+                        Common.ShowMessageDialog("E_A-D-001");
+                        return;
+                    }
+                    // バックアップディレクトリが見つからない場合は何もしない
+                    if (!Directory.Exists(backupPath))
                     {
                         break;
                     }
@@ -389,6 +419,22 @@ namespace osuTaikoSvTool
                         Common.ShowMessageDialog("E_A-P-001");
                     }
                     break;
+                //［Ctrl］+［Shift］+［Z］が押されたら過去の譜面にする
+                case (Keys.Z | Keys.Shift | Keys.Control):
+                    // 譜面情報がリアルタイムで取得できていない場合はエラーダイアログを表示する
+                    if (this.beatmapInfo.beatmapPath == null || this.beatmapInfo.beatmapPath == string.Empty)
+                    {
+                        Common.ShowMessageDialog("E_A-D-001");
+                        return;
+                    }
+                    // バックアップディレクトリが見つからない場合は何もしない
+                    if (!Directory.Exists(backupPath))
+                    {
+                        break;
+                    }
+                    BackupForm backupForm = new(backupDirectoryName, this.beatmapInfo.beatmapPath);
+                    backupForm.ShowDialog();
+                    break;
             }
 
         }
@@ -396,6 +442,7 @@ namespace osuTaikoSvTool
         {
             //ApplicationExitイベントハンドラを削除
             Application.ApplicationExit -= new EventHandler(Application_ApplicationExit);
+            config.ConfigSave();
             Common.WriteInfoMessage("LOG_I-END");
         }
         private void btnApply_Click(object sender, EventArgs e)
@@ -415,6 +462,7 @@ namespace osuTaikoSvTool
                                                           chkEnableKiai.Checked,
                                                           relativeCode,
                                                           txtRelativeBaseSv.Text,
+                                                          chkEnableSvTo.Checked,
                                                           chkEnableOffset.Checked,
                                                           txtOffset.Text,
                                                           isSetMode[0],
@@ -465,6 +513,7 @@ namespace osuTaikoSvTool
                                                           chkEnableKiai.Checked,
                                                           relativeCode,
                                                           txtRelativeBaseSv.Text,
+                                                          chkEnableSvTo.Checked,
                                                           chkEnableOffset.Checked,
                                                           txtOffset.Text,
                                                           isSetMode[0],
@@ -565,22 +614,29 @@ namespace osuTaikoSvTool
             if (chkEnableSv.Checked)
             {
                 // SV関連のコントロールを有効化
+                chkRelative.Checked = false;
+                chkRelative.Visible = true;
                 txtSvFrom.Enabled = true;
-                txtSvTo.Enabled = true;
                 txtSvFrom.BackColor = SystemColors.Window;
-                txtSvTo.BackColor = SystemColors.Window;
-                btnSwapSv.Enabled = true;
-                btnSwapSv.ForeColor = Color.Cyan;
-                btnSwapSv.FlatAppearance.BorderColor = Color.Cyan;
+                if (chkEnableSvTo.Checked)
+                {
+                    txtSvTo.Enabled = true;
+                    txtSvTo.BackColor = SystemColors.Window;
+                    btnSwapSv.Enabled = true;
+                    btnSwapSv.ForeColor = Color.Cyan;
+                    btnSwapSv.FlatAppearance.BorderColor = Color.Cyan;
+                }
                 rdoArithmetic.Enabled = true;
                 rdoGeometric.Enabled = true;
             }
             else
             {
                 // SV関連のコントロールを無効化
+                chkRelative.Visible = false;
+                chkRelative.Checked = false;
                 txtSvFrom.Text = string.Empty;
-                txtSvTo.Text = string.Empty;
                 txtSvFrom.Enabled = false;
+                txtSvTo.Text = string.Empty;
                 txtSvTo.Enabled = false;
                 txtSvFrom.BackColor = SystemColors.WindowFrame;
                 txtSvTo.BackColor = SystemColors.WindowFrame;
@@ -589,7 +645,6 @@ namespace osuTaikoSvTool
                 btnSwapSv.FlatAppearance.BorderColor = SystemColors.WindowFrame;
                 rdoArithmetic.Enabled = false;
                 rdoGeometric.Enabled = false;
-
             }
         }
         private void chkEnableVolume_CheckedChanged(object sender, EventArgs e)
@@ -624,18 +679,32 @@ namespace osuTaikoSvTool
         {
             if (chkRelative.Checked)
             {
+                btnSwapSv.Enabled = false;
+                btnSwapSv.ForeColor = SystemColors.WindowFrame;
+                btnSwapSv.FlatAppearance.BorderColor = SystemColors.WindowFrame;
+                txtSvTo.Enabled = false;
+                txtSvTo.BackColor = SystemColors.WindowFrame;
                 pnlRelativeSvGroup.Visible = true;
                 txtRelativeBaseSv.Enabled = false;
                 txtRelativeBaseSv.Text = "";
                 txtRelativeBaseSv.BackColor = SystemColors.WindowFrame;
+                chkEnableSvTo.Visible = true;
+                chkEnableSvTo.Checked = false;
             }
             else
             {
+                btnSwapSv.Enabled = true;
+                btnSwapSv.ForeColor = Color.Cyan;
+                btnSwapSv.FlatAppearance.BorderColor = Color.Cyan;
+                txtSvTo.Enabled = true;
+                txtSvTo.BackColor = SystemColors.Window;
                 pnlRelativeSvGroup.Visible = false;
                 rdoRelativeMultiply.Checked = false;
                 rdoRelativeSum.Checked = false;
                 relativeCode = Constants.RELATIVE_DISABLE;
                 txtRelativeBaseSv.Text = "";
+                chkEnableSvTo.Visible = false;
+                chkEnableSvTo.Checked = true;
             }
         }
         private void rdoRelativeMultiply_CheckedChanged(object sender, EventArgs e)
@@ -659,6 +728,27 @@ namespace osuTaikoSvTool
             if (rdoRelativeSum.Checked)
             {
                 relativeCode = Constants.RELATIVE_SUM;
+            }
+        }
+        private void chkEnableSvTo_CheckedChanged(object sender, EventArgs e)
+        {
+            if (chkEnableSvTo.Checked)
+            {
+                btnSwapSv.Enabled = true;
+                btnSwapSv.ForeColor = Color.Cyan;
+                btnSwapSv.FlatAppearance.BorderColor = Color.Cyan;
+                txtSvTo.Enabled = true;
+                txtSvTo.Text = "";
+                txtSvTo.BackColor = SystemColors.Window;
+            }
+            else
+            {
+                btnSwapSv.Enabled = false;
+                btnSwapSv.ForeColor = SystemColors.WindowFrame;
+                btnSwapSv.FlatAppearance.BorderColor = SystemColors.WindowFrame;
+                txtSvTo.Enabled = false;
+                txtSvTo.Text = "";
+                txtSvTo.BackColor = SystemColors.WindowFrame;
             }
         }
         private void chkEnableOffset_CheckedChanged(object sender, EventArgs e)
@@ -860,6 +950,12 @@ namespace osuTaikoSvTool
             // 実行履歴画面を表示する
             Form historyForm = new HistoryForm();
             historyForm.ShowDialog();
+        }
+        private void btnViewSetting_Click(object sender, EventArgs e)
+        {
+            // 設定画面を表示する
+            Form settingForm = new SettingForm(config);
+            settingForm.ShowDialog();
         }
         private void rdoAllHitObjects_CheckedChanged(object sender, EventArgs e)
         {

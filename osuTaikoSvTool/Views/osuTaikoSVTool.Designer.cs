@@ -100,6 +100,8 @@ namespace osuTaikoSvTool
             rdoRelativeMultiply = new RadioButton();
             rdoRelativeSum = new RadioButton();
             chkRelative = new CheckBox();
+            btnViewSetting = new Button();
+            chkEnableSvTo = new CheckBox();
             pnlBeatmapInfoGroup.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)picDisplayBg).BeginInit();
             pnlCalcurationTypeGroup.SuspendLayout();
@@ -357,7 +359,7 @@ namespace osuTaikoSvTool
             btnBackup.FlatStyle = FlatStyle.Flat;
             btnBackup.Font = new Font("Yu Gothic UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 128);
             btnBackup.ForeColor = SystemColors.ControlLightLight;
-            btnBackup.Location = new Point(210, 868);
+            btnBackup.Location = new Point(10, 917);
             btnBackup.Name = "btnBackup";
             btnBackup.Size = new Size(189, 39);
             btnBackup.TabIndex = 8;
@@ -957,7 +959,7 @@ namespace osuTaikoSvTool
             pnlRelativeSvGroup.Controls.Add(lblRelativeBaseSv);
             pnlRelativeSvGroup.Controls.Add(rdoRelativeMultiply);
             pnlRelativeSvGroup.Controls.Add(rdoRelativeSum);
-            pnlRelativeSvGroup.Location = new Point(255, 393);
+            pnlRelativeSvGroup.Location = new Point(107, 392);
             pnlRelativeSvGroup.Name = "pnlRelativeSvGroup";
             pnlRelativeSvGroup.Size = new Size(140, 85);
             pnlRelativeSvGroup.TabIndex = 11;
@@ -1014,7 +1016,7 @@ namespace osuTaikoSvTool
             chkRelative.AutoSize = true;
             chkRelative.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
             chkRelative.ForeColor = Color.White;
-            chkRelative.Location = new Point(258, 369);
+            chkRelative.Location = new Point(110, 368);
             chkRelative.Name = "chkRelative";
             chkRelative.Size = new Size(118, 24);
             chkRelative.TabIndex = 13;
@@ -1022,12 +1024,44 @@ namespace osuTaikoSvTool
             chkRelative.UseVisualStyleBackColor = true;
             chkRelative.CheckedChanged += chkRelative_CheckedChanged;
             // 
+            // btnViewSetting
+            // 
+            btnViewSetting.BackColor = Color.DarkCyan;
+            btnViewSetting.FlatAppearance.BorderColor = Color.Cyan;
+            btnViewSetting.FlatAppearance.BorderSize = 2;
+            btnViewSetting.FlatStyle = FlatStyle.Flat;
+            btnViewSetting.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
+            btnViewSetting.ForeColor = SystemColors.ControlLightLight;
+            btnViewSetting.Location = new Point(210, 868);
+            btnViewSetting.Name = "btnViewSetting";
+            btnViewSetting.Size = new Size(189, 39);
+            btnViewSetting.TabIndex = 14;
+            btnViewSetting.TabStop = false;
+            btnViewSetting.Text = "設定";
+            btnViewSetting.UseVisualStyleBackColor = false;
+            btnViewSetting.Click += btnViewSetting_Click;
+            // 
+            // chkEnableSvTo
+            // 
+            chkEnableSvTo.AutoSize = true;
+            chkEnableSvTo.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 128);
+            chkEnableSvTo.ForeColor = Color.White;
+            chkEnableSvTo.Location = new Point(253, 397);
+            chkEnableSvTo.Name = "chkEnableSvTo";
+            chkEnableSvTo.Size = new Size(96, 19);
+            chkEnableSvTo.TabIndex = 15;
+            chkEnableSvTo.Text = "終点の有効化";
+            chkEnableSvTo.UseVisualStyleBackColor = true;
+            chkEnableSvTo.CheckedChanged += chkEnableSvTo_CheckedChanged;
+            // 
             // osuTaikoSVTool
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(0, 64, 64);
-            ClientSize = new Size(408, 938);
+            ClientSize = new Size(408, 987);
+            Controls.Add(chkEnableSvTo);
+            Controls.Add(btnViewSetting);
             Controls.Add(chkRelative);
             Controls.Add(pnlRelativeSvGroup);
             Controls.Add(btnSetTimingTo);
@@ -1155,5 +1189,7 @@ namespace osuTaikoSvTool
         private CheckBox chkRelative;
         private Label lblRelativeBaseSv;
         private TextBox txtRelativeBaseSv;
+        private Button btnViewSetting;
+        private CheckBox chkEnableSvTo;
     }
 }

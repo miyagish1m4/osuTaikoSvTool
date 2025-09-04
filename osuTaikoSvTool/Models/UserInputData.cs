@@ -1,5 +1,3 @@
-using osuTaikoSvTool.Utils;
-
 namespace osuTaikoSvTool.Models
 {
     /// <summary>
@@ -111,6 +109,8 @@ namespace osuTaikoSvTool.Models
         /// <param name="volumeTo">Volume(終点)</param>
         /// <param name="calculationCode">計算コード</param>
         /// <param name="isKiai">kiai有効化フラグ</param>
+        /// <param name="relativeCode">相対速度変化コード</param>
+        /// <param name="relativeBaseSv">相対速度変化基準SV</param>
         /// <param name="isOffset">オフセット有効化フラグ</param>
         /// <param name="offset">オフセット</param>
         /// <param name="isSetObject">オブジェクト配置有効化フラグ</param>

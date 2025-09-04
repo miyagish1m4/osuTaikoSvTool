@@ -170,8 +170,8 @@ namespace osuTaikoSvTool.Services
                 {
                     throw new Exception();
                 }
-                if ((userInputData.setObjectOption.isKiaiStart || userInputData.setObjectOption.isKiaiEnd) && 
-                    ((userInputData.setObjectOption.setObjectsCode != 0x00000100) && 
+                if ((userInputData.setObjectOption.isKiaiStart || userInputData.setObjectOption.isKiaiEnd) &&
+                    ((userInputData.setObjectOption.setObjectsCode != 0x00000100) &&
                      (userInputData.setObjectOption.setObjectsCode != 0x00000400)))
                 {
                     // 始点・終点に緑線適応処理
@@ -246,14 +246,14 @@ namespace osuTaikoSvTool.Services
                     }
                     decimal sv;
                     int volume;
-                    if ((userInputData.setObjectOption.setObjectsCode == 0x0000017f) && 
-                        !userInputData.setObjectOption.isTimingStart && 
+                    if ((userInputData.setObjectOption.setObjectsCode == 0x0000017f) &&
+                        !userInputData.setObjectOption.isTimingStart &&
                         (beatmap.hitObjects[i].time == userInputData.timingFrom))
                     {
                         continue;
                     }
-                    if ((userInputData.setObjectOption.setObjectsCode == 0x0000017f) && 
-                        !userInputData.setObjectOption.isTimingEnd && 
+                    if ((userInputData.setObjectOption.setObjectsCode == 0x0000017f) &&
+                        !userInputData.setObjectOption.isTimingEnd &&
                         (beatmap.hitObjects[i].time == userInputData.timingTo))
                     {
                         continue;
@@ -909,7 +909,7 @@ namespace osuTaikoSvTool.Services
                             // 直前の音量を参照する
                             volume = applyTimingPoint != null ? applyTimingPoint.volume : 100;
                         }
-                        if(applyInheritedPoint == null)
+                        if (applyInheritedPoint == null)
                         {
                             return false;
                         }
@@ -1049,54 +1049,5 @@ namespace osuTaikoSvTool.Services
         {
             return volumeFrom + (volumePerMs * (currentTiming - timingFrom));
         }
-        //private static bool ResetOriginalTimingPoints(Beatmap beatmap,
-        //                                              UserInputData userInputData,
-        //                                              int effectCode,
-        //                                              decimal volumePerMs)
-        //{
-        //    try
-        //    {
-        //        for (global::System.Int32 i = 0; i < beatmap.timingPoints.Count; i++)
-        //        {
-        //            // もし赤線がTiming(終点)より上回った場合は処理を抜ける
-        //            if (beatmap.timingPoints[i].time > userInputData.timingTo)
-        //            {
-        //                // のちの処理のためにKiai終点判定フラグが有効な場合はエフェクトコードを1に変更する
-        //                if (userInputData.isKiaiEnd)
-        //                {
-        //                    effectCode = 1;
-        //                }
-        //                break;
-        //            }
-        //            // もし赤線がTiming(終点)と同じタイミングかつ、
-        //            // Kiai終点判定フラグが有効な場合はエフェクトコードを0に変更する(kiaiを無効にする)
-        //            if ((beatmap.timingPoints[i].time == userInputData.timingTo) && userInputData.isKiaiEnd)
-        //            {
-        //                effectCode = 0;
-        //            }
-        //            if ((beatmap.timingPoints[i].time >= userInputData.timingFrom) &&
-        //                (beatmap.timingPoints[i].time <= userInputData.timingTo))
-        //            {
-        //                if (userInputData.isVolume)
-        //                {
-        //                    // 指定範囲内に赤線があるかつ、Volume有効化フラグが有効な場合は
-        //                    // 赤線に音量を計算し適応する
-        //                    beatmap.timingPoints[i].volume = (int)(userInputData.volumeFrom +
-        //                                                       (volumePerMs *
-        //                                                        (beatmap.timingPoints[i].time -
-        //                                                         userInputData.timingFrom)));
-        //                }
-        //                // kiaiをつける場合はkiai有効化する
-        //                beatmap.timingPoints[i].effect += effectCode;
-        //            }
-        //        }
-        //        return true;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Common.WriteExceptionMessage(ex);
-        //        return false;
-        //    }
-        //}
     }
 }

@@ -644,6 +644,27 @@ namespace osuTaikoSvTool.Utils.Helper
             }
         }
         /// <summary>
+        /// 指定したバックアップファイルをコピーする処理
+        /// </summary>
+        /// <param name="beatmapPath">osuファイルが格納されているフォルダ</param>
+        /// <param name="backupFile">バックアップファイル</param>
+        /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
+        internal static bool ExportToOsuFileFromBackup(string beatmapPath, string backupFile)
+        {
+            try
+            {
+                // Songsフォルダにコピーの作成
+                File.Copy(backupFile, beatmapPath, true);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Common.WriteErrorMessage("LOG_E-EXPORT-OSU");
+                Common.WriteExceptionMessage(ex);
+                return false;
+            }
+        }
+        /// <summary>
         /// osuファイルのヒットオブジェクトの行を作成する
         /// </summary>
         /// <param name="hitObject">ヒットオブジェクトデータ</param>

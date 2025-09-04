@@ -5,15 +5,14 @@ namespace osuTaikoSvTool.Properties
     /// </summary>
     internal class Constants
     {
-        // ヒットオブジェクトの種類
-        internal enum NoteType
-        {
-            BARLINE,
-            BOOKMARK,
-            CIRCLE,
-            SLIDER,
-            SPINNER
-        }
+        #region ファイル名
+        internal const string APP_NAME = "osuTaikoSvTool";
+        internal const string APP_VERSION = "0.3.0";
+        #endregion
+        #region 言語設定
+        internal static readonly string[] LANGUAGES = ["日本語", 
+                                                       "English"];
+        #endregion
         #region ディレクトリ
         // バックアップディレクトリ
         internal const string BACKUP_DIRECTORY = "\\BackUp";
@@ -37,6 +36,11 @@ namespace osuTaikoSvTool.Properties
         internal const string LOG_EXTENSION = ".log";
         // xmlファイル拡張子
         internal const string XML_EXTENSION = ".xml";
+        #endregion
+        #region ログレベル
+        internal const string LOG_LEVEL_INFO = "INFO";
+        internal const string LOG_LEVEL_WARNING = "WARNING";
+        internal const string LOG_LEVEL_ERROR = "ERROR";
         #endregion
         #region osuファイルのセクション
         internal const string GENERAL = "[General]";
@@ -70,10 +74,14 @@ namespace osuTaikoSvTool.Properties
         internal const int RELATIVE_SUM = 1;        // 加算
         internal const int RELATIVE_MULTIPLY = 2;   // 乗算
         #endregion
-        #region ログレベル
-        internal const string LOG_LEVEL_INFO = "INFO";
-        internal const string LOG_LEVEL_WARNING = "WARNING";
-        internal const string LOG_LEVEL_ERROR = "ERROR";
-        #endregion
+        // ヒットオブジェクトの種類
+        internal enum NoteType
+        {
+            BARLINE,
+            BOOKMARK,
+            CIRCLE,
+            SLIDER,
+            SPINNER
+        }
     }
 }

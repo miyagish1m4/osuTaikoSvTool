@@ -6,12 +6,11 @@ namespace osuTaikoSvTool.Views
 {
     public partial class HistoryForm : Form
     {
-        List<UserInputData> userInputData = new List<UserInputData>();
+        List<UserInputData> userInputData = [];
         public HistoryForm()
         {
             InitializeComponent();
         }
-
         private void HistoryForm_Load(object sender, EventArgs e)
         {
             string format = "yyyy/MM/dd HH:mm:ss.fff";
