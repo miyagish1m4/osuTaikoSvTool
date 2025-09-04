@@ -48,7 +48,7 @@ namespace osuTaikoSvTool.Views
             string? backupDirectory = Path.GetDirectoryName(backupFiles[fileIndex]);
             if (BeatmapHelper.ExportToOsuFileFromBackup(beatmapPath, backupFiles[fileIndex]))
             {
-                Common.ShowMessageDialog("I_A-P-002");
+                Common.ShowMessageDialog("I_A-P-004");
                 this.Close();
             }
             else
