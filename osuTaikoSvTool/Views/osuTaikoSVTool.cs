@@ -209,6 +209,10 @@ namespace osuTaikoSvTool
             chkEnableVolume.Enabled = false;
             chkRelative.Visible = false;
             chkRelative.Checked = false;
+            chkApplyStartObject.Checked = false;
+            chkApplyStartObject.Enabled = false;
+            chkApplyEndObject.Checked = false;
+            chkApplyEndObject.Enabled = false;
         }
         /// <summary>
         /// 実行項目タブが"削除"から変更された時のコントロールの初期化処理
@@ -221,6 +225,10 @@ namespace osuTaikoSvTool
             chkEnableVolume.Enabled = true;
             chkRelative.Visible = true;
             chkRelative.Checked = false;
+            chkApplyStartObject.Checked = true;
+            chkApplyStartObject.Enabled = true;
+            chkApplyEndObject.Checked = true;
+            chkApplyEndObject.Enabled = true;
         }
         /// <summary>
         /// 処理項目タブが"Objectsのみ"の時のコントロールの初期化処理
@@ -269,7 +277,7 @@ namespace osuTaikoSvTool
             // 実行コードにSV処理を行う
             switch (executeCode)
             {
-                // 追加
+                // 適応
                 case Constants.EXECUTE_APPLY:
                     isSvCalculation = SVCalculatorService.Apply(userInputData, beatmapData, ref timingPoints);
                     beatmapData.timingPoints.AddRange(timingPoints);
@@ -690,6 +698,10 @@ namespace osuTaikoSvTool
                 txtRelativeBaseSv.BackColor = SystemColors.WindowFrame;
                 chkEnableSvTo.Visible = true;
                 chkEnableSvTo.Checked = false;
+                rdoGeometric.Enabled = false;
+                rdoGeometric.Checked = false;
+                rdoArithmetic.Enabled = false;
+                rdoArithmetic.Checked = true;
             }
             else
             {
@@ -705,6 +717,10 @@ namespace osuTaikoSvTool
                 txtRelativeBaseSv.Text = "";
                 chkEnableSvTo.Visible = false;
                 chkEnableSvTo.Checked = true;
+                rdoGeometric.Enabled = true;
+                rdoGeometric.Checked = false;
+                rdoArithmetic.Enabled = true;
+                rdoArithmetic.Checked = false;
             }
         }
         private void rdoRelativeMultiply_CheckedChanged(object sender, EventArgs e)
@@ -980,10 +996,6 @@ namespace osuTaikoSvTool
                 chkEnableKiaiEnd.Checked = false;
                 chkEnableKiaiStart.Visible = false;
                 chkEnableKiaiEnd.Visible = false;
-                chkApplyStartObject.Checked = true;
-                chkApplyEndObject.Checked = true;
-                chkApplyStartObject.Visible = false;
-                chkApplyEndObject.Visible = false;
             }
         }
         private void rdoOnlyBarline_CheckedChanged(object sender, EventArgs e)

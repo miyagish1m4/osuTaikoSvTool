@@ -344,19 +344,6 @@ namespace osuTaikoSvTool.Utils.Helper
                             return false;
                         }
                         break;
-                    case Constants.RELATIVE_MULTIPLY:
-                        // 相対速度変化オプションが乗算の場合は
-                        // 等比数列で計算する場合、末項が0以下ではないかチェックする
-                        if (calculationCode == Constants.CALCULATION_GEOMETRIC &&
-                            retSvTo <= 0m && isSvTo)
-                        {
-                            retSvFrom = -1m;
-                            retSvTo = -1m;
-                            // 末項が0になる
-                            Common.ShowMessageDialog("E_V-C-004");
-                            return false;
-                        }
-                        break;
                     case Constants.RELATIVE_SUM:
                         // 相対速度変化オプションが加算の場合は
                         // SVがosu側で指定できる範囲内かチェックする
@@ -366,16 +353,6 @@ namespace osuTaikoSvTool.Utils.Helper
                             retSvTo = -1m;
                             // SVがosu側で指定できる範囲外の値
                             Common.ShowMessageDialog("E_V-C-003");
-                            return false;
-                        }
-                        // 等比数列で計算する場合、始点と終点の積が0以下ではないかチェックする
-                        if ((calculationCode == Constants.CALCULATION_GEOMETRIC) &&
-                            (retSvFrom * retSvTo <= 0))
-                        {
-                            retSvFrom = -1m;
-                            retSvTo = -1m;
-                            // SV(始点)とSV(終点)の正負が一致していない
-                            Common.ShowMessageDialog("E_V-C-005");
                             return false;
                         }
                         break;
