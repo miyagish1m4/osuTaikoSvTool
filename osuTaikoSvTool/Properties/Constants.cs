@@ -1,15 +1,19 @@
 namespace osuTaikoSvTool.Properties
 {
+    /// <summary>
+    /// 定数クラス
+    /// </summary>
     internal class Constants
     {
-        // ヒットオブジェクトの種類
-        internal enum NoteType
-        {
-            BARLINE,
-            CIRCLE,
-            SLIDER,
-            SPINNER
-        }
+        #region ファイル名
+        internal const string APP_NAME = "osuTaikoSvTool";
+        internal const string APP_VERSION = "0.3.1";
+        #endregion
+        #region 言語設定
+        internal static readonly string[] LANGUAGES = ["日本語", 
+                                                       "English"];
+        #endregion
+        #region ディレクトリ
         // バックアップディレクトリ
         internal const string BACKUP_DIRECTORY = "\\BackUp";
         // 作業ディレクトリ
@@ -24,25 +28,14 @@ namespace osuTaikoSvTool.Properties
         internal const string ERROR_LOG_DIRECTORY = "\\Log\\Error";
         // 履歴ディレクトリ
         internal const string HISTORY_DIRECTORY = "\\History";
+        #endregion
+        #region 拡張子
         // osuファイル拡張子
         internal const string OSU_EXTENSION = ".osu";
         // ログファイル拡張子
         internal const string LOG_EXTENSION = ".log";
         // xmlファイル拡張子
         internal const string XML_EXTENSION = ".xml";
-        // コンフィグファイル名
-        internal const string CONFIG_FILE_NAME = "config.cfg";
-        #region コンフィグファイルのセクション
-        internal const string SONGS_DIRECTORY = "[SongsDirectory]";
-        #endregion
-        #region 計算コード
-        internal const int CALCULATION_ARITHMETIC = 1; // 等差
-        internal const int CALCULATION_GEOMETRIC = 2; // 等比
-        #endregion
-        #region 実行コード
-        internal const int EXECUTE_ADD = 0;
-        internal const int EXECUTE_MODIFY = 1;
-        internal const int EXECUTE_REMOVE = 2;
         #endregion
         #region ログレベル
         internal const string LOG_LEVEL_INFO = "INFO";
@@ -68,5 +61,27 @@ namespace osuTaikoSvTool.Properties
         internal const int COLOURS_CODE = 7;
         internal const int HIT_OBJECTS_CODE = 8;
         #endregion
+        #region 実行コード
+        internal const int EXECUTE_APPLY = 0;
+        internal const int EXECUTE_REMOVE = 1;
+        #endregion
+        #region 計算コード
+        internal const int CALCULATION_ARITHMETIC = 1;  // 等差
+        internal const int CALCULATION_GEOMETRIC = 2;   // 等比
+        #endregion
+        #region 相対速度オプション
+        internal const int RELATIVE_DISABLE = -1;   // 無効
+        internal const int RELATIVE_SUM = 1;        // 加算
+        internal const int RELATIVE_MULTIPLY = 2;   // 乗算
+        #endregion
+        // ヒットオブジェクトの種類
+        internal enum NoteType
+        {
+            BARLINE,
+            BOOKMARK,
+            CIRCLE,
+            SLIDER,
+            SPINNER
+        }
     }
 }

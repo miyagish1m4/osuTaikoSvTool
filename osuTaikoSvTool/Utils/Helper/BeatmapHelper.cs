@@ -4,84 +4,93 @@ using osuTaikoSvTool.Properties;
 
 namespace osuTaikoSvTool.Utils.Helper
 {
+    /// <summary>
+    /// 譜面の情報を取得し、加工するクラス
+    /// </summary>
     class BeatmapHelper
     {
-        /// <summary>
-        /// "ファイル開く"ボタン押下時のダイアログ処理
-        /// </summary>
-        /// <param name="initialDirectory">初期ディレクトリ</param>
-        /// <returns>osuファイルのパス</returns>
-        internal static string SelectFile(string initialDirectory)
-        {
-            string ret = string.Empty;
-
-            using (OpenFileDialog openFileDialog = new OpenFileDialog())
-            {
-                openFileDialog.Title = "ファイル選択ダイアログ";
-                openFileDialog.Filter = "osuファイル(*.osu)|*.osu";
-                openFileDialog.InitialDirectory = initialDirectory;
-
-                //ファイル選択ダイアログを開く
-                if (openFileDialog.ShowDialog() == DialogResult.OK)
-                {
-                    ret = openFileDialog.FileName;
-                }
-            }
-            return ret;
-        }
         /// <summary>
         /// BGを取得して、フォームの背景に設定する
         /// </summary>
         /// <param name="path">ファイルパス</param>
-        /// <returns>BGデータ</returns>
-        internal static Bitmap SetBgOnForm(string path, List<string> eventsList)
+        /// <returns>加工したBGデータ</returns>
+        internal static Bitmap SetBgOnForm(string path)
         {
-            string imageName = string.Empty;
-            bool isGetBG = false;
+            const double DARKNESS_FACTOR = 0.5;
+            Bitmap canvas = new(384, 216);
             try
             {
-                for (global::System.Int32 i = 0; i < eventsList.Count; i++)
-                {
-                    if (eventsList[i] == "//Background and Video events")
-                    {
-                        while (true)
-                        {
-                            string[] buff = eventsList[i + 1].Split(",");
-                            if (buff[0] == "Video")
-                            {
-                                i++;
-                                continue;
-                            }
-                            imageName = buff[2].Replace("\"", "");
-                            isGetBG = true;
-                            break;
-                        }
-                        break;
-                    }
-                }
-                if (isGetBG)
-                {
-                    Bitmap canvas = new Bitmap(384, 216);
-                    Graphics g = Graphics.FromImage(canvas);
-                    Bitmap image = new Bitmap(Path.GetDirectoryName(path) + "\\" + imageName);
-                    g.InterpolationMode =
-                        System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
-                    g.DrawImage(image, 0, 0, 384, 216);
-                    g.InterpolationMode =
-                        System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-                    image.Dispose();
-                    g.Dispose();
-                    return canvas;
-                }
-                else
+                if (path == "")
                 {
                     throw new Exception("背景画像が見つかりませんでした。");
                 }
-            } catch (Exception ex)
+                Bitmap image = new(path);
+                float width = 0;
+                float height = 0;
+                float diffWidth = 0;
+                float diffHeight = 0;
+                float zoomRatio = 0;
+                // 横長画像の場合
+                if (((float)image.Height / (float)image.Width) < 0.5625f)
+                {
+                    // 縦の長さから拡大率を求める
+                    zoomRatio = ((float)image.Height / 216f);
+                    // 縦の長さからアスペクト比が16:9の場合の横の長さを求める
+                    height = image.Height;
+                    float heightRatio = (float)image.Height / 9f;
+                    width = heightRatio * 16;
+                    // 中央部を表示したいため、表示する際の横の座標を求める
+                    diffWidth = ((float)image.Width - width) / 2;
+                }
+                else if (((float)image.Height / (float)image.Width) > 0.5625f)
+                {
+                    // 横の長さから拡大率を求める
+                    zoomRatio = ((float)image.Width / 384f);
+                    // 横の長さからアスペクト比が16:9の場合の縦の長さを求める
+                    width = image.Width;
+                    float widthRatio = (float)image.Width / 16f;
+                    height = widthRatio * 9;
+                    // 中央部を表示したいため、表示する際の縦の座標を求める
+                    diffHeight = ((float)image.Height - height) / 2;
+                }
+                else
+                {
+                    // 拡大率を求める
+                    zoomRatio = ((float)image.Width / 384f);
+                    width = image.Width;
+                    height = image.Height;
+                }
+                RectangleF destinationRect = new(0, 0, width / zoomRatio, height / zoomRatio);
+                RectangleF sourceRect = new(diffWidth, diffHeight, width, height);
+                Graphics graphic = Graphics.FromImage(canvas);
+                // 補間方法を高品質双三次補間に設定
+                graphic.InterpolationMode =
+                    System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                // 表示する
+                graphic.DrawImage(image, destinationRect, sourceRect, GraphicsUnit.Pixel);
+                image.Dispose();
+                graphic.Dispose();
+                // BGの明度を下げる
+                for (int y = 0; y < 216; y++)
+                {
+                    for (int x = 0; x < 384; x++)
+                    {
+                        Color pixel = canvas.GetPixel(x, y);
+                        int r = (int)(pixel.R * DARKNESS_FACTOR);
+                        int g = (int)(pixel.G * DARKNESS_FACTOR);
+                        int b = (int)(pixel.B * DARKNESS_FACTOR);
+                        Color darkPixel = Color.FromArgb(r, g, b);
+                        canvas.SetPixel(x, y, darkPixel);
+                    }
+                }
+
+                return canvas;
+            }
+            catch (Exception ex)
             {
                 Common.WriteWarningMessage("LOG_W-GET-BG");
                 Common.WriteExceptionMessage(ex);
-                return null;
+                return canvas;
             }
         }
         /// <summary>
@@ -101,7 +110,7 @@ namespace osuTaikoSvTool.Utils.Helper
             var coloursList = new List<string>();
             var uninheritedTimingPointList = new List<TimingPoint>();
             var hitObjectList = new List<HitObject>();
-            List<int> bookmarks = new List<int>();
+            List<Bookmark> bookmarkList = [];
             try
             {
                 var lines = File.ReadAllLines(path);
@@ -116,14 +125,15 @@ namespace osuTaikoSvTool.Utils.Helper
                                              ref timingPointList,
                                              ref coloursList,
                                              ref hitObjectList,
-                                             ref bookmarks))
+                                             ref bookmarkList))
                 {
                     throw new Exception();
                 }
                 // 赤線と小節線を取得する
-                if (!GetRedLineAndBarline(ref timingPointList,
-                                          ref hitObjectList,
-                                          ref uninheritedTimingPointList))
+                if (!GetRedLineAndBarlineAndBookmark(ref timingPointList,
+                                                     ref hitObjectList,
+                                                     ref uninheritedTimingPointList,
+                                                     ref bookmarkList))
                 {
                     throw new Exception();
                 }
@@ -134,8 +144,7 @@ namespace osuTaikoSvTool.Utils.Helper
                     throw new Exception();
                 }
                 // BeatmapInfo に渡す
-                return new Beatmap(path,
-                                   version,
+                return new Beatmap(version,
                                    generalList,
                                    editorList,
                                    metadataList,
@@ -144,13 +153,22 @@ namespace osuTaikoSvTool.Utils.Helper
                                    timingPointList,
                                    coloursList,
                                    hitObjectList,
-                                   bookmarks);
+                                   bookmarkList);
             }
             catch (Exception ex)
             {
                 Common.WriteErrorMessage("LOG_E-GET-BEATMAP");
                 Common.WriteExceptionMessage(ex);
-                return null;
+                return new Beatmap("",
+                                   generalList,
+                                   editorList,
+                                   metadataList,
+                                   difficultyList,
+                                   eventsList,
+                                   timingPointList,
+                                   coloursList,
+                                   hitObjectList,
+                                   bookmarkList);
             }
         }
         /// <summary>
@@ -177,29 +195,32 @@ namespace osuTaikoSvTool.Utils.Helper
                                                     ref List<TimingPoint> timingPointList,
                                                     ref List<string> coloursList,
                                                     ref List<HitObject> hitObjectList,
-                                                    ref List<int> bookmarks)
+                                                    ref List<Bookmark> bookmarks)
         {
             int structureCode = Constants.VERSION_CODE;
             try
             {
                 foreach (var line in lines)
                 {
+                    // 空白行は何もしない
                     if (line == "")
                     {
                         continue;
                     }
+                    // bookmarkがある場合はbookmarksリストにインスタンスを作成する
                     if (line.Length >= 9)
                     {
-                        if (line.Substring(0, 9) == "Bookmarks")
+                        if (line[..9] == "Bookmarks")
                         {
                             string[] bookmarkParts = line.Split(':');
-                            List<string> stringBookmarks = new List<string>(bookmarkParts[1].Replace(" ", "").Split(","));
+                            List<string> stringBookmarks = [.. bookmarkParts[1].Replace(" ", "").Split(",")];
                             foreach (var timing in stringBookmarks)
                             {
-                                bookmarks.Add(int.Parse(timing));
+                                bookmarks.Add(new Bookmark(int.Parse(timing)));
                             }
                         }
                     }
+                    // 構成コードを設定する
                     switch (line)
                     {
                         case Constants.GENERAL:
@@ -229,6 +250,7 @@ namespace osuTaikoSvTool.Utils.Helper
                         default:
                             break;
                     }
+                    // 構成コードに応じて1行のデータをそれぞれのリストに格納する
                     switch (structureCode)
                     {
                         case Constants.VERSION_CODE:
@@ -271,17 +293,18 @@ namespace osuTaikoSvTool.Utils.Helper
                 return false;
             }
         }
-
         /// <summary>
-        /// 赤線と小節線を取得する
+        /// 赤線と小節線とブックマークを取得する
         /// </summary>
         /// <param name="timingPointList">赤線のリスト</param>
         /// <param name="hitObjectList">小節線の格納先(小節線はHitObjectとしてカウントする)</param>
         /// <param name="uninheritedTimingPointList">赤線の格納先</param>
+        /// <param name="bookmarkList">ブックマークの格納先</param>
         /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
-        private static bool GetRedLineAndBarline(ref List<TimingPoint> timingPointList,
-                                                 ref List<HitObject> hitObjectList,
-                                                 ref List<TimingPoint> uninheritedTimingPointList)
+        private static bool GetRedLineAndBarlineAndBookmark(ref List<TimingPoint> timingPointList,
+                                                            ref List<HitObject> hitObjectList,
+                                                            ref List<TimingPoint> uninheritedTimingPointList,
+                                                            ref List<Bookmark> bookmarkList)
         {
             try
             {
@@ -293,7 +316,9 @@ namespace osuTaikoSvTool.Utils.Helper
                 {
                     if (timingPoint.isRedLine)
                     {
+                        // 赤線を追加
                         uninheritedTimingPointList.Add(timingPoint);
+                        uninheritedTimingPointList.Last().sv = 1;
                     }
                 }
                 for (int i = 0; i < uninheritedTimingPointList.Count; i++)
@@ -312,19 +337,75 @@ namespace osuTaikoSvTool.Utils.Helper
                         if (hitObjectOnBarLine == null)
                         {
                             // 赤線を HitObject として追加
-                            hitObjectList.Add(new HitObject(timeBarline));
+                            hitObjectList.Add(new HitObject(timeBarline, 0));
                         }
                         else
                         {
-                            hitObjectOnBarLine.isBarline = true;
+                            // オブジェクトコードに小節線を追加
+                            hitObjectOnBarLine.hitObjectCode += unchecked((int)0x00000100);
                         }
                     }
                 }
-
                 // ソートする
-                timingPointList.Sort((a, b) => b.isRedLine.CompareTo(a.isRedLine));
-                timingPointList.Sort((a, b) => a.time.CompareTo(b.time));
-                hitObjectList.Sort((a, b) => a.time.CompareTo(b.time));
+                timingPointList = [.. timingPointList.OrderBy(a => a.time).ThenByDescending(b => b.isRedLine ? 1 : 0)];
+                hitObjectList = [.. hitObjectList.OrderBy(a => a.time)];
+
+                // bookmarksをhitObjectに含める
+                for (int i = 0; i < bookmarkList.Count; i++)
+                {
+                    //for (global::System.Int32 j = (timingPointList.Count) - (1); j >= 0; j--)
+                    //{
+                    //    // 対象となるbookmarkにtime以外設定されていない場合は
+                    //    // bookmarkの直前の赤線、または緑線からTimingPointsとしての情報を受け取る
+                    //    if ((timingPointList[j].time <= bookmarkList[i].time) && bookmarkList[i].sv == -1)
+                    //    {
+                    //        bookmarkList[i].sv = timingPointList[j].isRedLine ? 1 : timingPointList[j].sv;
+                    //        bookmarkList[i].meter = timingPointList[j].meter;
+                    //        bookmarkList[i].sampleSet = timingPointList[j].sampleSet;
+                    //        bookmarkList[i].sampleIndex = timingPointList[j].sampleIndex;
+                    //        bookmarkList[i].volume = timingPointList[j].volume;
+                    //        bookmarkList[i].isRedLine = false;
+                    //        bookmarkList[i].effect = timingPointList[j].effect;
+                    //    }
+                    //    // 対象となるbookmarkにBPM情報などが設定されていない場合は
+                    //    // bookmarkの直前の赤線からBPM情報などを受け取る
+                    //    if (timingPointList[j].time <= bookmarkList[i].time && timingPointList[j].isRedLine)
+                    //    {
+                    //        bookmarkList[i].bpm = timingPointList[j].bpm;
+                    //        bookmarkList[i].barLength = timingPointList[j].barLength;
+                    //        break;
+                    //    }
+                    //}
+                    int currentTime = bookmarkList[i].time;
+                    // すでに同じ time の HitObject が存在するかをチェック
+                    var hitObjectOnBookmark = hitObjectList.FirstOrDefault(h => h.time == currentTime);
+                    if (hitObjectOnBookmark == null)
+                    {
+                        // ない場合はBookmarkをHitObjectとして追加
+                        hitObjectList.Add(new HitObject(currentTime, 1));
+                    }
+                    else
+                    {
+                        // ある場合はオブジェクトコードにBookmarkを追加
+                        hitObjectOnBookmark.hitObjectCode += 0x00000400;
+                    }
+                }
+                foreach (var hitObject in hitObjectList)
+                {
+                    if ((hitObject.hitObjectCode & 0x00000400) == 0)
+                    {
+                        // オブジェクトコードにbookmarkがない場合は
+                        // オブジェクトコードにbookmark以外を追加
+                        hitObject.hitObjectCode += unchecked((int)0x00000200);
+                    }
+                    if ((hitObject.hitObjectCode & 0x00000100) == 0)
+                    {
+                        // オブジェクトコードに小節線がない場合は
+                        // オブジェクトコードに小節線以外を追加
+                        hitObject.hitObjectCode += 0b10000000;
+                    }
+                }
+                hitObjectList = [.. hitObjectList.OrderBy(a => a.time)];
                 return true;
             }
             catch (Exception ex)
@@ -362,8 +443,8 @@ namespace osuTaikoSvTool.Utils.Helper
                     // 赤線と緑線が同じ time に複数ある可能性があるため、
                     // その time の中で緑線があれば優先的に使う
                     var timeGroup = timingPointList
-                        .Where(tp => tp.time == timingPointList[timingIndex].time)
-                        .ToList();
+                                    .Where(tp => tp.time == timingPointList[timingIndex].time)
+                                    .ToList();
 
                     var green = timeGroup.FirstOrDefault(tp => !tp.isRedLine);
                     var red = timeGroup.FirstOrDefault(tp => tp.isRedLine);
@@ -398,17 +479,46 @@ namespace osuTaikoSvTool.Utils.Helper
             }
         }
         /// <summary>
+        /// バックアップフォルダを作成する
+        /// </summary>
+        /// <param name="path">osuファイルが格納されているフォルダ</param>
+        /// <param name="backupDirectory">バックアップの出力先</param>
+        /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
+        internal static bool CreateBackup(string path, string backupDirectory)
+        {
+            try
+            {
+                string backupPath = Directory.GetCurrentDirectory() + Constants.BACKUP_DIRECTORY + "\\" + backupDirectory;
+                DateTime now = DateTime.Now;
+                string backupFileName = $"{now:yyyy_MM_dd_HH_mm_ss_fff}.osu";
+                // バックアップフォルダがない場合は作成する
+                if (!Directory.Exists(backupPath))
+                {
+                    Directory.CreateDirectory(backupPath);
+                }
+                // コピーの作成
+                File.Copy(path, Path.Combine(backupPath, backupFileName), true);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Common.WriteWarningMessage("LOG_E-CREATE-BACKUP");
+                Common.WriteExceptionMessage(ex);
+                return false;
+            }
+        }
+        /// <summary>
         /// osuファイルを作成する
         /// </summary>
         /// <param name="beatmap">譜面情報</param>
-        /// <param name="path">ファイル名</param>
+        /// <param name="beatmapPath">ファイル名</param>
         /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
-        internal static bool ExportToOsuFile(Beatmap beatmap)
+        internal static bool ExportToOsuFile(Beatmap beatmap, string beatmapPath)
         {
-            string workPath = Directory.GetCurrentDirectory() + Constants.WORK_DIRECTORY + "\\" + Path.GetFileName(beatmap.path);
-            StreamWriter file = new StreamWriter(workPath, true, Encoding.GetEncoding("utf-8"));
+            StreamWriter file = new(beatmapPath, false, Encoding.GetEncoding("utf-8"));
             try
             {
+                // 設定されている譜面データをすべて出力する
                 file.WriteLine(beatmap.version);
                 file.WriteLine("");
                 file.WriteLine(Constants.GENERAL);
@@ -429,14 +539,23 @@ namespace osuTaikoSvTool.Utils.Helper
                 file.WriteLine(Constants.TIMING_POINTS);
                 foreach (var timingPoint in beatmap.timingPoints)
                 {
+                    // beatLengthは桁数を指定して求める
+                    string beatLength = (timingPoint.isRedLine ?
+                                        (60000 / timingPoint.bpm).ToString($"F12").TrimEnd('0') :
+                                        (-100 / timingPoint.sv).ToString($"F12").TrimEnd('0'));
+                    // beatLengthが整数だった場合は"."を消す
+                    if (beatLength.Substring(beatLength.Length - 1, 1) == ".")
+                    {
+                        beatLength = beatLength.TrimEnd('.');
+                    }
                     string timingPointLine = timingPoint.time + "," +
-                          (timingPoint.isRedLine ? (60000 / timingPoint.bpm).ToString("0.000000000000") : (-100 / timingPoint.sv).ToString("0.000000000000")) + "," +
-                           timingPoint.meter + "," +
-                           timingPoint.sampleSet + "," +
-                           timingPoint.sampleIndex + "," +
-                           timingPoint.volume + "," +
-                          (timingPoint.isRedLine ? "1" : "0") + "," +
-                           timingPoint.effect;
+                                             beatLength + "," +
+                                             timingPoint.meter + "," +
+                                             timingPoint.sampleSet + "," +
+                                             timingPoint.sampleIndex + "," +
+                                             timingPoint.volume + "," +
+                                             (timingPoint.isRedLine ? "1" : "0") + "," +
+                                             timingPoint.effect;
                     file.WriteLine(timingPointLine);
                 }
                 file.WriteLine("");
@@ -449,6 +568,7 @@ namespace osuTaikoSvTool.Utils.Helper
                 file.WriteLine(Constants.HIT_OBJECTS);
                 foreach (var hitObject in beatmap.hitObjects)
                 {
+                    // HitObjectsの1行のデータを作成する
                     if (hitObject.noteType != Constants.NoteType.BARLINE)
                     {
                         string hitObjectLine = CreateHitObjectLine(hitObject);
@@ -469,13 +589,89 @@ namespace osuTaikoSvTool.Utils.Helper
             return true;
         }
         /// <summary>
+        /// 前に実行したファイルをコピーする処理
+        /// </summary>
+        /// <param name="path">osuファイルが格納されているフォルダ</param>
+        /// <param name="backupDirectory">バックアップディレクトリ</param>
+        /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
+        internal static bool ExportToPreviousOsuFile(string path, string backupDirectory)
+        {
+            try
+            {
+                string backupPath = Directory.GetCurrentDirectory() + Constants.BACKUP_DIRECTORY + "\\" + backupDirectory;
+                // バックアップディレクトリが見つからない場合はfalseで返す
+                if (!Directory.Exists(backupPath))
+                {
+                    return false;
+                }
+                // バックアップファイルを探す
+                string[] files = Directory.GetFiles(backupPath, "*.osu");
+                // バックアップファイルが見つからない場合はfalseで返す
+                if (files.Length == 0)
+                {
+                    return false;
+                }
+                List<long> fileDate = [];
+                // ファイル名の_を消し、数値にする
+                foreach (var file in files)
+                {
+                    string deletedPath = file.Replace(backupPath + "\\", "");
+                    string deletedExtension = deletedPath.Replace(".osu", "");
+                    string deletedUnderScore = deletedExtension.Replace("_", "");
+                    fileDate.Add(Convert.ToInt64(deletedUnderScore));
+                }
+                // 数値を降順にソートする
+                fileDate.Sort();
+                fileDate.Reverse();
+                // 最後の実行で作成されたバックアップファイルを探す
+                long currentDate = Convert.ToInt64(DateTime.Now.ToString("yyyyMMddHHmmssfff"));
+                var targetFile = fileDate.FirstOrDefault(f => f <= currentDate);
+                if (targetFile == 0)
+                {
+                    return false;
+                }
+                string targetFileString = targetFile.ToString("0000_00_00_00_00_00_000");
+                targetFileString = Path.Combine(backupPath, targetFileString + ".osu");
+                // Songsフォルダにコピーの作成
+                File.Copy(targetFileString, path, true);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Common.WriteErrorMessage("LOG_E-EXPORT-OSU");
+                Common.WriteExceptionMessage(ex);
+                return false;
+            }
+        }
+        /// <summary>
+        /// 指定したバックアップファイルをコピーする処理
+        /// </summary>
+        /// <param name="beatmapPath">osuファイルが格納されているフォルダ</param>
+        /// <param name="backupFile">バックアップファイル</param>
+        /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
+        internal static bool ExportToOsuFileFromBackup(string beatmapPath, string backupFile)
+        {
+            try
+            {
+                // Songsフォルダにコピーの作成
+                File.Copy(backupFile, beatmapPath, true);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Common.WriteErrorMessage("LOG_E-EXPORT-OSU");
+                Common.WriteExceptionMessage(ex);
+                return false;
+            }
+        }
+        /// <summary>
         /// osuファイルのヒットオブジェクトの行を作成する
         /// </summary>
         /// <param name="hitObject">ヒットオブジェクトデータ</param>
         /// <returns>ヒットオブジェクトの行</returns>
         private static string CreateHitObjectLine(HitObject hitObject)
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             sb.Append(hitObject.positionX + ",");
             sb.Append(hitObject.positionY + ",");
             sb.Append(hitObject.time + ",");
@@ -483,9 +679,21 @@ namespace osuTaikoSvTool.Utils.Helper
             sb.Append(hitObject.hitSound + ",");
             if (hitObject.noteType == Constants.NoteType.SLIDER)
             {
+                // スライダーの場合はsliderLengthを13桁に指定して
+                // curveSetting,
+                // slides,
+                // sliderLength,
+                // (edgeSounds),
+                // (edgeSets),
+                // (hitSample)を設定する
+                string sliderLength = hitObject.sliderLength.ToString($"F13").TrimEnd('0');
+                if (sliderLength.Substring(sliderLength.Length - 1, 1) == ".")
+                {
+                    sliderLength = sliderLength.TrimEnd('.');
+                }
                 sb.Append(hitObject.curveSetting + ",");
                 sb.Append(hitObject.slides + ",");
-                sb.Append(hitObject.sliderLength);
+                sb.Append(sliderLength);
                 if ((hitObject.edgeSounds != null) && (hitObject.edgeSets) != null && (hitObject.hitSample != null))
                 {
                     sb.Append(",");
@@ -500,14 +708,74 @@ namespace osuTaikoSvTool.Utils.Helper
             }
             else if (hitObject.noteType == Constants.NoteType.SPINNER)
             {
+                // スピナーの場合はendTimeとhitSampleを設定する
                 sb.Append(hitObject.endTime + ",");
                 sb.Append(hitObject.hitSample);
             }
             else
             {
+                // 通常ノーツの場合はhitSampleを設定する
                 sb.Append(hitObject.hitSample);
             }
             return sb.ToString();
+        }
+        /// <summary>
+        /// osu側で丸められたTimingの正確な値を算出する
+        /// </summary>
+        /// <param name="timingPoints">譜面のTimingPoint</param>
+        /// <param name="timing">指定されたタイミング</param>
+        /// <returns>
+        /// 指定されたタイミングがosuの動作対象内の場合 : 算出された正確なタイミング<br/>
+        /// 指定されたタイミングがosuの動作対象外の場合 : 引数で指定されたタイミング<br/>
+        /// 処理が異常終了した場合 : decimal型の最小値</returns>
+        internal static decimal GetRawTiming(List<TimingPoint> timingPoints, int timing)
+        {
+            // snapPerMs[0] 1/16のノーツ間隔(ms) -> 1/1,1/2,1/4,1/8,1/16 に対応可
+            // snapPerMs[1] 1/12のノーツ間隔(ms) ->         1/3,1/6,1/12 に対応可
+            // snapPerMs[2] 1/9のノーツ間隔(ms)  ->                  1/9 に対応可
+            // snapPerMs[3] 1/7のノーツ間隔(ms)  ->                  1/7 に対応可
+            // snapPerMs[4] 1/5のノーツ間隔(ms)  ->                  1/5 に対応可
+            decimal[] snapPerMs = new decimal[5];
+            try
+            {
+                // 手前のTimingPointを算出する
+                var applyTimingPoint = timingPoints.LastOrDefault(tp => (tp.time <= timing) && tp.isRedLine) ?? throw new Exception();
+                // それぞれのノーツ間隔を算出する
+                snapPerMs[0] = 60 / applyTimingPoint.bpm / 16;
+                snapPerMs[1] = 60 / applyTimingPoint.bpm / 12;
+                snapPerMs[2] = 60 / applyTimingPoint.bpm / 9;
+                snapPerMs[3] = 60 / applyTimingPoint.bpm / 7;
+                snapPerMs[4] = 60 / applyTimingPoint.bpm / 5;
+
+                // 細かいスナップ間隔から指定されたタイミングの正確なタイミングを算出する
+                foreach (var snap in snapPerMs)
+                {
+                    decimal currentTime = applyTimingPoint.time;
+                    while (true)
+                    {
+                        // もし現時点を丸めた値が指定されたタイミングと一致した場合
+                        // 正確かは怪しい
+                        if (Math.Floor(currentTime) == timing)
+                        {
+                            return currentTime;
+                        }
+                        // もし現時点が指定されたタイミングより大きい値になった場合は処理を抜ける
+                        if (currentTime > timing)
+                        {
+                            break;
+                        }
+                        currentTime += snap;
+                    }
+                }
+                // 指定されたTimingの位置が動作対象外
+                return (decimal)timing;
+            }
+            catch (Exception ex)
+            {
+                Common.WriteErrorMessage("LOG_E-EXCEPTION");
+                Common.WriteExceptionMessage(ex);
+                return Decimal.MinValue;
+            }
         }
     }
 }

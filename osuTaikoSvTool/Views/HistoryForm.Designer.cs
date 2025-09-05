@@ -50,7 +50,7 @@
             lblCreateDateData.Name = "lblCreateDateData";
             lblCreateDateData.Size = new Size(197, 23);
             lblCreateDateData.TabIndex = 1;
-            lblCreateDateData.Text = "yyyy/mm/dd hh:mm:ss:fff";
+            lblCreateDateData.Text = "yyyy/mm/dd HH:mm:ss:fff";
             // 
             // HistoryForm
             // 

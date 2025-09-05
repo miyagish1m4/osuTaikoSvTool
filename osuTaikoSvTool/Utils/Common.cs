@@ -71,79 +71,63 @@ namespace osuTaikoSvTool.Utils
             {
                 Directory.CreateDirectory(Directory.GetCurrentDirectory() + Constants.BACKUP_DIRECTORY);
             }
-            // 作業ディレクトリの作成
-            if (!Directory.Exists(Directory.GetCurrentDirectory() + Constants.WORK_DIRECTORY))
-            {
-                Directory.CreateDirectory(Directory.GetCurrentDirectory() + Constants.WORK_DIRECTORY);
-            }
         }
         /// <summary>
-        /// コンフィグファイルの初期化設定
+        /// songsフォルダを取得する
         /// </summary>
-        /// <returns>処理が<br/>・正常終了した場合は指定したフォルダパス<br/>・異常終了した場合は空文字</returns>
-        internal static string InitializeConfigDirectory()
+        /// <param name="osuDirectory">osuフォルダパス</param>
+        /// <returns>songsフォルダパス</returns>
+        internal static string GetSongsFolderLocation(string osuDirectory)
         {
-            try
+            // ユーザー名の取得
+            string userName = Environment.UserName;
+            // osuのユーザー設定ファイルの取得
+            string file = Path.Combine(osuDirectory, "osu!." + userName + ".cfg");
+            if (!File.Exists(file))
             {
-                string configPath = Directory.GetCurrentDirectory() + "\\" + Constants.CONFIG_FILE_NAME;
-                string? songsPath = "";
-                if (!File.Exists(configPath) || File.ReadAllText(configPath) == "" || File.ReadAllText(configPath) == null)
-                {
-                    MessageBox.Show(WriteDialogMessage("I_A-EM-001"), "Information", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
-                    //{
-                    //    MessageBox.Show(WriteDialogMessage("E_A-P-002"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    //    return "";
-                    //}
-                    using (var OpenFolderDialog = new OpenFileDialog()
-                    {
-                        Title = "フォルダ選択ダイアログ",
-                        FileName = "SongFolder",
-                        Filter = "Folder|.",
-                        InitialDirectory = Directory.GetCurrentDirectory(),
-                        CheckFileExists = false
-                    })
-                    {
-                        if (OpenFolderDialog.ShowDialog() == DialogResult.OK)
-                        {
-                            songsPath = Path.GetDirectoryName(OpenFolderDialog.FileName);
-                            if (!File.Exists(configPath))
-                            {
-                                // 新規ファイル作成
-                                File.Create(configPath).Close();
-                            }
-                            MessageBox.Show(WriteDialogMessage("I_A-P-002"), "Information", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
-                            StreamWriter configFile = new StreamWriter(configPath);
-                            configFile.WriteLine(Constants.SONGS_DIRECTORY);
-                            configFile.WriteLine(songsPath);
-                            configFile.Close();
-                        }
-                        else
-                        {
-                            MessageBox.Show(WriteDialogMessage("E_A-P-002"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            throw new Exception("Songsフォルダの設定がキャンセルされました。");
-                        }
-                    }
-                }
-                else
-                {
-                    var lines = File.ReadAllLines(configPath);
-                    for (global::System.Int32 i = 0; i < lines.Length; i++)
-                    {
-                        if (lines[i] == Constants.SONGS_DIRECTORY)
-                        {
-                            songsPath = lines[i + 1];
-                        }
-                    }
-                }
-                return songsPath == null ? "" : songsPath;
+                // osuのユーザー設定ファイルが存在しない場合はosuフォルダ直下のsongsフォルダを参照する
+                return Path.Combine(osuDirectory, "Songs");
             }
-            catch (Exception ex)
+            // ユーザー設定を読み込む
+            foreach (string readLine in File.ReadLines(file))
             {
-                WriteErrorMessage("LOG_E-DIRECTORY-SONGS");
-                WriteExceptionMessage(ex);
-                return "";
+                if (!readLine.StartsWith("BeatmapDirectory"))
+                {
+                    continue;
+                }
+                // songsフォルダが指定されていた場合はそのsongsフォルダのパスを取得する
+                string path = readLine.Split('=')[1].Trim(' ');
+                return path == "Songs" ? Path.Combine(osuDirectory, "Songs") : path;
             }
-
+            // songsフォルダが指定されていない場合はosuフォルダ直下のsongsフォルダを参照する
+            return Path.Combine(osuDirectory, "Songs");
+        }
+        /// <summary>
+        /// ダイアログを表示する
+        /// </summary>
+        /// <param name="messageCode">メッセージコード、またはメッセージ</param>
+        internal static void ShowMessageDialog(string messageCode)
+        {
+            string messageLevel = messageCode[..1];
+            switch (messageLevel)
+            {
+                // Informationメッセージの場合
+                case "I":
+                    MessageBox.Show(WriteDialogMessage(messageCode), "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    break;
+                // Warningメッセージの場合
+                case "W":
+                    MessageBox.Show(WriteDialogMessage(messageCode), "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    break;
+                // Errorメッセージの場合
+                case "E":
+                    MessageBox.Show(WriteDialogMessage(messageCode), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    break;
+                // 上記以外の場合
+                default:
+                    MessageBox.Show(messageCode, "Information", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    break;
+            }
         }
         /// <summary>
         /// ダイアログメッセージ設定処理
@@ -155,10 +139,14 @@ namespace osuTaikoSvTool.Utils
             string message;
             if (Messages.DialogMessages.ContainsKey(messageCode))
             {
+                // メッセージリストにメッセージIDがあった場合は
+                // メッセージIDと紐づくメッセージを出力する
                 message = Messages.DialogMessages[messageCode];
             }
             else
             {
+                // メッセージリストにメッセージIDがなかった場合は
+                // 引数で渡された文字列をそのまま出力する
                 message = messageCode;
             }
             return message;
@@ -171,13 +159,15 @@ namespace osuTaikoSvTool.Utils
         {
             DateTime currentDateTime = DateTime.Now;
             string errorLogPath = Directory.GetCurrentDirectory() + Constants.ERROR_LOG_DIRECTORY + "\\error_" + currentDateTime.ToString("yyyyMMdd") + Constants.LOG_EXTENSION;
+            // ログフォルダがない場合は作成する
             if (!Directory.Exists(Directory.GetCurrentDirectory() + Constants.ERROR_LOG_DIRECTORY))
             {
                 Directory.CreateDirectory(Directory.GetCurrentDirectory() + Constants.ERROR_LOG_DIRECTORY);
             }
+            // Exceptionのメッセージと発生メソッドなどをERRORメッセージとして出力する
             WriteMessage(ex.Message + "\r\n" +
                          ex.TargetSite + "\r\n" +
-                         ex.StackTrace,
+                         ex.ToString(),
                          Constants.LOG_LEVEL_ERROR, errorLogPath, currentDateTime);
         }
         /// <summary>
@@ -188,10 +178,12 @@ namespace osuTaikoSvTool.Utils
         {
             DateTime currentDateTime = DateTime.Now;
             string infoLogPath = Directory.GetCurrentDirectory() + Constants.INFO_LOG_DIRECTORY + "\\info_" + currentDateTime.ToString("yyyyMMdd") + Constants.LOG_EXTENSION;
+            // ログフォルダがない場合は作成する
             if (!Directory.Exists(Directory.GetCurrentDirectory() + Constants.INFO_LOG_DIRECTORY))
             {
                 Directory.CreateDirectory(Directory.GetCurrentDirectory() + Constants.INFO_LOG_DIRECTORY);
             }
+            // INFOメッセージを出力する
             WriteMessage(messageCode, Constants.LOG_LEVEL_INFO, infoLogPath, currentDateTime);
         }
         /// <summary>
@@ -202,10 +194,12 @@ namespace osuTaikoSvTool.Utils
         {
             DateTime currentDateTime = DateTime.Now;
             string warningLogPath = Directory.GetCurrentDirectory() + Constants.WARNING_LOG_DIRECTORY + "\\warning_" + currentDateTime.ToString("yyyyMMdd") + Constants.LOG_EXTENSION;
+            // ログフォルダがない場合は作成する
             if (!Directory.Exists(Directory.GetCurrentDirectory() + Constants.WARNING_LOG_DIRECTORY))
             {
                 Directory.CreateDirectory(Directory.GetCurrentDirectory() + Constants.WARNING_LOG_DIRECTORY);
             }
+            // WARNINGメッセージを出力する
             WriteMessage(messageCode, Constants.LOG_LEVEL_WARNING, warningLogPath, currentDateTime);
         }
         /// <summary>
@@ -216,10 +210,12 @@ namespace osuTaikoSvTool.Utils
         {
             DateTime currentDateTime = DateTime.Now;
             string errorLogPath = Directory.GetCurrentDirectory() + Constants.ERROR_LOG_DIRECTORY + "\\error_" + currentDateTime.ToString("yyyyMMdd") + Constants.LOG_EXTENSION;
+            // ログフォルダがない場合は作成する
             if (!Directory.Exists(Directory.GetCurrentDirectory() + Constants.ERROR_LOG_DIRECTORY))
             {
                 Directory.CreateDirectory(Directory.GetCurrentDirectory() + Constants.ERROR_LOG_DIRECTORY);
             }
+            // ERRORメッセージを出力する
             WriteMessage(messageCode, Constants.LOG_LEVEL_ERROR, errorLogPath, currentDateTime);
         }
         /// <summary>
@@ -239,33 +235,50 @@ namespace osuTaikoSvTool.Utils
             }
             if (Messages.LogMessages.ContainsKey(messageCode))
             {
+                // メッセージリストにメッセージIDがあった場合は
+                // メッセージIDと紐づくメッセージを出力する
                 message = Messages.LogMessages[messageCode];
-                using (StreamWriter writer = new StreamWriter(logPath, true, Encoding.GetEncoding("utf-8")))
+                using (StreamWriter writer = new(logPath, true, Encoding.GetEncoding("utf-8")))
                 {
                     writer.WriteLine(date.ToString("[HH:mm:ss.fff]") + " " + logLevel + " : " + message);
                 }
             }
             else
             {
+                // メッセージリストにメッセージIDがなかった場合は
+                // 引数で渡された文字列をそのまま出力する
                 message = messageCode;
-                using (StreamWriter writer = new StreamWriter(logPath, true, Encoding.GetEncoding("utf-8")))
+                using (StreamWriter writer = new(logPath, true, Encoding.GetEncoding("utf-8")))
                 {
                     writer.WriteLine(message);
                 }
             }
         }
-
         /// <summary>
-        /// ユーザが入力したタイミングを変換する処理
+        /// ユーザが入力したタイミングをミリ秒表記に変換する処理
         /// </summary>
         /// <param name="baseTiming">入力したタイミング (mm:ss:fff (notes))</param>
         /// <param name="returnTiming">変換後のタイミング (mmssfff)</param>
-        /// <returns>処理が正常終了した場合はtrue、異常終了した場合はfalse</returns>
-        internal static bool ConvertTiming(string baseTiming, ref int returnTiming)
+        /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
+        internal static bool ConvertMsTiming(string baseTiming, ref int returnTiming)
         {
             try
             {
+
                 string[] arr = baseTiming.Split(':');
+                // ms表記で指定されている場合はint型に変換する
+                if (arr.Length == 1)
+                {
+                    if (int.TryParse(baseTiming, out returnTiming))
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                // mm:ss:fff表記で指定されていた場合はms表記に変換し、int型に変換する
                 arr[2] = arr[2][..3];
                 returnTiming = Convert.ToInt32(arr[2]) +
                                Convert.ToInt32(arr[1]) * 1000 +
@@ -276,6 +289,20 @@ namespace osuTaikoSvTool.Utils
             {
                 return false;
             }
+        }
+        /// <summary>
+        /// 取得したタイミングをmm:ss:fff表記に変換する処理
+        /// </summary>
+        /// <param name="currentTime">現タイミング</param>
+        /// <returns>変換後のタイミング</returns>
+        internal static string ConvertFormatTiming(int currentTime) 
+        {
+            int minute = currentTime / 60000;
+            int second = (currentTime % 60000) / 1000;
+            int milliSecond = currentTime % 1000;
+            return minute.ToString("00") + ":" +
+                   second.ToString("00") + ":" +
+                   milliSecond.ToString("000");
         }
 
     }
