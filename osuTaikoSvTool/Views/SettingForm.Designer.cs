@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SettingForm));
             lblLanguage = new Label();
             lblMaxBackupCount = new Label();
             lblMaxHistoryCount = new Label();
@@ -129,6 +130,7 @@
             Controls.Add(lblMaxBackupCount);
             Controls.Add(lblLanguage);
             FormBorderStyle = FormBorderStyle.FixedSingle;
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "SettingForm";
             Text = "Setting";
             Load += SettingForm_Load;
