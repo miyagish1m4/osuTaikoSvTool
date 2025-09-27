@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(BackupForm));
             panel1 = new Panel();
             lblDate10 = new Label();
             lblFileName10 = new Label();
@@ -434,6 +435,7 @@
             Controls.Add(panel1);
             Controls.Add(btnPreviousPage);
             FormBorderStyle = FormBorderStyle.FixedSingle;
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "BackupForm";
             Text = "Backup";
             Load += BackupForm_Load;

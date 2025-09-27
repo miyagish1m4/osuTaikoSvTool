@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationIcon>Resources\taiko.ico</ApplicationIcon>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -14,6 +15,10 @@
 
   <ItemGroup>
     <None Remove="Resources\backGround.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Resources\taiko.ico" />
   </ItemGroup>
 
   <ItemGroup>
