@@ -267,15 +267,22 @@ namespace osuTaikoSvTool.Services
                         var applyInheritedPointIndex = beatmap.timingPoints.FindLastIndex(tp => tp.time <= beatmap.hitObjects[i].svApplyTime);
                         // 直前の赤線を探す
                         var applyTimingPoint = beatmap.timingPoints.LastOrDefault(tp => (tp.time <= beatmap.hitObjects[i].svApplyTime) && tp.isRedLine);
-                        if (i != 0)
+                        if ((userInputData.timingFrom - userInputData.offset <= applyInheritedPoint?.time) &&
+                            !applyInheritedPoint.isRedLine)
                         {
-                            // 直前のTimingPointが前のノーツより後にあるかつ、
-                            // ユーザーの指定範囲内の場合は削除対象にする
-                            if ((beatmap.hitObjects[i - 1].time < applyInheritedPoint?.time) &&
-                                (userInputData.timingFrom - userInputData.offset <= applyInheritedPoint?.time) &&
-                                !applyInheritedPoint.isRedLine)
+                            if (i == 0)
                             {
+                                // 全体の1ノーツ目で、緑線がユーザーの指定範囲内にある場合は削除対象にする
                                 removeList.Add(applyInheritedPointIndex);
+                            }
+                            else
+                            {
+                                // 直前のTimingPointが前のノーツより後にあるかつ、
+                                // ユーザーの指定範囲内の場合は削除対象にする
+                                if (beatmap.hitObjects[i - 1].time < applyInheritedPoint?.time)
+                                {
+                                    removeList.Add(applyInheritedPointIndex);
+                                }
                             }
                         }
                         if (userInputData.isSv)

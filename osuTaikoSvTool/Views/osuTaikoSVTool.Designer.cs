@@ -250,12 +250,14 @@ namespace osuTaikoSvTool
             // 
             // rdoArithmetic
             // 
+            rdoArithmetic.Checked = true;
             rdoArithmetic.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold);
             rdoArithmetic.ForeColor = Color.White;
             rdoArithmetic.Location = new Point(14, 5);
             rdoArithmetic.Name = "rdoArithmetic";
             rdoArithmetic.Size = new Size(52, 24);
             rdoArithmetic.TabIndex = 0;
+            rdoArithmetic.TabStop = true;
             rdoArithmetic.Text = "ìôç∑";
             rdoArithmetic.UseVisualStyleBackColor = true;
             rdoArithmetic.CheckedChanged += rdoArithmetic_CheckedChanged;

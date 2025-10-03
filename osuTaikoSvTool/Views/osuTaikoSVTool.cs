@@ -30,9 +30,8 @@ namespace osuTaikoSvTool
         private bool[] isOnlySpecificHitObjectArray = [false, false, false, false, false, false, false];
         private bool[] isSetMode = [true, false];
         private int objectCode = 0;
-        private int calculationCode = 0;
+        private int calculationCode = 1;
         private int relativeCode = -1;
-        private bool isExecute = false;
         private int beforeSelectedTabIndex = 0;
         private string backupDirectoryName = string.Empty;
         #endregion
@@ -325,7 +324,6 @@ namespace osuTaikoSvTool
             }
             // 成功した場合はメッセージダイアログを表示する
             Common.ShowMessageDialog("I_A-P-001");
-            isExecute = true;
             return;
         }
         /// <summary>
