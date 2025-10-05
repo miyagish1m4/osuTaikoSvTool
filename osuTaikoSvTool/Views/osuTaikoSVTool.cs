@@ -31,6 +31,7 @@ namespace osuTaikoSvTool
         private bool[] isSetMode = [true, false];
         private int objectCode = 0;
         private int calculationCode = 1;
+        private int beforeCalculationCode = 1;
         private int relativeCode = -1;
         private int beforeSelectedTabIndex = 0;
         private string backupDirectoryName = string.Empty;
@@ -62,7 +63,7 @@ namespace osuTaikoSvTool
                     var processes = Process.GetProcessesByName("osu!");
                     if (processes.Length == 0)
                     {
-                        if(isDirectoryLoaded)
+                        if (isDirectoryLoaded)
                         {
                             beatmapInfo = new();
                         }
@@ -696,6 +697,15 @@ namespace osuTaikoSvTool
                 txtRelativeBaseSv.BackColor = SystemColors.WindowFrame;
                 chkEnableSvTo.Visible = true;
                 chkEnableSvTo.Checked = false;
+                switch (calculationCode)
+                {
+                    case 1:
+                        beforeCalculationCode = 1;
+                        break;
+                    case 2:
+                        beforeCalculationCode = 2;
+                        break;
+                }
                 rdoGeometric.Enabled = false;
                 rdoGeometric.Checked = false;
                 rdoArithmetic.Enabled = false;
@@ -716,9 +726,16 @@ namespace osuTaikoSvTool
                 chkEnableSvTo.Visible = false;
                 chkEnableSvTo.Checked = true;
                 rdoGeometric.Enabled = true;
-                rdoGeometric.Checked = false;
                 rdoArithmetic.Enabled = true;
-                rdoArithmetic.Checked = false;
+                switch (beforeCalculationCode)
+                {
+                    case 1:
+                        rdoArithmetic.Checked = true;
+                        break;
+                    case 2:
+                        rdoGeometric.Checked = true;
+                        break;
+                }
             }
         }
         private void rdoRelativeMultiply_CheckedChanged(object sender, EventArgs e)
