@@ -775,7 +775,7 @@ namespace osuTaikoSvTool.Services
                 // 終点の次のタイミングポイントの取得
                 timingTo = beatmap.timingPoints.FirstOrDefault(tp => tp.time > userInputData.timingTo);
 
-                if (timingPointBeforeTimingFrom != null && timingTo != null)
+                if (timingPointBeforeTimingFrom != null)
                 {
                     for (global::System.Int32 i = 0; i < beatmap.hitObjects.Count; i++)
                     {
@@ -785,7 +785,7 @@ namespace osuTaikoSvTool.Services
                             continue;
                         }
                         // ノーツのタイミングが指定範囲以降だった場合は処理を抜ける
-                        if (beatmap.hitObjects[i].time >= timingTo.time)
+                        if (timingTo != null && beatmap.hitObjects[i].time >= timingTo.time)
                         {
                             break;
                         }
