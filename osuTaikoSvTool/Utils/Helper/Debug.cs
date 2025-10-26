@@ -62,5 +62,71 @@ namespace osuTaikoSvTool.Utils.Helper
             }
             return true;
         }
+        /// <summary>
+        /// 入力値のCSVファイル出力処理
+        /// </summary>
+        /// <param name="userInputData">入力値データ</param>
+        /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
+        internal static bool ExportToUserInputData(UserInputData userInputData)
+        {
+            string path = Directory.GetCurrentDirectory() + Constants.HISTORY_DIRECTORY;
+            DateTime now = DateTime.Now;
+            string backupFileName = $"history.csv";
+            try
+            {
+                if(!File.Exists(path + "\\" + backupFileName))
+                {
+                    File.Create(path + "\\" + backupFileName).Close();
+                }
+                StreamReader srFile = new(path + "\\" + backupFileName, Encoding.GetEncoding("utf-8"));
+                string line = srFile.ReadToEnd();
+                srFile.Close();
+                StreamWriter swFile = new(path + "\\" + backupFileName, true, Encoding.GetEncoding("utf-8"));
+                if (string.IsNullOrEmpty(line) || line.Length == 0)
+                {
+                    string Header = "timingFrom,timingTo,isSv,svFrom,svTo,isVolume,volumeFrom,volumeTo,calculationCode,isKiai,relativeCode,relativeBaseSv,isOffset,offset,setOption.isSetObjects,setOption.isSetBeatSnap,setObjectOption.setObjectsCode,setObjectOption.isKiaiStart,setObjectOption.isKiaiEnd,setObjectOption.isTimingStart,setObjectOption.isTimingEnd,setBeatSnapOption.beatSnap,setBeatSnapOption.isBeatSnap,createDate";
+                    // ヘッダーを書き込む
+                    swFile.WriteLine(Header);
+                }
+                // データを書き込む
+                string timingPointLine = userInputData.timingFrom + "," +
+                                         userInputData.timingTo + "," +
+                                         userInputData.isSv + "," +
+                                         userInputData.svFrom + "," +
+                                         userInputData.svTo + "," +
+                                         userInputData.isVolume + "," +
+                                         userInputData.volumeFrom + "," +
+                                         userInputData.volumeTo + "," +
+                                         userInputData.calculationCode + "," +
+                                         userInputData.isKiai + "," +
+                                         userInputData.relativeCode + "," +
+                                         userInputData.relativeBaseSv + "," +
+                                         userInputData.isOffset + "," +
+                                         userInputData.offset + "," +
+                                         userInputData.setOption.isSetObjects + "," +
+                                         userInputData.setOption.isSetBeatSnap + "," +
+                                         userInputData.setObjectOption.setObjectsCode + "," +
+                                         userInputData.setObjectOption.isKiaiStart + "," +
+                                         userInputData.setObjectOption.isKiaiEnd + "," +
+                                         userInputData.setObjectOption.isTimingStart + "," +
+                                         userInputData.setObjectOption.isTimingEnd + "," +
+                                         userInputData.setBeatSnapOption.beatSnap + "," +
+                                         userInputData.setBeatSnapOption.isBeatSnap + "," +
+                                         userInputData.createDate;
+                swFile.WriteLine(timingPointLine);
+                // いかなる場合でもファイルを閉じる
+                swFile.Close();
+            }
+            catch (Exception ex)
+            {
+                Common.WriteErrorMessage("LOG_E-EXPORT-OSU");
+                Common.WriteExceptionMessage(ex);
+                return false;
+            }
+            finally
+            {
+            }
+            return true;
+        }
     }
 }

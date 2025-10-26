@@ -317,7 +317,9 @@ namespace osuTaikoSvTool
                 return;
             }
             // 入力値をxmlファイルにシリアライズする
-            if (!UserInputDataHelper.SerializeUserInputData(userInputData))
+            if (!UserInputDataHelper.SerializeUserInputData(userInputData)
+                // || !Utils.Helper.Debug.ExportToUserInputData(userInputData)
+                )
             {
                 // 失敗した場合はエラーダイアログを表示する
                 Common.ShowMessageDialog("E_A-P-001");

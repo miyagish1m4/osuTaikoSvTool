@@ -252,13 +252,13 @@ namespace osuTaikoSvTool.Services
                     }
                     decimal sv;
                     int volume;
-                    if ((userInputData.setObjectOption.setObjectsCode == 0x0000017f) &&
+                    if (((userInputData.setObjectOption.setObjectsCode & 0x0000017f) != 0) &&
                         !userInputData.setObjectOption.isTimingStart &&
                         (beatmap.hitObjects[i].time == userInputData.timingFrom))
                     {
                         continue;
                     }
-                    if ((userInputData.setObjectOption.setObjectsCode == 0x0000017f) &&
+                    if (((userInputData.setObjectOption.setObjectsCode & 0x0000017f) != 0) &&
                         !userInputData.setObjectOption.isTimingEnd &&
                         (beatmap.hitObjects[i].time == userInputData.timingTo))
                     {
@@ -314,11 +314,11 @@ namespace osuTaikoSvTool.Services
                         if (userInputData.isVolume)
                         {
                             // 音量を求める
-                            volume = applyTimingPoint != null ? (int)Math.Floor(CalculateVolume(userInputData.volumeFrom,
-                                                                                                volumePerMs,
-                                                                                                userInputData.timingFrom,
-                                                                                                beatmap.hitObjects[i].time) *
-                                                                                                (baseBpm / applyTimingPoint.bpm)) : 100;
+                            volume = applyTimingPoint != null ? (int)(CalculateVolume(userInputData.volumeFrom,
+                                                                                      volumePerMs,
+                                                                                      userInputData.timingFrom,
+                                                                                      beatmap.hitObjects[i].time) *
+                                                                                      (baseBpm / applyTimingPoint.bpm) + 0.5m) : 100;
                         }
                         else
                         {
@@ -559,11 +559,11 @@ namespace osuTaikoSvTool.Services
                         if (userInputData.isVolume)
                         {
                             // 音量を求める
-                            volume = applyTimingPoint != null ? (int)Math.Floor(CalculateVolume(userInputData.volumeFrom,
-                                                                                                volumePerMs,
-                                                                                                userInputData.timingFrom,
-                                                                                                beatmap.hitObjects[i].time) *
-                                                                                                (baseBpm / applyTimingPoint.bpm)) : 100;
+                            volume = applyTimingPoint != null ? (int)(CalculateVolume(userInputData.volumeFrom,
+                                                                                      volumePerMs,
+                                                                                      userInputData.timingFrom,
+                                                                                      beatmap.hitObjects[i].time) *
+                                                                                      (baseBpm / applyTimingPoint.bpm) + 0.5m) : 100;
                         }
                         else
                         {
@@ -910,11 +910,11 @@ namespace osuTaikoSvTool.Services
                         if (userInputData.isVolume)
                         {
                             // 音量を求める
-                            volume = applyTimingPoint != null ? (int)Math.Floor(CalculateVolume(userInputData.volumeFrom,
-                                                                                                volumePerMs,
-                                                                                                userInputData.timingFrom,
-                                                                                                (int)currentTiming) *
-                                                                (applyTimingPoint.volume / applyTimingPoint.bpm)) : 100;
+                            volume = applyTimingPoint != null ? (int)(CalculateVolume(userInputData.volumeFrom,
+                                                                                      volumePerMs,
+                                                                                      userInputData.timingFrom,
+                                                                                      (int)currentTiming) *
+                                                                (applyTimingPoint.volume / applyTimingPoint.bpm) + 0.5m) : 100;
                         }
                         else
                         {
