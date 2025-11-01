@@ -264,21 +264,22 @@ namespace osuTaikoSvTool.Services
                     {
                         continue;
                     }
-                    // 相対指定が有効かつ、現在のノーツに適応されている緑線の位置が前のノーツ以前の場合はスキップする
-                    if (userInputData.relativeCode != Constants.RELATIVE_DISABLE && i != 0)
-                    {
-                        var previousInheritedPoint = beatmap.timingPoints.LastOrDefault(tp => tp.time <= beatmap.hitObjects[i].svApplyTime) ??
-                                                     throw new Exception();
-                        if (previousInheritedPoint.time <= beatmap.hitObjects[i - 1].time)
-                        {
-                            continue;
-                        }
-                    }
                     // オブジェクトコードを比較し、一致するものがある場合に緑線の追加を行う
                     if ((beatmap.hitObjects[i].hitObjectCode & userInputData.setObjectOption.setObjectsCode) != 0)
                     {
+
                         // 直前のTimingPointを探す
-                        var applyInheritedPoint = beatmap.timingPoints.LastOrDefault(tp => tp.time <= beatmap.hitObjects[i].svApplyTime);
+                        var applyInheritedPoint = beatmap.timingPoints.LastOrDefault(tp => tp.time <= beatmap.hitObjects[i].svApplyTime) ??
+                                                  throw new Exception();
+                        // 相対指定が有効かつ、現在のノーツに適応されている緑線の位置が前のノーツ以前の場合はスキップする
+                        if (userInputData.relativeCode != Constants.RELATIVE_DISABLE && i != 0)
+                        {
+                            if (applyInheritedPoint.time <= beatmap.hitObjects[i - 1].time &&
+                                applyInheritedPoint.time >= userInputData.timingFrom)
+                            {
+                                continue;
+                            }
+                        }
                         // 直前のTimingPointのインデックスを算出する
                         var applyInheritedPointIndex = beatmap.timingPoints.FindLastIndex(tp => tp.time <= beatmap.hitObjects[i].svApplyTime);
                         // 直前の赤線を探す
