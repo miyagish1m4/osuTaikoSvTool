@@ -264,6 +264,16 @@ namespace osuTaikoSvTool.Services
                     {
                         continue;
                     }
+                    // 相対指定が有効かつ、現在のノーツに適応されている緑線の位置が前のノーツ以前の場合はスキップする
+                    if (userInputData.relativeCode != Constants.RELATIVE_DISABLE && i != 0)
+                    {
+                        var previousInheritedPoint = beatmap.timingPoints.LastOrDefault(tp => tp.time <= beatmap.hitObjects[i].svApplyTime) ??
+                                                     throw new Exception();
+                        if (previousInheritedPoint.time <= beatmap.hitObjects[i - 1].time)
+                        {
+                            continue;
+                        }
+                    }
                     // オブジェクトコードを比較し、一致するものがある場合に緑線の追加を行う
                     if ((beatmap.hitObjects[i].hitObjectCode & userInputData.setObjectOption.setObjectsCode) != 0)
                     {
@@ -317,8 +327,7 @@ namespace osuTaikoSvTool.Services
                             volume = applyTimingPoint != null ? (int)(CalculateVolume(userInputData.volumeFrom,
                                                                                       volumePerMs,
                                                                                       userInputData.timingFrom,
-                                                                                      beatmap.hitObjects[i].time) *
-                                                                                      (baseBpm / applyTimingPoint.bpm) + 0.5m) : 100;
+                                                                                      beatmap.hitObjects[i].time) + 0.5m) : 100;
                         }
                         else
                         {
@@ -562,8 +571,7 @@ namespace osuTaikoSvTool.Services
                             volume = applyTimingPoint != null ? (int)(CalculateVolume(userInputData.volumeFrom,
                                                                                       volumePerMs,
                                                                                       userInputData.timingFrom,
-                                                                                      beatmap.hitObjects[i].time) *
-                                                                                      (baseBpm / applyTimingPoint.bpm) + 0.5m) : 100;
+                                                                                      beatmap.hitObjects[i].time) + 0.5m) : 100;
                         }
                         else
                         {
@@ -913,8 +921,7 @@ namespace osuTaikoSvTool.Services
                             volume = applyTimingPoint != null ? (int)(CalculateVolume(userInputData.volumeFrom,
                                                                                       volumePerMs,
                                                                                       userInputData.timingFrom,
-                                                                                      (int)currentTiming) *
-                                                                (applyTimingPoint.volume / applyTimingPoint.bpm) + 0.5m) : 100;
+                                                                                      (int)currentTiming) + 0.5m) : 100;
                         }
                         else
                         {
