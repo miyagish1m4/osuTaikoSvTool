@@ -12,6 +12,26 @@ namespace osuTaikoSvTool.Views
         #endregion
         #region メソッド
         /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="config">コンフィグ</param>
+        internal SettingForm(Config config)
+        {
+            InitializeComponent();
+            this.config = config;
+            InitializeLabelText();
+        }
+        /// <summary>
+        /// ラベルテキストの初期化設定
+        /// </summary>
+        private void InitializeLabelText()
+        {
+            Common.SetLabelText(lblLanguage, "LBL_SETTINGS_LANGUAGE");
+            Common.SetLabelText(lblMaxBackupCount, "LBL_SETTINGS_BACKUP_MAX_COUNT");
+            Common.SetLabelText(lblMaxHistoryCount, "LBL_SETTINGS_INPUT_HISTORY_MAX_COUNT");
+            Common.SetLabelText(btnSave, "LBL_SETTINGS_SAVE");
+        }
+        /// <summary>
         /// コントロール初期化設定
         /// </summary>
         private void InitializeControls()
@@ -25,11 +45,6 @@ namespace osuTaikoSvTool.Views
         }
         #endregion
         #region イベントハンドラ
-        internal SettingForm(Config config)
-        {
-            InitializeComponent();
-            this.config = config;
-        }
         private void SettingForm_Load(object sender, EventArgs e)
         {
             // コントロールの初期化
@@ -43,6 +58,7 @@ namespace osuTaikoSvTool.Views
                                         txtHistoryCount.Text,
                                         config))
             {
+                Common.LoadConfig(config);
                 // 設定値に応じてバックアップと入力履歴ファイルの保持数を変更する
                 if (SettingHelper.ResetBackupFile(config) &&
                     SettingHelper.ResetHistoryFile(config))

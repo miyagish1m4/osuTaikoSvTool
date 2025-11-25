@@ -19,7 +19,7 @@ namespace osuTaikoSvTool.Utils.Helper
         {
             string path = Directory.GetCurrentDirectory() + Constants.BACKUP_DIRECTORY + "\\" + backupDirectory;
             DateTime now = DateTime.Now;
-            string backupFileName = $"{now:yyyy_MM_dd_HH_mm_ss_fff}.csv";
+            string backupFileName = $"{now:yyyy_MM_dd_HH_mm_ss_fff}" + Constants.CSV_EXTENSION;
             // バックアップフォルダがない場合は作成する
             if (!Directory.Exists(path))
             {
@@ -71,7 +71,7 @@ namespace osuTaikoSvTool.Utils.Helper
         {
             string path = Directory.GetCurrentDirectory() + Constants.HISTORY_DIRECTORY;
             DateTime now = DateTime.Now;
-            string backupFileName = $"history.csv";
+            string backupFileName = $"history" + Constants.CSV_EXTENSION;
             try
             {
                 if(!File.Exists(path + "\\" + backupFileName))
@@ -84,7 +84,7 @@ namespace osuTaikoSvTool.Utils.Helper
                 StreamWriter swFile = new(path + "\\" + backupFileName, true, Encoding.GetEncoding("utf-8"));
                 if (string.IsNullOrEmpty(line) || line.Length == 0)
                 {
-                    string Header = "timingFrom,timingTo,isSv,svFrom,svTo,isVolume,volumeFrom,volumeTo,calculationCode,isKiai,relativeCode,relativeBaseSv,isOffset,offset,setOption.isSetObjects,setOption.isSetBeatSnap,setObjectOption.setObjectsCode,setObjectOption.isKiaiStart,setObjectOption.isKiaiEnd,setObjectOption.isTimingStart,setObjectOption.isTimingEnd,setBeatSnapOption.beatSnap,setBeatSnapOption.isBeatSnap,createDate";
+                    string Header = "timingFrom,timingTo,isSv,svFrom,svTo,isVolume,volumeFrom,volumeTo,calculationCode,isKiai,relativeCode,relativeBaseSv,isOffset,offset,setOption.isSetObjects,setOption.isSetBeatSnap,setOption.isSetGreenLine,setObjectOption.setObjectsCode,setObjectOption.isTimingStart,setObjectOption.isTimingEnd,setBeatSnapOption.beatSnap,setBeatSnapOption.isBeatSnap,createDate";
                     // ヘッダーを書き込む
                     swFile.WriteLine(Header);
                 }
@@ -105,9 +105,10 @@ namespace osuTaikoSvTool.Utils.Helper
                                          userInputData.offset + "," +
                                          userInputData.setOption.isSetObjects + "," +
                                          userInputData.setOption.isSetBeatSnap + "," +
+                                         userInputData.setOption.isSetGreenLine + "," +
                                          userInputData.setObjectOption.setObjectsCode + "," +
-                                         userInputData.setObjectOption.isKiaiStart + "," +
-                                         userInputData.setObjectOption.isKiaiEnd + "," +
+                                         //userInputData.setObjectOption.isKiaiStart + "," +
+                                         //userInputData.setObjectOption.isKiaiEnd + "," +
                                          userInputData.setObjectOption.isTimingStart + "," +
                                          userInputData.setObjectOption.isTimingEnd + "," +
                                          userInputData.setBeatSnapOption.beatSnap + "," +

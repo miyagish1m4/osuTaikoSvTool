@@ -5,7 +5,7 @@ namespace osuTaikoSvTool.Models
     /// <summary>
     /// osuから取得したHitObjectsデータをまとめたクラス
     /// </summary>
-    class HitObject
+    internal class HitObject
     {
         // BPM
         public decimal bpm { set; get; }

@@ -3,7 +3,7 @@
     /// <summary>
     /// osuファイルから取得したTimingPointsデータをまとめたクラス
     /// </summary>
-    class TimingPoint
+    internal class TimingPoint
     {
         // タイミングポイント
         internal int time { set; get; }
@@ -85,6 +85,7 @@
                 isRedLine = true;
                 barLength = decimal.Parse(buff[1]) * meter;
                 bpm = 60000 / decimal.Parse(buff[1]);
+                sv = 1;
             }
             else
             {

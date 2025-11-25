@@ -7,7 +7,7 @@ namespace osuTaikoSvTool.Properties
     {
         #region ファイル名
         internal const string APP_NAME = "osuTaikoSvTool";
-        internal const string APP_VERSION = "0.3.7";
+        internal const string APP_VERSION = "0.5.1";
         #endregion
         #region 言語設定
         internal static readonly string[] LANGUAGES = ["日本語", 
@@ -28,6 +28,8 @@ namespace osuTaikoSvTool.Properties
         internal const string ERROR_LOG_DIRECTORY = "\\Log\\Error";
         // 履歴ディレクトリ
         internal const string HISTORY_DIRECTORY = "\\History";
+        // エスケープ文字
+        internal const string ESCAPE_CHARACTER = @"[\\,/,:,*,?,"",<,>,|]";
         #endregion
         #region 拡張子
         // osuファイル拡張子
@@ -36,6 +38,8 @@ namespace osuTaikoSvTool.Properties
         internal const string LOG_EXTENSION = ".log";
         // xmlファイル拡張子
         internal const string XML_EXTENSION = ".xml";
+        // csvファイル拡張子
+        internal const string CSV_EXTENSION = ".csv";
         #endregion
         #region ログレベル
         internal const string LOG_LEVEL_INFO = "INFO";
@@ -60,6 +64,12 @@ namespace osuTaikoSvTool.Properties
         internal const int TIMING_POINTS_CODE = 6;
         internal const int COLOURS_CODE = 7;
         internal const int HIT_OBJECTS_CODE = 8;
+        internal const string BOOKMARKS = "Bookmarks";
+        #endregion
+        #region セットコード
+        internal const int SET_TIMING = 0;
+        internal const int SET_SV = 1;
+        internal const int SET_VOLUME = 2;
         #endregion
         #region 実行コード
         internal const int EXECUTE_APPLY = 0;

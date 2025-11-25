@@ -3,7 +3,7 @@
     /// <summary>
     /// 選曲中の譜面から取得したメタデータ
     /// </summary>
-    class BeatmapMetadata
+    internal class BeatmapMetadata
     {
         // タイトル
         internal string title { set; get; }

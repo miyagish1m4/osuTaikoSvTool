@@ -30,6 +30,14 @@ namespace osuTaikoSvTool.Views
             SetBackupFileList();
         }
         /// <summary>
+        /// ラベルテキストの初期化設定
+        /// </summary>
+        private void InitializeLabelText()
+        {
+            Common.SetLabelText(lblFileName, "LBL_BACKUP_FILE");
+            Common.SetLabelText(lblDate, "LBL_BACKUP_DATE");
+        }
+        /// <summary>
         /// バックアップファイル名を取得する
         /// </summary>
         /// <param name="index">ボタンのインデックス</param>
@@ -97,6 +105,7 @@ namespace osuTaikoSvTool.Views
             {
                 btnNextPage.Enabled = false;
             }
+            InitializeLabelText();
         }
         private void lblFileName1_DoubleClick(object sender, EventArgs e)
         {

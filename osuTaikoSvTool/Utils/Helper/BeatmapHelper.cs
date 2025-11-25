@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.RegularExpressions;
 using osuTaikoSvTool.Models;
 using osuTaikoSvTool.Properties;
 
@@ -86,10 +87,9 @@ namespace osuTaikoSvTool.Utils.Helper
 
                 return canvas;
             }
-            catch (Exception ex)
+            catch
             {
                 Common.WriteWarningMessage("LOG_W-GET-BG");
-                Common.WriteExceptionMessage(ex);
                 return canvas;
             }
         }
@@ -210,7 +210,7 @@ namespace osuTaikoSvTool.Utils.Helper
                     // bookmarkがある場合はbookmarksリストにインスタンスを作成する
                     if (line.Length >= 9)
                     {
-                        if (line[..9] == "Bookmarks")
+                        if (line[..Constants.BOOKMARKS.Length] == Constants.BOOKMARKS)
                         {
                             string[] bookmarkParts = line.Split(':');
                             List<string> stringBookmarks = [.. bookmarkParts[1].Replace(" ", "").Split(",")];
@@ -482,13 +482,14 @@ namespace osuTaikoSvTool.Utils.Helper
         /// バックアップフォルダを作成する
         /// </summary>
         /// <param name="path">osuファイルが格納されているフォルダ</param>
-        /// <param name="backupDirectory">バックアップの出力先</param>
+        /// <param name="backupFile">バックアップの出力先</param>
         /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
-        internal static bool CreateBackup(string path, string backupDirectory)
+        internal static bool CreateBackup(string path, string backupFile)
         {
             try
             {
-                string backupPath = Directory.GetCurrentDirectory() + Constants.BACKUP_DIRECTORY + "\\" + backupDirectory;
+                string escapedBackupFile = Regex.Replace(backupFile, Constants.ESCAPE_CHARACTER, " ");
+                string backupPath = Directory.GetCurrentDirectory() + Constants.BACKUP_DIRECTORY + "\\" + escapedBackupFile;
                 DateTime now = DateTime.Now;
                 string backupFileName = $"{now:yyyy_MM_dd_HH_mm_ss_fff}.osu";
                 // バックアップフォルダがない場合は作成する
@@ -541,11 +542,12 @@ namespace osuTaikoSvTool.Utils.Helper
                 {
                     // beatLengthは桁数を指定して求める
                     string beatLength = (timingPoint.isRedLine ?
-                                        (60000 / timingPoint.bpm).ToString($"F12").TrimEnd('0') :
-                                        (-100 / timingPoint.sv).ToString($"F12").TrimEnd('0'));
-                    // beatLengthが整数だった場合は"."を消す
-                    if (beatLength.Substring(beatLength.Length - 1, 1) == ".")
+                                        Math.Round(60000 / timingPoint.bpm, 12, MidpointRounding.AwayFromZero).ToString() :
+                                        Math.Round(-100 / timingPoint.sv, 12, MidpointRounding.AwayFromZero).ToString());
+                    if (beatLength.Contains('.'))
                     {
+                        // beatLengthが整数だった場合は"0"と"."を削除する
+                        beatLength = beatLength.TrimEnd('0');
                         beatLength = beatLength.TrimEnd('.');
                     }
                     string timingPointLine = timingPoint.time + "," +
@@ -569,7 +571,8 @@ namespace osuTaikoSvTool.Utils.Helper
                 foreach (var hitObject in beatmap.hitObjects)
                 {
                     // HitObjectsの1行のデータを作成する
-                    if (hitObject.noteType != Constants.NoteType.BARLINE)
+                    if (hitObject.noteType != Constants.NoteType.BARLINE &&
+                        hitObject.noteType != Constants.NoteType.BOOKMARK)
                     {
                         string hitObjectLine = CreateHitObjectLine(hitObject);
                         file.WriteLine(hitObjectLine);
@@ -719,6 +722,20 @@ namespace osuTaikoSvTool.Utils.Helper
             }
             return sb.ToString();
         }
+        internal static bool Optimize﻿Sv(UserInputData userInputData, ref Beatmap beatmap)
+        {
+            try
+            {
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Common.WriteErrorMessage("LOG_E-EXCEPTION");
+                Common.WriteExceptionMessage(ex);
+                return false;
+            }
+        }
+
         /// <summary>
         /// osu側で丸められたTimingの正確な値を算出する
         /// </summary>
