@@ -17,9 +17,12 @@ namespace osuTaikoSvTool.Views
         /// <param name="config">コンフィグ</param>
         internal SettingForm(Config config)
         {
+            object? sender = null;
+            EventArgs? e = null;
             InitializeComponent();
             this.config = config;
             InitializeLabelText();
+            SetChkAdvanceMode(config.advanceMode);
         }
         /// <summary>
         /// ラベルテキストの初期化設定
@@ -56,6 +59,7 @@ namespace osuTaikoSvTool.Views
             if (SettingHelper.SetConfig(cmbLanguage.Text,
                                         txtMaxBackupCount.Text,
                                         txtHistoryCount.Text,
+                                        chkAdvanceMode.Checked,
                                         config))
             {
                 Common.LoadConfig(config);
@@ -66,7 +70,8 @@ namespace osuTaikoSvTool.Views
                     // 成功した場合はメッセージダイアログを表示する
                     Common.ShowMessageDialog("I_A-P-003");
                     this.Close();
-                } else
+                }
+                else
                 {
                     // 失敗した場合はエラーダイアログを表示する
                     Common.ShowMessageDialog("E_A-P-002");
@@ -74,5 +79,14 @@ namespace osuTaikoSvTool.Views
             }
         }
         #endregion
+
+        private void chkAdvanceMode_CheckedChanged(object? sender, EventArgs? e)
+        {
+            chkAdvanceMode.Text = chkAdvanceMode.Checked ? "✔" : "";
+        }
+        private void SetChkAdvanceMode(int isAdvanceMode)
+        {
+            chkAdvanceMode.Checked = isAdvanceMode == 1 ? true : false;
+        }
     }
 }

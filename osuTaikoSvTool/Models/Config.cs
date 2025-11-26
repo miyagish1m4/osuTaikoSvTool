@@ -13,6 +13,8 @@ namespace osuTaikoSvTool.Models
         internal int maxHistoryCount { get; set; }
         // 言語設定
         internal string? language { get; set; }
+        // AdvanceMode設定
+        internal int advanceMode { get; set; }
         /// <summary>
         /// configファイルの読み込み処理
         /// </summary>
@@ -24,6 +26,7 @@ namespace osuTaikoSvTool.Models
             maxBackupCount = Convert.ToInt32(config.AppSettings.Settings["maxBackupCount"].Value);
             maxHistoryCount = Convert.ToInt32(config.AppSettings.Settings["maxHistoryCount"].Value);
             language = config.AppSettings.Settings["language"].Value;
+            advanceMode = Convert.ToInt32(config.AppSettings.Settings["advanceMode"].Value);
         }
         /// <summary>
         /// configファイルの書き込み処理
@@ -36,6 +39,7 @@ namespace osuTaikoSvTool.Models
             config.AppSettings.Settings["maxBackupCount"].Value = maxBackupCount.ToString();
             config.AppSettings.Settings["maxHistoryCount"].Value = maxHistoryCount.ToString();
             config.AppSettings.Settings["language"].Value = language;
+            config.AppSettings.Settings["advanceMode"].Value = advanceMode.ToString();
             config.Save();
         }
     }

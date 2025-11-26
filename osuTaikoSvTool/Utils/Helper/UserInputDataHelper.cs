@@ -195,6 +195,7 @@ namespace osuTaikoSvTool.Utils.Helper
         {
             try
             {
+                userInputData.isKiai = userInputTempData.isKiai;
                 return true;
             }
             catch

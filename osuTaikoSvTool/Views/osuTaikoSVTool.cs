@@ -194,6 +194,13 @@ namespace osuTaikoSvTool
             lblSpecificGridLine.Visible = false;
             lblSpecificGridLine2.Visible = false;
             rdoAllHitObjects.Checked = true;
+            if (config.advanceMode == 1)
+            {
+                chkRelative.Visible = true;
+            } else
+            {
+                chkRelative.Visible = false;
+            }
         }
         /// <summary>
         /// 処理項目タブが"Objectsのみ"の時のコントロールの初期化処理
@@ -886,6 +893,15 @@ namespace osuTaikoSvTool
             Form settingForm = new SettingForm(config);
             settingForm.ShowDialog();
             InitializeLabelText();
+            if (config.advanceMode == 1)
+            {
+                chkRelative.Visible = true;
+            }
+            else
+            {
+                chkRelative.Checked = false;
+                chkRelative.Visible = false;
+            }
         }
         // SV helper
         private void txtTimingFrom_Enter(object sender, EventArgs e)

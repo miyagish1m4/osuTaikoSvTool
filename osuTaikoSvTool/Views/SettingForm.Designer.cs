@@ -36,6 +36,8 @@
             txtHistoryCount = new TextBox();
             cmbLanguage = new ComboBox();
             btnSave = new Button();
+            label1 = new Label();
+            chkAdvanceMode = new CheckBox();
             SuspendLayout();
             // 
             // lblLanguage
@@ -100,7 +102,7 @@
             // 
             // btnSave
             // 
-            btnSave.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            btnSave.Anchor = AnchorStyles.Bottom;
             btnSave.BackColor = Color.DarkCyan;
             btnSave.FlatAppearance.BorderColor = Color.Cyan;
             btnSave.FlatAppearance.BorderSize = 2;
@@ -108,7 +110,7 @@
             btnSave.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
             btnSave.ForeColor = SystemColors.ControlLightLight;
             btnSave.ImageAlign = ContentAlignment.MiddleLeft;
-            btnSave.Location = new Point(146, 219);
+            btnSave.Location = new Point(146, 278);
             btnSave.Name = "btnSave";
             btnSave.Size = new Size(189, 39);
             btnSave.TabIndex = 15;
@@ -117,11 +119,38 @@
             btnSave.UseVisualStyleBackColor = false;
             btnSave.Click += btnSave_Click;
             // 
+            // label1
+            // 
+            label1.Font = new Font("Yu Gothic UI", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
+            label1.ForeColor = Color.White;
+            label1.Location = new Point(12, 222);
+            label1.Name = "label1";
+            label1.Size = new Size(256, 25);
+            label1.TabIndex = 16;
+            label1.Text = "AdvanceMode";
+            label1.TextAlign = ContentAlignment.MiddleRight;
+            // 
+            // chkAdvanceMode
+            // 
+            chkAdvanceMode.Appearance = Appearance.Button;
+            chkAdvanceMode.BackColor = Color.White;
+            chkAdvanceMode.Font = new Font("MS UI Gothic", 15F, FontStyle.Regular, GraphicsUnit.Point, 128);
+            chkAdvanceMode.ForeColor = Color.Green;
+            chkAdvanceMode.Location = new Point(273, 222);
+            chkAdvanceMode.Name = "chkAdvanceMode";
+            chkAdvanceMode.Size = new Size(25, 25);
+            chkAdvanceMode.TabIndex = 17;
+            chkAdvanceMode.TextAlign = ContentAlignment.MiddleCenter;
+            chkAdvanceMode.UseVisualStyleBackColor = false;
+            chkAdvanceMode.CheckedChanged += chkAdvanceMode_CheckedChanged;
+            // 
             // SettingForm
             // 
             AutoScaleMode = AutoScaleMode.None;
             BackColor = Color.FromArgb(0, 64, 64);
-            ClientSize = new Size(466, 287);
+            ClientSize = new Size(466, 346);
+            Controls.Add(chkAdvanceMode);
+            Controls.Add(label1);
             Controls.Add(btnSave);
             Controls.Add(cmbLanguage);
             Controls.Add(txtHistoryCount);
@@ -147,5 +176,7 @@
         private TextBox txtHistoryCount;
         private ComboBox cmbLanguage;
         private Button btnSave;
+        private Label label1;
+        private CheckBox chkAdvanceMode;
     }
 }

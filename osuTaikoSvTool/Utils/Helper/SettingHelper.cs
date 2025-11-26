@@ -16,12 +16,14 @@ namespace osuTaikoSvTool.Utils.Helper
         internal static bool SetConfig(string language,
                                        string maxBackupCount,
                                        string maxHistoryCount,
+                                       bool isAdvanceMode,
                                        Config config)
         {
             try
             {
                 int retMaxBackupCount = 0;
                 int retMaxHistoryCount = 0;
+                int advanceMode = isAdvanceMode ? 1 : 0;
                 if (!ValidateMaxBackupCount(maxBackupCount, ref retMaxBackupCount) ||
                     !ValidateMaxHistoryCount(maxHistoryCount, ref retMaxHistoryCount))
                 {
@@ -31,6 +33,7 @@ namespace osuTaikoSvTool.Utils.Helper
                 config.language = language;
                 config.maxBackupCount = retMaxBackupCount;
                 config.maxHistoryCount = retMaxHistoryCount;
+                config.advanceMode = advanceMode;
                 config.ConfigSave();
                 return true;
             }
