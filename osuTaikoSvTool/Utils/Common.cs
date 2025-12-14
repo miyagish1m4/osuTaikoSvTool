@@ -1,10 +1,19 @@
 using System.Text;
+using osuTaikoSvTool.Models;
 using osuTaikoSvTool.Properties;
+using osuTaikoSvTool.Views;
 
 namespace osuTaikoSvTool.Utils
 {
     class Common
     {
+        private static Config? config;
+        private static Form? executeResultForm;
+
+        internal static void LoadConfig(Config userConfig)
+        {
+            config = userConfig;
+        }
         /// <summary>
         /// ファイル,フォルダの初期化設定
         /// </summary>
@@ -103,30 +112,66 @@ namespace osuTaikoSvTool.Utils
             return Path.Combine(osuDirectory, "Songs");
         }
         /// <summary>
+        /// ラベルテキスト設定処理
+        /// </summary>
+        /// <param name="labelCode">ラベルコード、またはラベルテキスト</param>
+        /// <returns>ラベルテキスト</returns>
+        internal static void SetLabelText(Control control,string labelCode)
+        {
+            string label;
+            switch (config?.language)
+            {
+                case "English":
+                    if (Labels.LabelsEn.ContainsKey(labelCode))
+                    {
+                        // ラベルリストにラベルIDがあった場合は
+                        // ラベルIDと紐づくラベルテキストを出力する
+                        label = Labels.LabelsEn[labelCode];
+                    }
+                    else
+                    {
+                        // ラベルリストにラベルIDがなかった場合は
+                        // 引数で渡された文字列をそのまま出力する
+                        label = labelCode;
+                    }
+                    break;
+                case "日本語":
+                    if (Labels.LabelsJp.ContainsKey(labelCode))
+                    {
+                        // ラベルリストにラベルIDがあった場合は
+                        // ラベルIDと紐づくラベルテキストを出力する
+                        label = Labels.LabelsJp[labelCode];
+                    }
+                    else
+                    {
+                        // ラベルリストにラベルIDがなかった場合は
+                        // 引数で渡された文字列をそのまま出力する
+                        label = labelCode;
+                    }
+                    break;
+                default:
+                    label = "";
+                    break;
+            }
+            control.Text = label;
+            return;
+        }
+        /// <summary>
         /// ダイアログを表示する
         /// </summary>
         /// <param name="messageCode">メッセージコード、またはメッセージ</param>
-        internal static void ShowMessageDialog(string messageCode)
+        internal static void ShowMessageDialog(string messageCode, int mode = 0)
         {
-            string messageLevel = messageCode[..1];
-            switch (messageLevel)
+            if (mode == 0)
             {
-                // Informationメッセージの場合
-                case "I":
-                    MessageBox.Show(WriteDialogMessage(messageCode), "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    break;
-                // Warningメッセージの場合
-                case "W":
-                    MessageBox.Show(WriteDialogMessage(messageCode), "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    break;
-                // Errorメッセージの場合
-                case "E":
-                    MessageBox.Show(WriteDialogMessage(messageCode), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    break;
-                // 上記以外の場合
-                default:
-                    MessageBox.Show(messageCode, "Information", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                    break;
+                executeResultForm = new ExecuteResultForm(messageCode);
+                executeResultForm.ShowDialog();
+            }
+            else
+            {
+                executeResultForm?.Close();
+                executeResultForm = new ExecuteResultForm(messageCode);
+                executeResultForm.Show();
             }
         }
         /// <summary>
@@ -137,17 +182,39 @@ namespace osuTaikoSvTool.Utils
         internal static string WriteDialogMessage(string messageCode)
         {
             string message;
-            if (Messages.DialogMessages.ContainsKey(messageCode))
+            switch (config?.language)
             {
-                // メッセージリストにメッセージIDがあった場合は
-                // メッセージIDと紐づくメッセージを出力する
-                message = Messages.DialogMessages[messageCode];
-            }
-            else
-            {
-                // メッセージリストにメッセージIDがなかった場合は
-                // 引数で渡された文字列をそのまま出力する
-                message = messageCode;
+                case "English":
+                    if (Messages.DialogMessagesEn.ContainsKey(messageCode))
+                    {
+                        // メッセージリストにメッセージIDがあった場合は
+                        // メッセージIDと紐づくメッセージを出力する
+                        message = Messages.DialogMessagesEn[messageCode];
+                    }
+                    else
+                    {
+                        // メッセージリストにメッセージIDがなかった場合は
+                        // 引数で渡された文字列をそのまま出力する
+                        message = messageCode;
+                    }
+                    break;
+                case "日本語":
+                    if (Messages.DialogMessagesJp.ContainsKey(messageCode))
+                    {
+                        // メッセージリストにメッセージIDがあった場合は
+                        // メッセージIDと紐づくメッセージを出力する
+                        message = Messages.DialogMessagesJp[messageCode];
+                    }
+                    else
+                    {
+                        // メッセージリストにメッセージIDがなかった場合は
+                        // 引数で渡された文字列をそのまま出力する
+                        message = messageCode;
+                    }
+                    break;
+                default:
+                    message = "";
+                    break;
             }
             return message;
         }
@@ -295,7 +362,7 @@ namespace osuTaikoSvTool.Utils
         /// </summary>
         /// <param name="currentTime">現タイミング</param>
         /// <returns>変換後のタイミング</returns>
-        internal static string ConvertFormatTiming(int currentTime) 
+        internal static string ConvertFormatTiming(int currentTime)
         {
             int minute = currentTime / 60000;
             int second = (currentTime % 60000) / 1000;

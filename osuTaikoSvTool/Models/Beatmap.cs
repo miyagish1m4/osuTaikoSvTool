@@ -3,7 +3,7 @@
     /// <summary>
     /// osuファイルから取得したビートマップ情報
     /// </summary>
-    class Beatmap
+    internal class Beatmap
     {
         // バージョン
         internal string version { set; get; }

@@ -6,6 +6,7 @@ namespace osuTaikoSvTool.Views
 {
     public partial class HistoryForm : Form
     {
+        // 未実装
         List<UserInputData> userInputData = [];
         public HistoryForm()
         {
