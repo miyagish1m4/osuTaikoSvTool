@@ -193,7 +193,7 @@ namespace osu_taiko_Mapping_Helper.Services
         {
             try
             {
-                double baseBpm = beatmap.timingPoints.LastOrDefault(tp => tp.time < userInputData.timingFrom && tp.isRedLine)?.bpm ?? 120;
+                double baseBpm = beatmap.timingPoints.LastOrDefault(tp => tp.time <= userInputData.timingFrom && tp.isRedLine)?.bpm ?? 120;
                 double svPerMs = userInputData.isSv ? GetSvPerMs() : 0;
                 double volumePerMs = userInputData.isVolume ? GetVolumePerMs() : 0;
                 bool isIgnoreObject = false;
@@ -312,7 +312,7 @@ namespace osu_taiko_Mapping_Helper.Services
         /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
         private static bool AddGreenLinesOnTimingPoints(ref List<TimingPoint> outTimingPoints)
         {
-            double baseBpm = beatmap.timingPoints.LastOrDefault(tp => tp.time < userInputData.timingFrom && tp.isRedLine)?.bpm ?? 120;
+            double baseBpm = beatmap.timingPoints.LastOrDefault(tp => tp.time <= userInputData.timingFrom && tp.isRedLine)?.bpm ?? 120;
             double svPerMs = userInputData.isSv ? GetSvPerMs() : 0;
             double volumePerMs = userInputData.isVolume ? GetVolumePerMs() : 0;
             List<TimingPoint> timingPointsBuff = [];
@@ -451,7 +451,7 @@ namespace osu_taiko_Mapping_Helper.Services
         {
             try
             {
-                double baseBpm = beatmap.timingPoints.LastOrDefault(tp => tp.time < userInputData.timingFrom && tp.isRedLine)?.bpm ?? 120;
+                double baseBpm = beatmap.timingPoints.LastOrDefault(tp => tp.time <= userInputData.timingFrom && tp.isRedLine)?.bpm ?? 120;
                 double svPerMs = userInputData.isSv ? GetSvPerMs() : 0;
                 double volumePerMs = userInputData.isVolume ? GetVolumePerMs() : 0;
                 for (int i = 0; i < beatmap.timingPoints.Count; i++)

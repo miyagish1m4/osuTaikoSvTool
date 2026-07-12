@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using System.IO.Compression;
 using System.Configuration;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -396,77 +395,44 @@ namespace osu_taiko_Mapping_Helper.Utils
             var currentProcess = Process.GetCurrentProcess();
             var executablePath = Environment.ProcessPath ?? Application.ExecutablePath;
             var applicationDirectory = AppContext.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar);
-            return CreateUpdateBatch(
-                sourceDirectory,
-                cleanupDirectory,
-                cleanupRootDirectory,
-                applicationDirectory,
-                executablePath,
-                currentProcess.Id);
-        }
-
-        private static string CreateUpdateBatch(
-            string sourceDirectory,
-            string cleanupDirectory,
-            string cleanupRootDirectory,
-            string applicationDirectory,
-            string executablePath,
-            int processId)
-        {
             var batchPath = Path.Combine(Path.GetTempPath(), "osu-taiko-mapping-helper-apply-update.bat");
             
             Directory.CreateDirectory(Path.GetDirectoryName(batchPath)!);
 
-            var powerShellScript = $$"""
-                $ErrorActionPreference = 'Stop'
-                $pidToWait = {{processId}}
-                $sourceDirectory = {{ToPowerShellSingleQuotedString(sourceDirectory)}}
-                $cleanupDirectory = {{ToPowerShellSingleQuotedString(cleanupDirectory)}}
-                $cleanupRootDirectory = {{ToPowerShellSingleQuotedString(cleanupRootDirectory)}}
-                $applicationDirectory = {{ToPowerShellSingleQuotedString(applicationDirectory)}}
-                $executablePath = {{ToPowerShellSingleQuotedString(executablePath)}}
-                $markerFileName = {{ToPowerShellSingleQuotedString(UpdateMarkerFileName)}}
-                $errorLogPath = [System.IO.Path]::Combine($cleanupDirectory, 'update-error.log')
-
-                try {
-                    while (Get-Process -Id $pidToWait -ErrorAction SilentlyContinue) {
-                        Start-Sleep -Seconds 1
-                    }
-
-                    Get-ChildItem -LiteralPath $sourceDirectory -Force | Copy-Item -Destination $applicationDirectory -Recurse -Force
-                    Set-Location -LiteralPath $env:TEMP
-
-                    $markerPath = [System.IO.Path]::Combine($cleanupDirectory, $markerFileName)
-                    if (Test-Path -LiteralPath $markerPath) {
-                        Remove-Item -LiteralPath $cleanupRootDirectory -Recurse -Force -ErrorAction SilentlyContinue
-                    }
-
-                    Start-Process -FilePath $executablePath
-                    exit 0
-                }
-                catch {
-                    $_ | Out-String | Set-Content -LiteralPath $errorLogPath -Encoding UTF8
-                    [Environment]::SetEnvironmentVariable('OSU_TAIKO_MAPPING_HELPER_UPDATE_ERROR', $errorLogPath, 'Process')
-                    Start-Process -FilePath $executablePath
-                    exit 1
-                }
-                """;
-            var encodedPowerShellScript = Convert.ToBase64String(Encoding.Unicode.GetBytes(powerShellScript));
             var batchLines = new[]
             {
                 "@echo off",
-                $"powershell.exe -NoProfile -ExecutionPolicy Bypass -EncodedCommand {encodedPowerShellScript}",
-                "set \"UPDATE_EXIT_CODE=%ERRORLEVEL%\"",
-                "start \"\" /b cmd /c del \"%~f0\" & exit /b %UPDATE_EXIT_CODE%"
+                "setlocal",
+                $"set \"PID={currentProcess.Id}\"",
+                $"set \"SRC={sourceDirectory}\"",
+                $"set \"CLEANUP={cleanupDirectory}\"",
+                $"set \"CLEANUP_ROOT={cleanupRootDirectory}\"",
+                $"set \"DST={applicationDirectory}\"",
+                $"set \"EXE={executablePath}\"",
+                ":wait",
+                "tasklist /FI \"PID eq %PID%\" | find \"%PID%\" >nul",
+                "if not errorlevel 1 (",
+                "  timeout /t 1 /nobreak >nul",
+                "  goto wait",
+                ")",
+                "xcopy \"%SRC%\\*\" \"%DST%\\\" /E /I /Y >nul",
+                "if errorlevel 1 (",
+                "  echo Update failed. Failed to copy files from \"%SRC%\" to \"%DST%\". > \"%CLEANUP%\\update-error.log\"",
+                "  set \"OSU_TAIKO_MAPPING_HELPER_UPDATE_ERROR=%CLEANUP%\\update-error.log\"",
+                "  start \"\" \"%EXE%\"",
+                "  endlocal",
+                "  del \"%~f0\"",
+                "  exit /b 1",
+                ")",
+                "cd /d \"%TEMP%\"",
+                $"if exist \"%CLEANUP%\\{UpdateMarkerFileName}\" rmdir /S /Q \"%CLEANUP_ROOT%\" >nul 2>nul",
+                "start \"\" \"%EXE%\"",
+                "endlocal",
+                "del \"%~f0\""
             };
 
-            File.WriteAllLines(batchPath, batchLines, Encoding.ASCII);
+            File.WriteAllLines(batchPath, batchLines);
             return batchPath;
-        }
-
-        private static string ToPowerShellSingleQuotedString(string value)
-        {
-            return $"'{value.Replace("'", "''")}'";
         }
 
         /// <summary>
