@@ -865,7 +865,8 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                                     beatmapInfo?.background != null)
                                 {
                                     line = beatmapInfo.background;
-                                } else
+                                }
+                                else
                                 {
                                     line = "0," + events[i].startTime + "," + events[i].fileName;
                                     if (events[i].xOffset != int.MinValue && events[i].yOffset != int.MinValue)
@@ -1433,16 +1434,29 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
         {
             try
             {
+                int bgAndVideoSectionIndex = -1;
+                int storyboardSectionIndex = -1;
                 var lines = Common.ReadAllLinesShared(beatmapInfo.beatmapPath);
                 for (global::System.Int32 i = 0; i < lines.Length; i++)
                 {
-                    if (lines[i] == Constants.BG_AND_VIDEO &&
-                        (lines[i + 1].Contains(Constants.JPG_EXTENSION) ||
-                         lines[i + 1].Contains(Constants.JPEG_EXTENSION) ||
-                         lines[i + 1].Contains(Constants.PNG_EXTENSION) ||
-                         lines[i + 1].Contains(Constants.WEBP_EXTENSION)))
+                    if (lines[i] == Constants.BG_AND_VIDEO)
                     {
-                        beatmapInfo.background = lines[i + 1];
+                        bgAndVideoSectionIndex = i;
+                        continue;
+                    }
+                    if (lines[i] == Constants.STORYBOARD_LAYER_0)
+                    {
+                        storyboardSectionIndex = i;
+                        continue;
+                    }
+                    if (bgAndVideoSectionIndex != -1 &&
+                        storyboardSectionIndex == -1 &&
+                        (lines[i].Contains(Constants.JPG_EXTENSION) ||
+                         lines[i].Contains(Constants.JPEG_EXTENSION) ||
+                         lines[i].Contains(Constants.PNG_EXTENSION) ||
+                         lines[i].Contains(Constants.WEBP_EXTENSION)))
+                    {
+                        beatmapInfo.background = lines[i];
                         i++;
                         return true;
                     }
