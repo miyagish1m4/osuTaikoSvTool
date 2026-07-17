@@ -217,10 +217,10 @@ namespace osu_taiko_Mapping_Helper.Services
                                                                            (x.tp.time >= (int)time && x.tp.time <= beatmap.hitObjects[i].time && !x.tp.isRedLine)).
                                                                 Select(x => x.index).
                                                                 ToList();
-                    // 削除対象となる緑線のdeleteFlagを有効にする
-                    SetDeleteFlag(greenLineIndexes);
                     if ((beatmap.hitObjects[i].hitObjectCode & userInputData.setObjectOption.setObjectsCode) != 0)
                     {
+                        // 削除対象となる緑線のdeleteFlagを有効にする
+                        SetDeleteFlag(greenLineIndexes);
                         double bpm = time >= beatmap.timingPoints[redLineIndex].time ?
                             beatmap.timingPoints[redLineIndex].bpm :
                             (beatmap.timingPoints.LastOrDefault(tp => (tp.time <= time) && tp.isRedLine)?.bpm ?? 120);
@@ -278,6 +278,8 @@ namespace osu_taiko_Mapping_Helper.Services
                         {
                             isIgnoreObject = true;
                         }
+                        // 削除対象となる緑線のdeleteFlagを有効にする
+                        SetDeleteFlag(greenLineIndexes);
                         outTimingPoints.Add(new TimingPoint
                         {
                             time = time,
