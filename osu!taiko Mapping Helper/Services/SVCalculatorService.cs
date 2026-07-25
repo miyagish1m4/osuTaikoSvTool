@@ -113,7 +113,7 @@ namespace osu_taiko_Mapping_Helper.Services
                 }
                 // SVのタイミング被りを削除
                 // ToDO: 先勝ちか後勝ちかについては要検討
-                outTimingPoints = [.. outTimingPoints.DistinctBy(tp => tp.time)];
+                outTimingPoints = outTimingPoints.AsEnumerable().Reverse().DistinctBy(tp => tp.time).Reverse().ToList();
                 return true;
             }
             catch (Exception ex)
@@ -242,7 +242,7 @@ namespace osu_taiko_Mapping_Helper.Services
                         //    outTimingPoints[^1].effect == effect) continue;
                         outTimingPoints.Add(new TimingPoint
                         {
-                            time = time,
+                            time = time - (beatmap.hitObjects[i].isSeparateBarline ? 1 : 0),
                             bpm = 0,
                             sv = sv,
                             barLength = 0,
@@ -286,7 +286,7 @@ namespace osu_taiko_Mapping_Helper.Services
                         SetDeleteFlag(greenLineIndexes);
                         outTimingPoints.Add(new TimingPoint
                         {
-                            time = time,
+                            time = time - (beatmap.hitObjects[i].isSeparateBarline ? 1 : 0),
                             bpm = 0,
                             sv = beatmap.timingPoints.SafeGetIndex(greenLineIndex)?.sv ?? 1,
                             barLength = beatmap.timingPoints.SafeGetIndex(greenLineIndex)?.barLength ?? 2000,
@@ -350,7 +350,7 @@ namespace osu_taiko_Mapping_Helper.Services
                             double sv = CalculateSv(i, greenLineIndex, svPerMs) *
                                 ((userInputData.relativeCode == Constants.RELATIVE_DISABLE && userInputData.isSv) ? (baseBpm / beatmap.timingPoints[redLineIndex].bpm) : 1);
                             int volume = CalculateVolume(i, greenLineIndex, volumePerMs);
-                            outTimingPoints.Add(new TimingPoint(beatmap.hitObjects[i].time,
+                            outTimingPoints.Add(new TimingPoint(beatmap.hitObjects[i].time - (beatmap.hitObjects[i].isSeparateBarline ? 1 : 0),
                                                                 0,
                                                                 sv,
                                                                 0,

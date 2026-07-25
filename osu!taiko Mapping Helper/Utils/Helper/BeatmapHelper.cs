@@ -347,25 +347,36 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                         t = uninheritedTimingPointList[j].time;
                         continue;
                     }
-
+                    int lazerTiming;
+                    int stableTiming = (int)Math.Floor(t);
+                    double roundedTime = Math.Round(t, MidpointRounding.AwayFromZero);
+                    if (Math.Abs(t - roundedTime) <= 1e-7)
+                    {
+                        lazerTiming = (int)roundedTime;
+                    }
+                    else
+                    {
+                        lazerTiming = (int)Math.Floor(t);
+                    }
                     // omitされている小節線以外を算出
                     if (!(t <= uninheritedTimingPointList[j].time &&
                         (uninheritedTimingPointList[j].effect & 8) > 0))
                     {
-                        int timeBarline = (int)Math.Floor(t);
-                        var hitObjectOnBarLine = hitObjectList.FirstOrDefault(h => h.time == timeBarline);
+                        var hitObjectOnBarLine = hitObjectList.FirstOrDefault(h => h.time == (lazerTiming != stableTiming ? lazerTiming : stableTiming));
                         if (hitObjectOnBarLine == null)
                         {
-                            // 赤線を HitObject として追加
-                            hitObjectList.Add(new HitObject(timeBarline, 1));
-                        }
-                        else
+                            // 小節線を HitObject として追加
+                            hitObjectList.Add(new HitObject(stableTiming, 1));
+                        } else
                         {
                             // オブジェクトコードに小節線を追加
                             hitObjectOnBarLine.hitObjectCode += unchecked((int)0x00000200);
+                            if (lazerTiming != stableTiming)
+                            {
+                                hitObjectOnBarLine.isSeparateBarline = true;
+                            }
                         }
                     }
-
                     // 次のtimingの算出
                     t += uninheritedTimingPointList[j].barLength;
                     if (uninheritedTimingPointList.SafeGetIndex(j + 1) != null &&

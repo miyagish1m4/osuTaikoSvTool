@@ -1025,6 +1025,13 @@ namespace osu_taiko_Mapping_Helper
             {
                 parentForm = this
             };
+            try
+            {
+                TimingPropertyForm.SetOsuData(beatmapInfo, currentTime);
+            }
+            catch
+            {
+            }
             TimingPropertyForm.Show();
             TimingPropertyForm.Text = "Timing Property";
             if (this.beatmapInfo.beatmapPath == null || this.beatmapInfo.beatmapPath == string.Empty)
