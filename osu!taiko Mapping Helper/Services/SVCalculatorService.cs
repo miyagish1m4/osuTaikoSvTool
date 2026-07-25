@@ -70,6 +70,7 @@ namespace osu_taiko_Mapping_Helper.Services
                 if (!DeleteTimingPoints()) throw new Exception("Failed to delete timing points.");
                 // 処理で取得した緑線を情報を格納する
                 outTimingPoints.AddRange(timingPointsBuff);
+
                 return true;
             }
             catch (Exception ex)
@@ -110,6 +111,9 @@ namespace osu_taiko_Mapping_Helper.Services
                 {
                     throw new Exception("Failed to add green lines on timing points.");
                 }
+                // SVのタイミング被りを削除
+                // ToDO: 先勝ちか後勝ちかについては要検討
+                outTimingPoints = outTimingPoints.AsEnumerable().Reverse().DistinctBy(tp => tp.time).Reverse().ToList();
                 return true;
             }
             catch (Exception ex)
@@ -210,7 +214,7 @@ namespace osu_taiko_Mapping_Helper.Services
                     var redLineIndex = beatmap.timingPoints.FindLastIndex(tp => (tp.time <= beatmap.hitObjects[i].svApplyTime) && tp.isRedLine);
                     //////
                     double offset = 0;
-                    int time = i == 0 ? beatmap.hitObjects[i].time : GetOffsetTiming(i, greenLineIndex, redLineIndex, out offset);
+                    int time = (i == 0 && redLineIndex == 0) ? beatmap.hitObjects[i].time : GetOffsetTiming(i, greenLineIndex, redLineIndex, out offset);
                     int effect = GetEffect(i, greenLineIndex, offset);
                     var greenLineIndexes = beatmap.timingPoints.Select((tp, index) => new { tp, index }).
                                                                 Where(x => isFirstNotes ? (x.tp.time <= beatmap.hitObjects[i].svApplyTime && x.tp.time > (beatmap.hitObjects.SafeGetIndex(i - 1)?.time ?? int.MinValue) && !x.tp.isRedLine) :
@@ -238,7 +242,7 @@ namespace osu_taiko_Mapping_Helper.Services
                         //    outTimingPoints[^1].effect == effect) continue;
                         outTimingPoints.Add(new TimingPoint
                         {
-                            time = time,
+                            time = time - (beatmap.hitObjects[i].isSeparateBarline ? 1 : 0),
                             bpm = 0,
                             sv = sv,
                             barLength = 0,
@@ -282,7 +286,7 @@ namespace osu_taiko_Mapping_Helper.Services
                         SetDeleteFlag(greenLineIndexes);
                         outTimingPoints.Add(new TimingPoint
                         {
-                            time = time,
+                            time = time - (beatmap.hitObjects[i].isSeparateBarline ? 1 : 0),
                             bpm = 0,
                             sv = beatmap.timingPoints.SafeGetIndex(greenLineIndex)?.sv ?? 1,
                             barLength = beatmap.timingPoints.SafeGetIndex(greenLineIndex)?.barLength ?? 2000,
@@ -346,7 +350,7 @@ namespace osu_taiko_Mapping_Helper.Services
                             double sv = CalculateSv(i, greenLineIndex, svPerMs) *
                                 ((userInputData.relativeCode == Constants.RELATIVE_DISABLE && userInputData.isSv) ? (baseBpm / beatmap.timingPoints[redLineIndex].bpm) : 1);
                             int volume = CalculateVolume(i, greenLineIndex, volumePerMs);
-                            outTimingPoints.Add(new TimingPoint(beatmap.hitObjects[i].time,
+                            outTimingPoints.Add(new TimingPoint(beatmap.hitObjects[i].time - (beatmap.hitObjects[i].isSeparateBarline ? 1 : 0),
                                                                 0,
                                                                 sv,
                                                                 0,

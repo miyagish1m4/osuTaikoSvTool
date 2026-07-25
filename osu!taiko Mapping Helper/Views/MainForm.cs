@@ -22,7 +22,7 @@ namespace osu_taiko_Mapping_Helper
         private UserInputData userInputData = new();
         private UserInputTempData userInputTempData = new();
         private UserInputUtilityData userInputUtilityData = new();
-        private Config config = new();
+        private static Config config = new();
         private int preUnicodeSupport;
         private List<TimingPoint> timingPoints = [];
         private string osuDirectory = string.Empty;
@@ -332,6 +332,10 @@ namespace osu_taiko_Mapping_Helper
                 tabSetType.Controls.Add(tabHitObjectsPage);
                 tabSetType.Controls.Add(tabBeatSnap);
             }
+            chkEnableHexaOffset.Checked = config.offsetHexa == 1;
+            chkEnableDuoOffset.Checked = config.offsetDuo == 1;
+            chkEnableOffset.Checked = config.offsetMs == 1;
+            txtOffset.Text = config.offsetMsValue ?? string.Empty;
             tabSetType.ItemSize = new Size(Constants.TAB_MAX_ITEM_SIZE / tabSetType.Controls.Count, tabSetType.ItemSize.Height);
         }
         /// <summary>
@@ -356,7 +360,7 @@ namespace osu_taiko_Mapping_Helper
             rdoOnlyBookMark.Checked = userInputTempData.setObjectOption.isOnlyBookmarks;
             rdoOnlySpecificHitObject.Checked = userInputTempData.setObjectOption.isOnlyHitObjects;
             chkEnableOffset.Enabled = true;
-            txtOffset.Enabled = true;
+            FormUtils.SetChkEnableOffset(chkEnableOffset.Checked, txtOffset);
             txtOffset.BackColor = SystemColors.Window;
             txtOffset.ForeColor = SystemColors.WindowText;
             Common.SetLabelText(chkEnableOffset, "LBL_APPLY_OFFSET");
@@ -379,10 +383,6 @@ namespace osu_taiko_Mapping_Helper
         {
             pnlHexaAndDecaOffset.Visible = false;
             pnlMiliSecondOffset.Visible = false;
-            chkEnableOffset.Enabled = false;
-            txtOffset.Enabled = false;
-            txtOffset.BackColor = SystemColors.WindowFrame;
-            txtOffset.ForeColor = txtSvFrom.BackColor;
             chkRelative.Visible = config.advanceMode == 1 && chkEnableSv.Checked;
             FormUtils.SetApplyContols(true,
                                       chkEnableSv,
@@ -401,10 +401,6 @@ namespace osu_taiko_Mapping_Helper
         {
             pnlHexaAndDecaOffset.Visible = false;
             pnlMiliSecondOffset.Visible = false;
-            chkEnableOffset.Enabled = false;
-            txtOffset.Enabled = false;
-            txtOffset.BackColor = SystemColors.WindowFrame;
-            txtOffset.ForeColor = txtSvFrom.BackColor;
             chkRelative.Visible = config.advanceMode == 1 && chkEnableSv.Checked;
             FormUtils.SetApplyContols(true,
                                       chkEnableSv,
@@ -423,10 +419,6 @@ namespace osu_taiko_Mapping_Helper
         {
             pnlHexaAndDecaOffset.Visible = false;
             pnlMiliSecondOffset.Visible = false;
-            chkEnableOffset.Enabled = false;
-            txtOffset.Enabled = false;
-            txtOffset.BackColor = SystemColors.WindowFrame;
-            txtOffset.ForeColor = txtSvFrom.BackColor;
             chkRelative.Visible = false;
             chkRelative.Checked = false;
             FormUtils.SetApplyContols(false,
@@ -1033,6 +1025,13 @@ namespace osu_taiko_Mapping_Helper
             {
                 parentForm = this
             };
+            try
+            {
+                TimingPropertyForm.SetOsuData(beatmapInfo, currentTime);
+            }
+            catch
+            {
+            }
             TimingPropertyForm.Show();
             TimingPropertyForm.Text = "Timing Property";
             if (this.beatmapInfo.beatmapPath == null || this.beatmapInfo.beatmapPath == string.Empty)
@@ -1283,27 +1282,37 @@ namespace osu_taiko_Mapping_Helper
         private void chkEnableOffset_CheckedChanged(object sender, EventArgs e)
         {
             userInputTempData.isOffset = chkEnableOffset.Checked;
+            config.offsetMs = chkEnableOffset.Checked ? 1 : 0;
             FormUtils.SetChkEnableOffset(userInputTempData.isOffset, txtOffset);
+            config.SaveOffsetMs();
         }
         private void txtOffset_TextChanged(object sender, EventArgs e)
         {
             userInputTempData.offset = txtOffset.Text;
+            config.offsetMsValue = txtOffset.Text;
+            config.SaveOffsetMsValue();
         }
         private void chkEnableHexaOffset_CheckedChanged(object sender, EventArgs e)
         {
             userInputTempData.isOffset = chkEnableHexaOffset.Checked;
+            config.offsetHexa = chkEnableHexaOffset.Checked ? 1 : 0;
             if (!userInputTempData.isOffset)
             {
                 chkEnableDuoOffset.Checked = false;
+                config.offsetDuo = 0;
             }
+            config.SaveOffsetHexa();
         }
         private void chkEnableDuoOffset_CheckedChanged(object sender, EventArgs e)
         {
             userInputTempData.isDuoOffset = chkEnableDuoOffset.Checked;
+            config.offsetDuo = chkEnableDuoOffset.Checked ? 1 : 0;
             if (!userInputTempData.isOffset && userInputTempData.isDuoOffset)
             {
                 chkEnableHexaOffset.Checked = true;
+                config.offsetHexa = 1;
             }
+            config.SaveOffsetDuo();
         }
         private void tabExecuteType_SelectedIndexChanged(object sender, EventArgs e)
         {

@@ -66,6 +66,8 @@ namespace osu_taiko_Mapping_Helper.Models
         public string? edgeSounds { set; get; } = null;
         // sliderの折り返し時のヒットサンプルの種類
         public string? edgeSets { set; get; } = null;
+        // stableによるバグで小節線と分離しているか
+        public bool isSeparateBarline { set; get; } = false;
         #endregion
         #region spinner専用変数
         // spinnerの終了時間

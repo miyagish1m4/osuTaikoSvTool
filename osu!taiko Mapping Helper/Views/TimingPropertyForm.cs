@@ -2,6 +2,7 @@
 using osu_taiko_Mapping_Helper.Properties;
 using osu_taiko_Mapping_Helper.Utils;
 using osu_taiko_Mapping_Helper.Utils.Helper;
+using OsuParsers.Beatmaps.Objects;
 
 namespace osu_taiko_Mapping_Helper.Views
 {
