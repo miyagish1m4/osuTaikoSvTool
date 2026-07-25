@@ -326,23 +326,33 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                         uninheritedTimingPointList.Last().sv = 1;
                     }
                 }
-                for (int i = 0; i < uninheritedTimingPointList.Count; i++)
+                double limit = lastHitObject.time + 1;
+                int j = 0;
+                double t = uninheritedTimingPointList[0].time
+                    - Math.Truncate(uninheritedTimingPointList[0].time / uninheritedTimingPointList[0].barLength) * uninheritedTimingPointList[0].barLength;
+                if (t < 0)
                 {
-                    if (uninheritedTimingPointList[i].bpm >= Constants.ONE_MINUTE)
+                    t += uninheritedTimingPointList[0].barLength;
+                }
+                while (t <= limit)
+                {
+                    // BPM60000以上は除外
+                    if (uninheritedTimingPointList[j].bpm >= Constants.ONE_MINUTE)
                     {
+                        j++;
+                        if (uninheritedTimingPointList.SafeGetIndex(j) == null)
+                        {
+                            break;
+                        }
+                        t = uninheritedTimingPointList[j].time;
                         continue;
                     }
-                    double startTime = uninheritedTimingPointList[i].time;
-                    double currentTime = startTime;
-                    int timeEnd = lastHitObject.time;
 
-                    if (i + 1 < uninheritedTimingPointList.Count) timeEnd = uninheritedTimingPointList[i + 1].time;
-                    double timeBar = uninheritedTimingPointList[i].barLength;
-                    for (int j = 0; currentTime < timeEnd; j++)
+                    // omitされている小節線以外を算出
+                    if (!(t <= uninheritedTimingPointList[j].time &&
+                        (uninheritedTimingPointList[j].effect & 8) > 0))
                     {
-                        int timeBarline = (int)Math.Floor(currentTime);
-
-                        // すでに同じ time の HitObject が存在するかをチェック
+                        int timeBarline = (int)Math.Floor(t);
                         var hitObjectOnBarLine = hitObjectList.FirstOrDefault(h => h.time == timeBarline);
                         if (hitObjectOnBarLine == null)
                         {
@@ -354,7 +364,15 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                             // オブジェクトコードに小節線を追加
                             hitObjectOnBarLine.hitObjectCode += unchecked((int)0x00000200);
                         }
-                        currentTime = startTime + timeBar * (j + 1);
+                    }
+
+                    // 次のtimingの算出
+                    t += uninheritedTimingPointList[j].barLength;
+                    if (uninheritedTimingPointList.SafeGetIndex(j + 1) != null &&
+                        t >= uninheritedTimingPointList[j + 1].time)
+                    {
+                        j++;
+                        t = uninheritedTimingPointList[j].time;
                     }
                 }
                 // ソートする

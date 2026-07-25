@@ -25,6 +25,11 @@ namespace osu_taiko_Mapping_Helper.Models
         internal int finisherDonY { get; set; }
         internal int finisherKatX { get; set; }
         internal int finisherKatY { get; set; }
+        internal int offsetHexa { get; set; }
+        internal int offsetDuo { get; set; }
+        internal int offsetMs { get; set; }
+        internal string? offsetMsValue { get; set; }
+
         /// <summary>
         /// configファイルの読み込み処理
         /// </summary>
@@ -46,6 +51,10 @@ namespace osu_taiko_Mapping_Helper.Models
             finisherDonY = Convert.ToInt32(config.AppSettings.Settings["finisherDonY"].Value);
             finisherKatX = Convert.ToInt32(config.AppSettings.Settings["finisherKatX"].Value);
             finisherKatY = Convert.ToInt32(config.AppSettings.Settings["finisherKatY"].Value);
+            offsetHexa = Convert.ToInt32(config.AppSettings.Settings["offsetHexa"].Value);
+            offsetDuo = Convert.ToInt32(config.AppSettings.Settings["offsetDuo"].Value);
+            offsetMs = Convert.ToInt32(config.AppSettings.Settings["offsetMs"].Value);
+            offsetMsValue = config.AppSettings.Settings["offsetMsValue"].Value;
         }
         /// <summary>
         /// configファイルの書き込み処理
@@ -68,6 +77,39 @@ namespace osu_taiko_Mapping_Helper.Models
             config.AppSettings.Settings["finisherDonY"].Value = finisherDonY.ToString();
             config.AppSettings.Settings["finisherKatX"].Value = finisherKatX.ToString();
             config.AppSettings.Settings["finisherKatY"].Value = finisherKatY.ToString();
+            config.Save();
+        }
+
+        internal void SaveOffsetHexa()
+        {
+            Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+
+            // config書き込み
+            config.AppSettings.Settings["offsetHexa"].Value = offsetHexa.ToString();
+            config.Save();
+        }
+        internal void SaveOffsetDuo()
+        {
+            Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+
+            // config書き込み
+            config.AppSettings.Settings["offsetDuo"].Value = offsetDuo.ToString();
+            config.Save();
+        }
+        internal void SaveOffsetMs()
+        {
+            Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+
+            // config書き込み
+            config.AppSettings.Settings["offsetMs"].Value = offsetMs.ToString();
+            config.Save();
+        }
+        internal void SaveOffsetMsValue()
+        {
+            Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+
+            // config書き込み
+            config.AppSettings.Settings["offsetMsValue"].Value = offsetMsValue;
             config.Save();
         }
     }
