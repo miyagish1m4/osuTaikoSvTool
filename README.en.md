@@ -14,7 +14,7 @@ For the main features and usage instructions, see the following user guides.
 ## Requirements
 
 - Windows
-- .NET 8 SDK
+- .NET 10 SDK
 - Visual Studio 2022 or later, or .NET CLI
 - osu! stable
 
