@@ -14,7 +14,7 @@ osu!taiko の譜面編集を補助する Windows 向けツールです。
 ## 動作環境
 
 - Windows
-- .NET 8 SDK
+- .NET 10 SDK
 - Visual Studio 2022 以降、または .NET CLI
 - osu! stable
 
