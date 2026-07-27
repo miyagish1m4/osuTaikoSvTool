@@ -8,6 +8,7 @@ using osu_taiko_Mapping_Helper.Views;
 using OsuMemoryDataProvider;
 using OsuMemoryDataProvider.OsuMemoryModels;
 using OsuParsers.Decoders;
+using System.ComponentModel;
 
 namespace osu_taiko_Mapping_Helper
 {
@@ -32,6 +33,7 @@ namespace osu_taiko_Mapping_Helper
         private bool isUpdate = true;
         private string backupDirectoryName = string.Empty;
         private TimingPropertyForm? TimingPropertyForm = null;
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int updateInterval { get; set; } = 15;
         #endregion
         #region ÉÅÉ\ÉbÉh
@@ -336,6 +338,19 @@ namespace osu_taiko_Mapping_Helper
             chkEnableDuoOffset.Checked = config.offsetDuo == 1;
             chkEnableOffset.Checked = config.offsetMs == 1;
             txtOffset.Text = config.offsetMsValue ?? string.Empty;
+            switch (config.offsetMode)
+            {
+                case 0:
+                    chkEnableOffset_CheckedChanged(null, null);
+                    chkEnableHexaOffset_CheckedChanged(null, null);
+                    break;
+                case 1:
+                    chkEnableOffset_CheckedChanged(null, null);
+                    chkEnableHexaOffset_CheckedChanged(null, null);
+                    break;
+            }
+            chkEnableDuoOffset_CheckedChanged(null, null);
+            txtOffset_TextChanged(null, null);
             tabSetType.ItemSize = new Size(Constants.TAB_MAX_ITEM_SIZE / tabSetType.Controls.Count, tabSetType.ItemSize.Height);
         }
         /// <summary>
@@ -1279,20 +1294,20 @@ namespace osu_taiko_Mapping_Helper
             FormUtils.SetBtnSwapSvEnabledState(userInputTempData.isEnableRelativeEnd, btnSwapSv);
             FormUtils.SetBtnSetSvToEnabledState(userInputTempData.isEnableRelativeEnd, btnSetSvTo);
         }
-        private void chkEnableOffset_CheckedChanged(object sender, EventArgs e)
+        private void chkEnableOffset_CheckedChanged(object? sender, EventArgs? e)
         {
             userInputTempData.isOffset = chkEnableOffset.Checked;
             config.offsetMs = chkEnableOffset.Checked ? 1 : 0;
             FormUtils.SetChkEnableOffset(userInputTempData.isOffset, txtOffset);
             config.SaveOffsetMs();
         }
-        private void txtOffset_TextChanged(object sender, EventArgs e)
+        private void txtOffset_TextChanged(object? sender, EventArgs? e)
         {
             userInputTempData.offset = txtOffset.Text;
             config.offsetMsValue = txtOffset.Text;
             config.SaveOffsetMsValue();
         }
-        private void chkEnableHexaOffset_CheckedChanged(object sender, EventArgs e)
+        private void chkEnableHexaOffset_CheckedChanged(object? sender, EventArgs? e)
         {
             userInputTempData.isOffset = chkEnableHexaOffset.Checked;
             config.offsetHexa = chkEnableHexaOffset.Checked ? 1 : 0;
@@ -1303,7 +1318,7 @@ namespace osu_taiko_Mapping_Helper
             }
             config.SaveOffsetHexa();
         }
-        private void chkEnableDuoOffset_CheckedChanged(object sender, EventArgs e)
+        private void chkEnableDuoOffset_CheckedChanged(object? sender, EventArgs? e)
         {
             userInputTempData.isDuoOffset = chkEnableDuoOffset.Checked;
             config.offsetDuo = chkEnableDuoOffset.Checked ? 1 : 0;

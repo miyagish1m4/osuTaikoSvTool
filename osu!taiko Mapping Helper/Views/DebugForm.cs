@@ -2,12 +2,14 @@
 using osu_taiko_Mapping_Helper.Properties;
 using osu_taiko_Mapping_Helper.Utils;
 using osu_taiko_Mapping_Helper.Utils.Helper;
+using System.ComponentModel;
 
 namespace osu_taiko_Mapping_Helper.Views
 {
     public partial class DebugForm : Form
     {
         #region クラス変数
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public MainForm parentForm { get; set; }
         private BeatmapMetadata beatmapInfo = new();
         private Beatmap? beatmapData;
